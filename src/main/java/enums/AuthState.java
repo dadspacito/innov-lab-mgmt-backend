@@ -3,10 +3,9 @@ package enums;
 
 public enum AuthState {
     ACTIVE("Token is active"),
+    INVALID("Token is invalid, please log in again"),
     EXPIRED("Token has expired, please log in again"),
     MISSING("Token is missing, please log in"),
-    UNVERIFIED("User not verified, please confirm your email"),
-    USER_NOT_FOUND("User does not exist"),
     UNAUTHORIZED("User does not have permissions");
 
     private final String message;

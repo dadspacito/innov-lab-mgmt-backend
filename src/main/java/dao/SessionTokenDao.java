@@ -28,21 +28,9 @@ public class SessionTokenDao extends AbstractDao<SessionTokenEntity> {
         }
     }
 
+
+
     // COMENTÁRIO : atualizar timeout do token
-
-    public boolean updateTokenSessionTimeout (String token, int timeout) {
-        try {
-            em.createNamedQuery("SessionToken.updateTokenSessionTimeout")
-                    .setParameter("token", token)
-                    .setParameter("timeout", timeout)
-                    .executeUpdate();
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    // COMENTÁRIO : resetar timeout do token
 
 
 

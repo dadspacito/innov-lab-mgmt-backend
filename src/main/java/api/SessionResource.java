@@ -1,39 +1,63 @@
-package rest;
+package api;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import dto.LoginDto;
-import enums.AuthState;
-import service.AuthService;
+import service.SessionService;
 
 
-@Path("/auth")
-public class AuthController {
+// recurso são as sessões
+// como os endpoints delete só podem ser acedidos com token, só o próprio user pode apagar a sessão
+
+//POST /sessions: Login (criação de uma nova sessão).
+//PATCH /sessions: Renovação da sessão
+//DELETE /sessions: Logout (apagar sessão atual).
+// DELETE /sessions/all : Logout em todos os dispositivos (apagar todas as sessões).
+
+
+
+
+@Path("/sessions")
+public class SessionResource {
 
     @Inject
-    AuthService authService;
+    SessionService sessionService;
 
 
-    @Path("/renew")
+    // renew session token
     @PUT
     @Consumes(MediaType.APPLICATION_JSON)
     public Response renewToken(@HeaderParam("token") String token) {
-       // authService.incrementSessionTimeout(token);
-        authService.incrementSessionTimeout(token);
-        return Response.ok().build();
+
+        if (sessionService.incrementSessionTimeout(token)){
+            return Response.status(200).entity("Token timeout reset").build();
+        }
+        else return Response.status(401).entity("Invalid token").build();
     }
 
-
-    @Path("/login")
+    // login
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response login(LoginDto loginDto) {
+        // consome login dto, produz postlogin
+        // devolve token e timeout
 
-        return Response.ok().build();
+
     }
+
+    // logout
+    @DELETE
+    public Response logout(@HeaderParam("token") String token) {
+        if (sessionService.logout(token)){
+            return Response.status(200).entity("Logout successful").build();
+        }
+        else return Response.status(401).entity("Invalid token").build();
+    }
+
+
 
 /*    @POST
     @Path("/login")

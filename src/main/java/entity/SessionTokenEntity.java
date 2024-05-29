@@ -19,12 +19,6 @@ import java.io.Serializable;
                 @NamedQuery(name = "SessionToken.findSessionTokenByToken",
                         query = "SELECT s FROM SessionTokenEntity s WHERE s.token = :token"),
 
-                @NamedQuery(name = "SessionToken.updateTokenSessionTimeout",
-                      query = "UPDATE SessionTokenEntity s " +
-                              "SET s.tokenTimeout = FUNCTION('DATE_ADD', CURRENT_TIMESTAMP, CONCAT(:timeout, ' MINUTE')) " +
-                              "WHERE s.token = :token"),
-
-
                 @NamedQuery(name = "SessionToken.resetTokenSessionTimeout",
                         query = "UPDATE SessionTokenEntity s " +
                                 "SET s.tokenTimeout = :newsessiontimeout WHERE s.token = :token")
