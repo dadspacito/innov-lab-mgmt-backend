@@ -17,8 +17,8 @@ import enums.UserState;
 
     // POST /users: Registo de utilizador.
     // DELETE /users: Apagar utilizador.
-    // get /users: obter dados do proprio utilizador.
-    // get /users/{id}: obter dados de um utilizador. (se o perfil for publico)
+    // get /users: obter dados do proprio utilizador. FALTA
+    // get /users/{id}: obter dados de um utilizador. (se o perfil for publico) FALTA
 
     // campos depois para atualização, usar só /users/ sem id porque só quem chama pode manipular a si próprio
 
@@ -62,7 +62,7 @@ public class UserResource {
     }
 
     // pedir para criar nova passe
-    // chamado por "http://localhost:3000/forget-password/"
+    // chamado por "https://localhost:3000/forget-password/"
     @Path("/passwords/resets")
 @POST
 @Consumes(MediaType.APPLICATION_JSON)
@@ -78,7 +78,7 @@ public Response requestActivation(@HeaderParam("email") String email) {
 
     // endpoint para fazer reset password
     // criar nova passe
-    // chamado por "http://localhost:3000/reset-password/"
+    // chamado por "https://localhost:3000/reset-password/"
 
     @Path("/passwords/resets/{emailtoken}")
     @POST

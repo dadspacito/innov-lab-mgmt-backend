@@ -110,7 +110,7 @@ public class UserService {
         user.setEmailToken(generateNewToken());
         user.setEmailTokenExpires(LocalDateTime.now().plusHours(1));
         userDao.merge(user);
-        String resetLink = "http://localhost:3000/reset-password/" + user.getEmailToken();
+        String resetLink = "https://localhost:3000/reset-password/" + user.getEmailToken();
         EmailSender.sendPasswordResetEmail(user.getEmail(), user.getFirstName(), resetLink);
         return true;
     }
