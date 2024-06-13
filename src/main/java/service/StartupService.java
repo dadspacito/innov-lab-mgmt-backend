@@ -89,16 +89,16 @@ public class StartupService {
         sessionTokenDao.deleteAll();
 
 
-     // definir um token de sessão para o user admin, SEMPRE VÁLIDO PARA EFEITOS DE TESTE
+         // definir um token de sessão para o user admin, SEMPRE VÁLIDO PARA EFEITOS DE TESTE
         // COMENTÁRIO MANTER ISTO APENAS EM DESENVOLVIMENTO
 
-        if (sessionTokenDao.findUserBySessionToken("admin") == null) {
-            SessionTokenEntity sessionTokenEntity = new SessionTokenEntity();
-            sessionTokenEntity.setToken("admin");
-            sessionTokenEntity.setTokenTimeout(LocalDateTime.now().plusYears(1));
-            sessionTokenEntity.setUser(userDao.findUserByNickname("admin"));
-            sessionTokenDao.persist(sessionTokenEntity);
-        }
+      if (sessionTokenDao.findUserBySessionToken("admin") == null) {
+          SessionTokenEntity sessionTokenEntity = new SessionTokenEntity();
+          sessionTokenEntity.setToken("admin");
+         sessionTokenEntity.setTokenTimeout(LocalDateTime.now().plusYears(1));
+          sessionTokenEntity.setUser(userDao.findUserByNickname("admin"));
+          sessionTokenDao.persist(sessionTokenEntity);
+      }
 
 
 

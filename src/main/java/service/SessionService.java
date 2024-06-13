@@ -106,6 +106,7 @@ public class SessionService {
         try {
             UserEntity user = sessionTokenDao.findUserBySessionToken(token);
             sessionTokenDao.deleteAllSessionTokens(user);
+            sessionTokenDao.flush();
             return true;
         } catch (Exception e) {
             LOGGER.error("Error during logout from all devices: ", e);
@@ -118,7 +119,9 @@ public class SessionService {
         try {
             int timeout = getSessionTimeout();
             LocalDateTime newTimeout = LocalDateTime.now().plusMinutes(timeout);
-            return sessionTokenDao.resetTokenSessionTimeout(token, newTimeout);
+            sessionTokenDao.resetTokenSessionTimeout(token, newTimeout);
+            sessionTokenDao.flush();
+            return true;
         } catch (Exception e) {
             LOGGER.error("Error incrementing session timeout: ", e);
             return false;
