@@ -1,4 +1,4 @@
-package entity;
+/*package entity;
 
 
 import jakarta.persistence.*;
@@ -53,4 +53,4 @@ public class InterestEntity implements Serializable
     }
 
 
-}
+}*/

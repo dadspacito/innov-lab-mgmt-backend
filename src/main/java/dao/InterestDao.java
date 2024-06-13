@@ -1,4 +1,4 @@
-package dao;
+/*package dao;
 
 
 import entity.InterestEntity;
@@ -24,7 +24,7 @@ public InterestEntity findInterestByName(String name) {
         } catch (NoResultException e) {
             return null;
         }
-    }
+    }*/
 
 
 
