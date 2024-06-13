@@ -35,9 +35,9 @@ public class SessionResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response renewToken(@HeaderParam("token") String token) {
         if (sessionService.incrementSessionTimeout(token)) {
-            return Response.status(200).entity("Token timeout reset").build();
+            return Response.status(Response.Status.OK).entity("Token timeout reset").build();
         } else {
-            return Response.status(401).entity("Invalid token").build();
+            return Response.status(Response.Status.BAD_REQUEST).entity("Invalid token").build();
         }
     }
 

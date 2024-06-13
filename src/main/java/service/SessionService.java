@@ -79,6 +79,8 @@ public class SessionService {
     public int getSessionTimeout() {
         return systemVariableDao.findSystemVariableByName("session_timeout").getVariableValue();
     }
+ //systemVariableDao.findSystemVariableByName("session_timeout").getVariableValue();
+
 
     private void saveSessionToken(UserEntity userEntity, String token, int timeout) {
         SessionTokenEntity sessionTokenEntity = new SessionTokenEntity();
