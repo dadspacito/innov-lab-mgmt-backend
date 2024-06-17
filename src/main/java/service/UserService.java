@@ -51,7 +51,7 @@ public class UserService {
         user.setWorkplace(workplaceDao.find(userDto.getWorkplaceId()));
         // a verificação ja foi feita, nao vai dar erro.
         user.setCreatedAt(LocalDateTime.now());
-        user.setDeleted(false);
+        user.setActive(false);
         user.setConfirmed(false);
         user.setEmailToken(generateNewToken());
         user.setEmailTokenExpires(LocalDateTime.now().plusHours(1));
@@ -65,7 +65,7 @@ public class UserService {
     // função que vai ativar user
     //
 
-    public boolean activateUser(String emailToken) {
+    public boolean confirmUser(String emailToken) {
         UserEntity user = userDao.findUserByEmailToken(emailToken);
         if (user == null) {
             return false;

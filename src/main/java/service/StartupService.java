@@ -77,7 +77,7 @@ public class StartupService {
         userEntity.setCreatedAt(LocalDateTime.now());
         userEntity.setAdmin(true);
         userEntity.setConfirmed(true);
-        userEntity.setDeleted(false);
+        userEntity.setActive(true);
         userEntity.setPublicProfile(false);
         userEntity.setWorkplace(workplaceDao.findWorkplaceByLocation("COIMBRA"));
         userDao.persist(userEntity);

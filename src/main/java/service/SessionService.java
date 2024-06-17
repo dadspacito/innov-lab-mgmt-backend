@@ -46,7 +46,7 @@ public class SessionService {
     public String login(String email, String password) {
         try {
             UserEntity user = userDao.findUserByEmail(email);
-            if (user != null && isPasswordValid(password, user.getPassword()) && user.isConfirmed() && !user.isDeleted()) {
+            if (user != null && isPasswordValid(password, user.getPassword()) && user.isConfirmed() && !user.isActive()) {
                 return createToken(user);
             }
         } catch (Exception e) {

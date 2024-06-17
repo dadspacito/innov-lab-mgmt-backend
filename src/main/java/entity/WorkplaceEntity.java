@@ -34,6 +34,11 @@ public class WorkplaceEntity implements Serializable {
     @Column(name="location", nullable = false, unique = true, updatable = true)
     private String location;
 
+    @Column(name="active", nullable = false, unique = false, updatable = true)
+    private boolean active = true;
+
+    //private List<ProjectEntity> projects = new ArrayList<>();
+
 
 
 
@@ -68,9 +73,15 @@ public class WorkplaceEntity implements Serializable {
         this.location = location;
     }
 
+    public boolean getActive() {
+        return active;
+    }
 
+    public void setActive(boolean active) {
+        this.active = active;
 
- /*   public List<ProjectEntity> getProjects() {
+    }
+    /*   public List<ProjectEntity> getProjects() {
         return projects;
     }*/
 

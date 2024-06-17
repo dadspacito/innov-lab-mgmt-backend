@@ -39,7 +39,7 @@ public class UserResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response registerUser(UserDto userDto) {
         if ((userService.registerUser(userDto)) == UserState.CREATED)
-            return Response.status(201).entity("yey").build();
+            return Response.status(201).entity("User created. Check your email "+userDto.getEmail()+" to activate").build();
         else return Response.status(400).entity("User already exists").build();
 
 }
@@ -55,7 +55,7 @@ public class UserResource {
     @PATCH
     @Produces(MediaType.APPLICATION_JSON)
     public Response verifyAccount(@PathParam("emailtoken") String emailtoken) {
-        if ((userService.activateUser(emailtoken))) {
+        if ((userService.confirmUser(emailtoken))) {
             return Response.status(200).entity("ativado").build();
         }
         return Response.status(400).entity("Invalid email token").build();

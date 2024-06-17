@@ -1,6 +1,5 @@
 package entity;
 
-import java.util.List;
 import java.time.LocalDateTime;
 import jakarta.persistence.*;
 import java.io.Serializable;
@@ -35,7 +34,6 @@ public class UserEntity implements Serializable {
     @Column(name = "nickname", nullable = true, unique = true, updatable = true)
     private String nickname;
 
-
     @Column(name = "email", nullable = false, unique = true, updatable = false)
     private String email;
 
@@ -48,7 +46,7 @@ public class UserEntity implements Serializable {
     @Column(name = "bio", nullable = true, unique = false, updatable = true)
     private String bio;
 
-    @Column(name = "createdAt", nullable = false, unique = false, updatable = true)
+    @Column(name = "createdAt", nullable = false, unique = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "isAdmin", nullable = false, unique = false, updatable = true)
@@ -60,8 +58,8 @@ public class UserEntity implements Serializable {
     @Column(name = "isConfirmed", nullable = false, unique = false, updatable = true)
     private boolean isConfirmed;
 
-    @Column(name = "isDeleted", nullable = false, unique = false, updatable = true)
-    private boolean isDeleted;
+    @Column(name = "isActive", nullable = false, unique = false, updatable = true)
+    private boolean isActive = true;
 
     @Column(name = "emailToken", nullable = true, unique = false, updatable = true)
     private String emailToken;
@@ -73,7 +71,9 @@ public class UserEntity implements Serializable {
     @JoinColumn(name = "workplace_id", nullable = false)
     private WorkplaceEntity workplace;
 
-    //interesses, skills, tabela tokens, projetos.
+    // COMENTÁRIO
+    //falta associar
+    //interesses, skills,projetos, mensagens....
 
 
 
@@ -181,12 +181,12 @@ public class UserEntity implements Serializable {
         isConfirmed = confirmed;
     }
 
-    public boolean isDeleted() {
-        return isDeleted;
+    public boolean isActive() {
+        return isActive;
     }
 
-    public void setDeleted(boolean deleted) {
-        isDeleted = deleted;
+    public void setActive(boolean active) {
+        isActive = active;
     }
 
     public String getEmailToken() {
