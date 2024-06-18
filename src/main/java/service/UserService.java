@@ -55,7 +55,7 @@ public class UserService {
         user.setConfirmed(false);
         user.setEmailToken(generateNewToken());
         user.setEmailTokenExpires(LocalDateTime.now().plusHours(1));
-        String verificationLink = "https://localhost:8443/activations/" + user.getEmailToken();
+        String verificationLink = "https://localhost:8443/innovlab/api/users/activations/" + user.getEmailToken();
         EmailSender.sendVerificationEmail(user.getEmail(), user.getFirstName(), verificationLink);
         userDao.persist(user);
          return UserState.CREATED;
@@ -68,6 +68,8 @@ public class UserService {
     public boolean activateUser(String emailToken) {
         UserEntity user = userDao.findUserByEmailToken(emailToken);
         if (user == null) {
+            System.out.println("entrei no activate user no user service");
+
             return false;
         }
         user.setConfirmed(true);

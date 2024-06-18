@@ -55,6 +55,7 @@ public class UserResource {
     @PATCH
     @Produces(MediaType.APPLICATION_JSON)
     public Response verifyAccount(@PathParam("emailtoken") String emailtoken) {
+        System.out.println("foi chamado");
         if ((userService.activateUser(emailtoken))) {
             return Response.status(200).entity("ativado").build();
         }

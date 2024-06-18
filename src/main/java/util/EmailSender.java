@@ -1,5 +1,7 @@
 package util;
 
+import jakarta.annotation.Resource;
+import jakarta.mail.*;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
 import jakarta.mail.Session;
@@ -12,14 +14,20 @@ import java.util.Properties;
 
 public class EmailSender {
 
-    private static final String username = "MS_ZkkD6n@trial-pq3enl6079ml2vwr.mlsender.net";
-    private static final String password = "SveXcazMDlGxN83r";
+    //private static final String username = "MS_ZkkD6n@trial-pq3enl6079ml2vwr.mlsender.net";
+    //private static final String password = "SveXcazMDlGxN83r";
+    private static final String username = "pedroodev77@gmail.com";
+    private static final String password = "bxib kcws nlag bggd";
+    @Resource(name = "mail/session")
+    private static Session session;
 
     public static void sendEmail(String to, String subject, String content) {
         Properties props = new Properties();
-        props.put("mail.smtp.host", "smtp.mailersend.net");
-        props.put("mail.smtp.socketFactory.port", "587");
-        props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        //props.put("mail.smtp.host", "smtp.mailersend.net");
+        //props.put("mail.smtp.socketFactory.port", "587");
+        //props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.port", "587");
         props.put("mail.smtp.starttls.enable", "true");
@@ -27,9 +35,20 @@ public class EmailSender {
 
         System.out.println("Sending email to " + to + " with subject " + subject + " and content " + content);
 
-        Session session = Session.getDefaultInstance(props, new jakarta.mail.Authenticator() {
-            protected jakarta.mail.PasswordAuthentication getPasswordAuthentication() {
-                return new jakarta.mail.PasswordAuthentication(username, password);
+        //session.getDefaultInstance
+        /*
+         * Session session = Session.getInstance(props, new jakarta.mail.Authenticator() {
+         *             protected jakarta.mail.PasswordAuthentication getPasswordAuthentication() {
+         *                 return new jakarta.mail.PasswordAuthentication(username, password);
+         *             }
+         *         });
+         * */
+
+        //adicionou-se isto
+        session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(username, password);
             }
         });
 
@@ -47,7 +66,11 @@ public class EmailSender {
             System.out.println("Content set");
 
             try {
-                Transport.send(message);
+                //faltam aqui coisas no transport acho eu
+                Transport transport = session.getTransport("smtp");
+                transport.connect("smtp.gmail.com", 587, username, password);
+                transport.sendMessage(message, message.getAllRecipients());
+                //Transport.send(message, message.getAllRecipients());
                 System.out.println("Email sent");
             } catch (Exception e) {
                 e.printStackTrace();
