@@ -73,6 +73,16 @@ public class UserEntity implements Serializable {
     @JoinColumn(name = "workplace_id", nullable = false)
     private WorkplaceEntity workplace;
 
+    /**
+     * one to many tokens
+     * mapped by user
+     * Pedro 21/06
+     */
+    @OneToMany(mappedBy="user")
+    private List<SessionTokenEntity> sessionToken;
+
+    //aqui tem de ficar one to many com a tabela de tokens para poder ser retornado no login.
+
     //interesses, skills, tabela tokens, projetos.
 
 
@@ -211,5 +221,13 @@ public class UserEntity implements Serializable {
 
     public void  setWorkplace(WorkplaceEntity workplace) {
         this.workplace = workplace;
+    }
+
+    public List<SessionTokenEntity> getSessionToken() {
+        return sessionToken;
+    }
+
+    public void setSessionToken(List<SessionTokenEntity> sessionToken) {
+        this.sessionToken = sessionToken;
     }
 }

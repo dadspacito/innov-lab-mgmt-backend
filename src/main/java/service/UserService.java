@@ -1,9 +1,11 @@
 package service;
 
 
+import dao.SessionTokenDao;
 import dao.UserDao;
 import dao.SystemVariableDao;
 import dao.WorkplaceDao;
+import dto.PostLoginDto;
 import dto.UserDto;
 import entity.UserEntity;
 import enums.UserState;
@@ -13,6 +15,7 @@ import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.UUID;
 
 @Stateless
@@ -26,6 +29,7 @@ public class UserService {
 
     @EJB
     private WorkplaceDao workplaceDao;
+    @EJB private SessionTokenDao sessionTokenDao;
 
 
 // função que vai adicionar user
@@ -55,7 +59,7 @@ public class UserService {
         user.setConfirmed(false);
         user.setEmailToken(generateNewToken());
         user.setEmailTokenExpires(LocalDateTime.now().plusHours(1));
-        String verificationLink = "https://localhost:8443/innovlab/api/users/activations/" + user.getEmailToken();
+        String verificationLink = "http://localhost:3000/users/activations/" + user.getEmailToken();
         EmailSender.sendVerificationEmail(user.getEmail(), user.getFirstName(), verificationLink);
         userDao.persist(user);
          return UserState.CREATED;
@@ -131,7 +135,48 @@ public class UserService {
 
 
 
-    // converter userDto em entity e vice versa
-    // rever
+
+    //recebe user entity e retorna um user DTO
+    //aqui tem de retornar o postLogin DTO para login
+    //ha alguma altura em que seja necessário o user inteiro?
+    //tem de receber um token
+    private PostLoginDto convertUserEntityToUserDTO(UserEntity ue){
+        PostLoginDto ud = new PostLoginDto();
+        ud.setId(ue.getId());
+        ud.setFirstName(ue.getFirstName());
+        ud.setLastName(ue.getLastName());
+        ud.setNickname(ue.getNickname());
+        ud.setEmail(ue.getEmail());
+        ud.setAvatar(ue.getAvatar());
+        ud.setBio(ue.getBio());
+        //ud.setAdmin(ue.isAdmin());
+        //ud.setPassword(ue.getPassword());
+        //ud.setPublicProfile(ue.isPublicProfile());
+        //ud.setDeleted(ue.isDeleted());
+        ud.setWorkplaceId(ue.getWorkplace().getId());
+        return ud;
+    }
+
+
+
+    //19/06/2024
+    //é preciso retornar users independentes e a lista de todos os users para o frontend
+    //retornar user independente.GET USER BY EMAIL
+    //aqui tem de ser por id para retornar o id do user que vem do token
+    public PostLoginDto getUserByToken(String token){
+        UserEntity ue = sessionTokenDao.findUserBySessionToken(token);
+        if (ue != null){
+            return convertUserEntityToUserDTO(ue) ;
+        }
+        return null;
+    }
+    //aqui tem de retornar as locatios todas
+
+
+
+
+    //devolve sempre uma lista de users para só se ter um get no serviço
+    //tem que percorrer uma lista e retornar uma lista com os users que se quer
+
 
 }

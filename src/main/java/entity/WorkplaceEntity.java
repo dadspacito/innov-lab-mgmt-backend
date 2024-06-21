@@ -35,9 +35,15 @@ public class WorkplaceEntity implements Serializable {
     private String location;
 
 
-
-
-
+    /**
+     * aqui tem de map à tabela dos users.
+     *
+     * one to many users
+     * faz sentido retornar uma lista ou simplesmente um user?
+     * a query retorna sempe uma lista, depois no dao e no transactional é que filtramos desse array o valor que queremos
+     */
+    @OneToMany(mappedBy = "workplace")
+    private List<UserEntity> users;
 
 
 

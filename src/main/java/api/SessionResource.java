@@ -1,9 +1,11 @@
 
 package api;
 
+import dao.SessionTokenDao;
+import entity.UserEntity;
 import jakarta.ejb.EJB;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.*; 
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -22,6 +24,8 @@ public class SessionResource {
 
     @EJB
     SessionService sessionService;
+    @EJB
+    SessionTokenDao sessionTokenDao;
 
     private static final Logger LOGGER = LogManager.getLogger(SessionResource.class);
 
@@ -56,8 +60,11 @@ public class SessionResource {
         String token = sessionService.login(loginDto.getEmail(), loginDto.getPassword());
 
         if (token != null) {
-            PostLoginDto postLoginDto = new PostLoginDto(token, sessionService.getSessionTimeout());
+            UserEntity ue = sessionTokenDao.findUserBySessionToken(token);
+            PostLoginDto postLoginDto = new PostLoginDto(ue, token, sessionService.getSessionTimeout());
+            //faz set as credenciais do user aqui
             LOGGER.info("Successful login from IP: " + clientIP + " for user: " + loginDto.getEmail());
+            //retorna o user contruido aqui
             return Response.status(Response.Status.CREATED).entity(postLoginDto).build();
         } else {
             LOGGER.warn("Failed login attempt from IP: " + clientIP + " for user: " + loginDto.getEmail());

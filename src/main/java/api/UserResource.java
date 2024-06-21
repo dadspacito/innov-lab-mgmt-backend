@@ -52,7 +52,7 @@ public class UserResource {
 
 
     @Path("/activations/{emailtoken}")
-    @PATCH
+    @PUT
     @Produces(MediaType.APPLICATION_JSON)
     public Response verifyAccount(@PathParam("emailtoken") String emailtoken) {
         System.out.println("foi chamado");
@@ -90,6 +90,15 @@ public Response requestActivation(@HeaderParam("email") String email) {
             return Response.status(200).entity("Password reset").build();
         }
         return Response.status(400).entity("Invalid email token").build();
+    }
+
+    //o postlogin DTO retorna o user
+    @Path("/{token}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getUser(@PathParam("token") String token){
+        //mecanismos de segurança aqui dentro 
+        return Response.status(200).entity(userService.getUserByToken(token)).build();
     }
 
 

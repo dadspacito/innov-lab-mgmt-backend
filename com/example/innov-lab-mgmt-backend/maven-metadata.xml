@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>com.example</groupId>
+  <artifactId>innov-lab-mgmt-backend</artifactId>
+  <versioning>
+    <versions>
+      <version>1.0-SNAPSHOT</version>
+    </versions>
+    <lastUpdated>20240618112329</lastUpdated>
+  </versioning>
+</metadata>
