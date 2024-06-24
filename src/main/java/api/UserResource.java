@@ -2,11 +2,15 @@ package api;
 
 import dto.UserDto;
 import jakarta.ejb.EJB;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import service.UserService;
 import enums.UserState;
+
+import java.io.StringReader;
 
 // COMENTÀRIOS : USOS DESTE FICHEIRO
 // recursos de utilizador
@@ -65,9 +69,9 @@ public class UserResource {
     // pedir para criar nova passe
     // chamado por "https://localhost:3000/forget-password/"
     @Path("/passwords/resets")
-@POST
-@Consumes(MediaType.APPLICATION_JSON)
-public Response requestActivation(@HeaderParam("email") String email) {
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response requestActivation(@HeaderParam("email") String email) {
         if ((userService.requestPasswordReset(email))) {
             return Response.status(200).entity("Password reset email sent").build();
         }
@@ -75,18 +79,16 @@ public Response requestActivation(@HeaderParam("email") String email) {
         return Response.status(400).entity("Invalid email").build();
     }
 
-
-
-    // endpoint para fazer reset password
-    // criar nova passe
-    // chamado por "https://localhost:3000/reset-password/"
-
+    //nova password
     @Path("/passwords/resets/{emailtoken}")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
 
-    public Response resetPassword(@PathParam("emailtoken") String emailtoken, String password) {
+    public Response resetPassword(@PathParam("emailtoken") String emailtoken, String newPassword) {
+        JsonObject jsonObject = Json.createReader(new StringReader(newPassword)).readObject();
+        String password = jsonObject.getString("password");
         if ((userService.resetPassword(emailtoken, password))) {
+
             return Response.status(200).entity("Password reset").build();
         }
         return Response.status(400).entity("Invalid email token").build();
