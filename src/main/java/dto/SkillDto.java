@@ -4,14 +4,16 @@ public class SkillDto {
 
     private String name;
     private String type;
+    private int id;
     private boolean isActive;
 
     public SkillDto() {
     }
 
-    public SkillDto(String name, String type) {
+    public SkillDto(String name, String type, int id) {
         this.name = name;
         this.type = type;
+        this.id = id;
     }
 
     public String getName() {
@@ -29,7 +31,6 @@ public class SkillDto {
     public void setType(String type) {
         this.type = type;
     }
-
     public boolean getIsActive() {
         return isActive;
     }
@@ -37,4 +38,12 @@ public class SkillDto {
     public void setIsActive(boolean isActive) {
         this.isActive = isActive;
     }
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
 }

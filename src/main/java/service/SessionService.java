@@ -11,6 +11,7 @@ import jakarta.ejb.Stateless;
 import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.*;
 import org.mindrot.jbcrypt.BCrypt;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -37,8 +38,7 @@ public class SessionService {
     @EJB
     private SystemVariableDao systemVariableDao;
 
-    @EJB
-    private UserService userService;
+
 
     private static final Logger LOGGER = LogManager.getLogger(SessionService.class);
 
@@ -46,7 +46,8 @@ public class SessionService {
     public String login(String email, String password) {
         try {
             UserEntity user = userDao.findUserByEmail(email);
-            if (user != null && isPasswordValid(password, user.getPassword()) && user.isConfirmed() && !user.isActive()) {
+            if (user != null && isPasswordValid(password, user.getPassword()) && user.isConfirmed() && user.isActive()) {
+                LOGGER.info("User " + email + " logged in successfully");
                 return createToken(user);
             }
         } catch (Exception e) {
@@ -65,6 +66,8 @@ public class SessionService {
             String token = generateToken();
             int timeout = getSessionTimeout();
             saveSessionToken(userEntity, token, timeout);
+            // teste se log funciona, faz log da açao
+            LOGGER.info("Token created for user: " + userEntity.getEmail());
             return token;
         } catch (Exception e) {
             LOGGER.error("Error creating token: ", e);
@@ -79,7 +82,6 @@ public class SessionService {
     public int getSessionTimeout() {
         return systemVariableDao.findSystemVariableByName("session_timeout").getVariableValue();
     }
- //systemVariableDao.findSystemVariableByName("session_timeout").getVariableValue();
 
 
     private void saveSessionToken(UserEntity userEntity, String token, int timeout) {
@@ -127,145 +129,18 @@ public class SessionService {
             return false;
         }
     }
-}
 
+    // verificar se token está válido
 
+    public boolean isTokenValid(String token) {
 
-/*
-package service;
-
-import dao.SessionTokenDao;
-import dao.UserDao;
-import dao.SystemVariableDao;
-import entity.SessionTokenEntity;
-import entity.UserEntity;
-import jakarta.ejb.EJB;
-import jakarta.ejb.Stateless;
-import org.mindrot.jbcrypt.BCrypt;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
-
-
-@Stateless
-
-public class SessionService {
-
-    // COMENTÁRIO
-    // classe gerar serviços de sessao, vai ser usada para gerar tokens de sessao
-    // e verificar se os tokens de sessao sao validos
-    // e apagar tokens de sessao
-    // e apagar todos os tokens de sessao de um utilizador
-    // e apagar todos os tokens de sessao inválidos (com session timeout caducado)
-    // reset do timeout do token .
-
-    @EJB
-    private SessionTokenDao sessionTokenDao;
-
-    @EJB
-    private UserDao userDao;
-
-    @EJB
-    private SystemVariableDao systemVariableDao;
-
-    @EJB
-    private UserService userService;
-
-
-
-    // LOGIN
-
-
-
-
-
-
-
-    // expressão de classes sao privadas
-
-
-
-
-
-    // login, buscar entidade por email, verificar se a password é correta, verificar se o utilizador está confirmado, verificar se o utilizador está ativo, criar token de sessão, guardar token de sessão na base de dados, devolver token de sessão
-
-    public String login(String email, String password) {
-        UserEntity user = userDao.findUserByEmail(email);
-        if (user != null) {
-            if (BCrypt.checkpw(password, user.getPassword())) {
-                if (user.isConfirmed()) {
-                    if (!user.isDeleted()) {
-                        return createToken(user);
-                        }
-                    }
-                }return null;
-            } return null;
-
-    }
-
-    public String createToken(UserEntity userEntity) {
-
-        try {
-            String token = UUID.randomUUID().toString();
-            int timeout = systemVariableDao.findSystemVariableByName("session_timeout").getVariableValue();
-            SessionTokenEntity sessionTokenEntity = new SessionTokenEntity();
-            sessionTokenEntity.setToken(token);
-            sessionTokenEntity.setUser(userEntity);
-            sessionTokenEntity.setTokenTimeout(LocalDateTime.now().plusMinutes(timeout));
-            sessionTokenDao.persist(sessionTokenEntity);
-            sessionTokenDao.flush();
-            return token;
-        } catch (Exception e) {
-            return "ERROR";
+        SessionTokenEntity sessionTokenEntity = sessionTokenDao.findSessionTokenByToken(token);
+        if (sessionTokenEntity != null && sessionTokenEntity.getTokenTimeout().isAfter(LocalDateTime.now())) {
+            return true;
         }
+        return false;
     }
-
-
-
-
-
-
-
-        // verificar se o utilizador existe
-
-
-
-        // verificar se a password está correta
-        // gerar token de sessão
-        // guardar token de sessão na base de dados
-        // devolver token de sessão
-
-
-
-    // LOGOUT
-    public boolean logout(String token) {
-        sessionTokenDao.deleteSessionToken(token);
-
-        return true;
-    }
-
-    public boolean logoutAllDevices(String token) {
-        sessionTokenDao.deleteAllSessionTokens(sessionTokenDao.findUserBySessionToken(token));
-        return true;
-    }
-
-
-
-
-
-// limpar a sessão do update
-
-
-    public boolean incrementSessionTimeout(String token) {
-
-        int timeout = systemVariableDao.findSystemVariableByName("session_timeout").getVariableValue();
-        LocalDateTime newtimeout = LocalDateTime.now().plusMinutes(timeout);
-
-        return sessionTokenDao.resetTokenSessionTimeout(token, newtimeout);
-    }
-
-
 
 
 }
-*/
+

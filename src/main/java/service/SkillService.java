@@ -9,6 +9,8 @@ import jakarta.ejb.Stateless;
 import jakarta.validation.*;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.List;
+
 @Stateless
 public class SkillService {
 
@@ -37,4 +39,12 @@ public class SkillService {
         // persistir dao
         skillDao.persist(skillEntity);
     }
+
+    // obter lista de todas as skills do sistema
+
+    public List<SkillEntity> getAllSkills() {
+        return skillDao.findAll();
+    }
+
+
 }

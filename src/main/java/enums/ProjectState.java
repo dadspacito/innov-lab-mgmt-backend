@@ -1,10 +1,13 @@
 package enums;
 
 public enum ProjectState {
-    NEW,
+
+    PLANNING,
+    READY,
+    APPROVED,
     IN_PROGRESS,
-    COMPLETED,
-    CANCELLED;
+    CANCELLED,
+    FINISHED;
 
     public static ProjectState fromString(String state) {
         for (ProjectState s : ProjectState.values()) {

@@ -4,13 +4,24 @@ package entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name="Interest")
+@NamedQueries(
+        {
+                @NamedQuery(name = "Interest.findInterestByName", query = "SELECT i FROM InterestEntity i WHERE i.name = :name"),
+                @NamedQuery(name = "Interest.findAllInterests", query = "SELECT i FROM InterestEntity i")
+        }
+)
 
-// COMENTÀRIO NAMED QUERIES EM FALTA
+
+
+// COMENTÁRIO NAMED QUERIES EM FALTA
 // ASSOCIAR A PROJETOS, para criar namedqueries com projetos
-// ASSOCIAR A USERS, para criar namedqueries com users para adicionar users com interesses? tipo users sugeridos?
+// ASSOCIAR A USERS, (done)
+
 
 public class InterestEntity implements Serializable
 
@@ -31,17 +42,27 @@ public class InterestEntity implements Serializable
     @Column (name = "createdAt", nullable = false, unique = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @ManyToMany(mappedBy = "interests")
+    private Set<UserEntity> users = new HashSet<>();
+
+
+    // código para map de projetos
+//    @ManyToMany(mappedBy = "keywords")
+//    private Set<ProjectEntity> projects = new HashSet<>();
+//
+
 
 
 
     public InterestEntity()
     {
+        this.createdAt = LocalDateTime.now();
     }
 
     public InterestEntity(String name)
     {
         this.name = name;
-
+        this.createdAt = LocalDateTime.now();
 
     }
 
@@ -84,5 +105,33 @@ public class InterestEntity implements Serializable
     {
         this.createdAt = createdAt;
     }
+
+    public Set<UserEntity> getUsers()
+    {
+        return users;
+    }
+
+    public void setUsers(Set<UserEntity> users)
+    {
+        this.users = users;
+    }
+
+    // MÉTODOS PARA AS LISTAS
+    // método para adicionar um user ao interesse
+
+    public void addUser(UserEntity user)
+    {
+        this.users.add(user);
+        user.getInterests().add(this);
+    }
+
+    // método para remover um user do interesse
+
+    public void removeUser(UserEntity user)
+    {
+        this.users.remove(user);
+        user.getInterests().remove(this);
+    }
+
 
 }

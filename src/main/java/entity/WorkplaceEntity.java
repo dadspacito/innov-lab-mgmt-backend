@@ -30,7 +30,6 @@ public class WorkplaceEntity implements Serializable {
     @Column(name="id", nullable = false, unique = true, updatable = false)
     private int id;
 
-
     @Column(name="location", nullable = false, unique = true, updatable = true)
     private String location;
 

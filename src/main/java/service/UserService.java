@@ -1,9 +1,11 @@
 package service;
 
 
+import dao.SessionTokenDao;
 import dao.UserDao;
 import dao.SystemVariableDao;
 import dao.WorkplaceDao;
+import dto.HeaderDto;
 import dto.UserDto;
 import entity.UserEntity;
 import enums.UserState;
@@ -26,6 +28,11 @@ public class UserService {
 
     @EJB
     private WorkplaceDao workplaceDao;
+
+    @EJB
+    private SessionTokenDao sessionTokenDao;
+
+
 
 
 // função que vai adicionar user
@@ -50,7 +57,7 @@ public class UserService {
         user.setAvatar("https://commons.wikimedia.org/wiki/File:Default_avatar_profile.jpg");
         user.setWorkplace(workplaceDao.find(userDto.getWorkplaceId()));
         // a verificação ja foi feita, nao vai dar erro.
-        user.setCreatedAt(LocalDateTime.now());
+     //   user.setCreatedAt(LocalDateTime.now());
         user.setActive(false);
         user.setConfirmed(false);
         user.setEmailToken(generateNewToken());
@@ -77,6 +84,12 @@ public class UserService {
         return true;
     }
 
+    // obter user pelo token (IMPORTANTE. função só chamada EM RESOURCE após validação de token, logo user existe)
+    public UserEntity getUserByToken(String token) {
+        return sessionTokenDao.findUserBySessionToken(token);
+    }
+
+
     public UserState checkUserState (String email) {
 
         UserEntity user = userDao.findUserByEmail(email);
@@ -94,6 +107,8 @@ public class UserService {
     }
 
     // métodos privados, de classe
+
+
 
     // gerar token para email
 
@@ -125,6 +140,19 @@ public class UserService {
         user.setEmailTokenExpires(null);
         userDao.merge(user);
         return true;
+    }
+
+
+
+    public HeaderDto getHeader (UserEntity user) {
+        HeaderDto headerDto = new HeaderDto();
+        if (user.getNickname() != null) {
+            headerDto.setNickname(user.getNickname());
+        } else {
+            headerDto.setNickname(user.getFirstName()   + " " + user.getLastName());
+        }
+        headerDto.setAvatar(user.getAvatar());
+        return headerDto;
     }
 
 
