@@ -1,6 +1,7 @@
 package api;
 
 
+import dto.SkillDto;
 import entity.SkillEntity;
 import jakarta.ejb.EJB;
 import jakarta.ws.rs.GET;
@@ -37,8 +38,7 @@ public class SkillResource {
     public Response getSkills(@HeaderParam("token") String token) {
 
             if (sessionService.isTokenValid(token)) {
-                List< SkillEntity > skills = skillService.getAllSkills();
-
+                List<SkillDto> skills = skillService.getAllSkills();
                 return Response.status(Response.Status.OK).entity(skills).build();
             }
             return Response.status(Response.Status.BAD_REQUEST).entity("Invalid token").build();

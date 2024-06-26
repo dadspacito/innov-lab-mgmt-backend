@@ -10,6 +10,7 @@ import jakarta.validation.*;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Stateless
 public class SkillService {
@@ -34,17 +35,49 @@ public class SkillService {
         }
 
         SkillEntity skillEntity = new SkillEntity(skillDto.getName(), skillType);
-        skillEntity.setIsActive(skillDto.getIsActive());
+       // skillEntity.setIsActive(skillDto.getIsActive());
 
         // persistir dao
         skillDao.persist(skillEntity);
     }
 
+
+
+
+    // métodos de obter entidades
     // obter lista de todas as skills do sistema
 
-    public List<SkillEntity> getAllSkills() {
-        return skillDao.findAll();
+
+
+    public List<SkillDto> getAllSkills() {
+        List<SkillEntity> skillEntities = skillDao.findAll();
+        return skillEntities.stream().map(this::mapSkillEntityToDto)
+                            .collect(Collectors.toList());
+
     }
+
+
+
+    // mapper entidade dto skill
+
+    public SkillDto mapSkillEntityToDto(SkillEntity skillEntity) {
+        SkillDto skillDto = new SkillDto();
+        skillDto.setId(skillEntity.getId());
+        skillDto.setName(skillEntity.getName());
+        skillDto.setType(skillEntity.getType().toString());
+        return skillDto;
+    }
+
+    // mapper skill dto entidade
+
+    public SkillEntity mapSkillDtoToEntity(SkillDto skillDto) {
+        SkillEntity skillEntity = new SkillEntity();
+        skillEntity.setId(skillDto.getId());
+        skillEntity.setName(skillDto.getName());
+        skillEntity.setType(SkillType.fromString(skillDto.getType()));
+        return skillEntity;
+    }
+
 
 
 }

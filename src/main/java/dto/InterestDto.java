@@ -1,18 +1,16 @@
 package dto;
 
-public class SkillDto {
+public class InterestDto {
 
     private String name;
-    private String type;
     private int id;
 
 
-    public SkillDto() {
+    public InterestDto() {
     }
 
-    public SkillDto(String name, String type, int id) {
+    public InterestDto(String name, int id) {
         this.name = name;
-        this.type = type;
         this.id = id;
     }
 
@@ -22,14 +20,6 @@ public class SkillDto {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
 

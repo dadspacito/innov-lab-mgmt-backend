@@ -11,7 +11,7 @@ public class UserProfileDto {
     private String nickname;
     private String avatar;
     private String bio;
-    private boolean isPublicProfile;
+ //   private boolean isPublicProfile;
 
 
 
