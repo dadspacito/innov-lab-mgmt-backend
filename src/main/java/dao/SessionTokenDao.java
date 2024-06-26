@@ -65,6 +65,20 @@ public class SessionTokenDao extends AbstractDao<SessionTokenEntity> {
     public void deleteAllInvalidSessionTokens() {
       em.createNamedQuery("SessionToken.deleteAllInvalidSessionTokens").executeUpdate();
     }
+
+
+// COMENTÁRIO : obter token por token
+
+    public SessionTokenEntity findSessionTokenByToken(String token) {
+        try {
+            return em.createNamedQuery("SessionToken.findSessionTokenByToken", SessionTokenEntity.class)
+                    .setParameter("token", token)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
 // passar voids pra booleans
 }
 

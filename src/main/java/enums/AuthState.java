@@ -2,6 +2,7 @@ package enums;
 
 
 public enum AuthState {
+
     ACTIVE("Token is active"),
     INVALID("Token is invalid, please log in again"),
     EXPIRED("Token has expired, please log in again"),

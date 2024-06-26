@@ -5,7 +5,9 @@ import dao.SessionTokenDao;
 import dao.UserDao;
 import dao.SystemVariableDao;
 import dao.WorkplaceDao;
-import dto.PostLoginDto;
+
+import dto.HeaderDto;
+
 import dto.UserDto;
 import entity.UserEntity;
 import enums.UserState;
@@ -31,6 +33,11 @@ public class UserService {
     private WorkplaceDao workplaceDao;
     @EJB private SessionTokenDao sessionTokenDao;
 
+    @EJB
+    private SessionTokenDao sessionTokenDao;
+
+
+
 
 // função que vai adicionar user
     // recebe user dto
@@ -54,8 +61,8 @@ public class UserService {
         user.setAvatar("https://commons.wikimedia.org/wiki/File:Default_avatar_profile.jpg");
         user.setWorkplace(workplaceDao.find(userDto.getWorkplaceId()));
         // a verificação ja foi feita, nao vai dar erro.
-        user.setCreatedAt(LocalDateTime.now());
-        user.setDeleted(false);
+     //   user.setCreatedAt(LocalDateTime.now());
+        user.setActive(false);
         user.setConfirmed(false);
         user.setEmailToken(generateNewToken());
         user.setEmailTokenExpires(LocalDateTime.now().plusHours(1));
@@ -69,7 +76,7 @@ public class UserService {
     // função que vai ativar user
     //
 
-    public boolean activateUser(String emailToken) {
+    public boolean confirmUser(String emailToken) {
         UserEntity user = userDao.findUserByEmailToken(emailToken);
         if (user == null) {
             System.out.println("entrei no activate user no user service");
@@ -82,6 +89,12 @@ public class UserService {
         userDao.merge(user);
         return true;
     }
+
+    // obter user pelo token (IMPORTANTE. função só chamada EM RESOURCE após validação de token, logo user existe)
+    public UserEntity getUserByToken(String token) {
+        return sessionTokenDao.findUserBySessionToken(token);
+    }
+
 
     public UserState checkUserState (String email) {
 
@@ -100,6 +113,8 @@ public class UserService {
     }
 
     // métodos privados, de classe
+
+
 
     // gerar token para email
 
@@ -141,48 +156,21 @@ public class UserService {
 
 
 
-
-    //recebe user entity e retorna um user DTO
-    //aqui tem de retornar o postLogin DTO para login
-    //ha alguma altura em que seja necessário o user inteiro?
-    //tem de receber um token
-    private PostLoginDto convertUserEntityToUserDTO(UserEntity ue){
-        PostLoginDto ud = new PostLoginDto();
-        ud.setId(ue.getId());
-        ud.setFirstName(ue.getFirstName());
-        ud.setLastName(ue.getLastName());
-        ud.setNickname(ue.getNickname());
-        ud.setEmail(ue.getEmail());
-        ud.setAvatar(ue.getAvatar());
-        ud.setBio(ue.getBio());
-        //ud.setAdmin(ue.isAdmin());
-        //ud.setPassword(ue.getPassword());
-        //ud.setPublicProfile(ue.isPublicProfile());
-        //ud.setDeleted(ue.isDeleted());
-        ud.setWorkplaceId(ue.getWorkplace().getId());
-        return ud;
-    }
-
-
-
-    //19/06/2024
-    //é preciso retornar users independentes e a lista de todos os users para o frontend
-    //retornar user independente.GET USER BY EMAIL
-    //aqui tem de ser por id para retornar o id do user que vem do token
-    public PostLoginDto getUserByToken(String token){
-        UserEntity ue = sessionTokenDao.findUserBySessionToken(token);
-        if (ue != null){
-            return convertUserEntityToUserDTO(ue) ;
+    public HeaderDto getHeader (UserEntity user) {
+        HeaderDto headerDto = new HeaderDto();
+        if (user.getNickname() != null) {
+            headerDto.setNickname(user.getNickname());
+        } else {
+            headerDto.setNickname(user.getFirstName()   + " " + user.getLastName());
         }
-        return null;
+        headerDto.setAvatar(user.getAvatar());
+        return headerDto;
     }
-    //aqui tem de retornar as locatios todas
 
 
 
-
-    //devolve sempre uma lista de users para só se ter um get no serviço
-    //tem que percorrer uma lista e retornar uma lista com os users que se quer
+    // converter userDto em entity e vice versa
+    // rever
 
 
 }

@@ -8,6 +8,7 @@ import jakarta.persistence.criteria.CriteriaDelete;
 import jakarta.persistence.criteria.CriteriaQuery;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -20,44 +21,34 @@ public abstract class AbstractDao<T extends Serializable> implements Serializabl
     @PersistenceContext(unitName = "PersistenceUnit")
     protected EntityManager em;
 
-    public AbstractDao(Class<T> clazz)
-    {
+    public AbstractDao(Class<T> clazz) {
         this.clazz = clazz;
     }
 
-
-    public T find(Object id)
-    {
+    public T find(Object id) {
         return em.find(clazz, id);
     }
 
-
-    public void persist(final T entity)
-    {
+    public void persist(final T entity) {
         em.persist(entity);
     }
 
-
-    public void merge(final T entity)
-    {
+    public void merge(final T entity) {
         em.merge(entity);
     }
 
-    public void remove(final T entity)
-    {
+    public void remove(final T entity) {
         em.remove(em.contains(entity) ? entity : em.merge(entity));
     }
 
-
-    public List<T> findAll()
-    {
+    public List<T> findAll() {
         final CriteriaQuery<T> criteriaQuery = em.getCriteriaBuilder().createQuery(clazz);
         criteriaQuery.select(criteriaQuery.from(clazz));
-        return em.createQuery(criteriaQuery).getResultList();
+        List<T> resultList = em.createQuery(criteriaQuery).getResultList();
+        return resultList != null ? resultList : Collections.emptyList();
     }
 
-    public void deleteAll()
-    {
+    public void deleteAll() {
         final CriteriaDelete<T> criteriaDelete = em.getCriteriaBuilder().createCriteriaDelete(clazz);
         criteriaDelete.from(clazz);
         em.createQuery(criteriaDelete).executeUpdate();

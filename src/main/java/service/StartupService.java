@@ -1,13 +1,13 @@
 package service;
 
-import dao.SessionTokenDao;
-import dao.SystemVariableDao;
-import dao.UserDao;
-import dao.WorkplaceDao;
+import dao.*;
 import entity.UserEntity;
 import entity.WorkplaceEntity;
 import entity.SystemVariableEntity;
 import entity.SessionTokenEntity;
+import entity.SkillEntity;
+import entity.InterestEntity;
+import enums.SkillType;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Startup;
 import jakarta.ejb.Singleton;
@@ -33,6 +33,12 @@ public class StartupService {
 
     @EJB
     SessionTokenDao sessionTokenDao;
+
+    @EJB
+    InterestDao interestDao;
+
+    @EJB
+    SkillDao skillDao;
 
 
 
@@ -74,10 +80,10 @@ public class StartupService {
         userEntity.setLastName("Admin");
         userEntity.setEmail("admin@innovlabmgmt.com");
         userEntity.setAvatar("https://commons.wikimedia.org/wiki/File:Default_avatar_profile.jpg");
-        userEntity.setCreatedAt(LocalDateTime.now());
+        //userEntity.setCreatedAt(LocalDateTime.now());
         userEntity.setAdmin(true);
         userEntity.setConfirmed(true);
-        userEntity.setDeleted(false);
+        userEntity.setActive(true);
         userEntity.setPublicProfile(false);
         userEntity.setWorkplace(workplaceDao.findWorkplaceByLocation("COIMBRA"));
         userDao.persist(userEntity);
@@ -89,16 +95,35 @@ public class StartupService {
         sessionTokenDao.deleteAll();
 
 
-     // definir um token de sessão para o user admin, SEMPRE VÁLIDO PARA EFEITOS DE TESTE
+         // definir um token de sessão para o user admin, SEMPRE VÁLIDO PARA EFEITOS DE TESTE
         // COMENTÁRIO MANTER ISTO APENAS EM DESENVOLVIMENTO
 
-        if (sessionTokenDao.findUserBySessionToken("admin") == null) {
-            SessionTokenEntity sessionTokenEntity = new SessionTokenEntity();
-            sessionTokenEntity.setToken("admin");
-            sessionTokenEntity.setTokenTimeout(LocalDateTime.now().plusYears(1));
-            sessionTokenEntity.setUser(userDao.findUserByNickname("admin"));
-            sessionTokenDao.persist(sessionTokenEntity);
-        }
+      if (sessionTokenDao.findUserBySessionToken("admin") == null) {
+          SessionTokenEntity sessionTokenEntity = new SessionTokenEntity();
+          sessionTokenEntity.setToken("admin");
+         sessionTokenEntity.setTokenTimeout(LocalDateTime.now().plusYears(1));
+          sessionTokenEntity.setUser(userDao.findUserByNickname("admin"));
+          sessionTokenDao.persist(sessionTokenEntity);
+      }
+
+      // teste de criar skills e interesses
+
+        SkillEntity skillEntity = new SkillEntity("Java", SkillType.SOFTWARE);
+        InterestEntity interestEntity = new InterestEntity("Yoga");
+        // não é obrigatorio por causa do cascade.
+        //interestDao.persist(interestEntity);
+      //  skillDao.persist(skillEntity);
+        UserEntity userEntity = userDao.findUserByNickname("admin");
+        userEntity.getSkills().add(skillEntity);
+        userEntity.getInterests().add(interestEntity);
+        userDao.merge(userEntity);
+
+
+        System.out.println("StartupService initialized.");
+
+
+        // NOTA. criar bean para start com criação de vários objetos
+
 
 
 
