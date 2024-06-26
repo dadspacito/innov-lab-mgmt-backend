@@ -33,8 +33,7 @@ public class UserService {
     private WorkplaceDao workplaceDao;
     @EJB private SessionTokenDao sessionTokenDao;
 
-    @EJB
-    private SessionTokenDao sessionTokenDao;
+
 
 
 
