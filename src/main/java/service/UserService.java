@@ -5,7 +5,9 @@ import dao.SessionTokenDao;
 import dao.UserDao;
 import dao.SystemVariableDao;
 import dao.WorkplaceDao;
+
 import dto.HeaderDto;
+
 import dto.UserDto;
 import entity.UserEntity;
 import enums.UserState;
@@ -15,6 +17,7 @@ import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.UUID;
 
 @Stateless
@@ -28,6 +31,7 @@ public class UserService {
 
     @EJB
     private WorkplaceDao workplaceDao;
+    @EJB private SessionTokenDao sessionTokenDao;
 
     @EJB
     private SessionTokenDao sessionTokenDao;
@@ -62,7 +66,7 @@ public class UserService {
         user.setConfirmed(false);
         user.setEmailToken(generateNewToken());
         user.setEmailTokenExpires(LocalDateTime.now().plusHours(1));
-        String verificationLink = "https://localhost:8443/activations/" + user.getEmailToken();
+        String verificationLink = "http://localhost:3000/users/activations/" + user.getEmailToken();
         EmailSender.sendVerificationEmail(user.getEmail(), user.getFirstName(), verificationLink);
         userDao.persist(user);
          return UserState.CREATED;
@@ -75,6 +79,8 @@ public class UserService {
     public boolean confirmUser(String emailToken) {
         UserEntity user = userDao.findUserByEmailToken(emailToken);
         if (user == null) {
+            System.out.println("entrei no activate user no user service");
+
             return false;
         }
         user.setConfirmed(true);
@@ -117,6 +123,7 @@ public class UserService {
     }
 
 
+    //função que envia mail ao user para seguir para o link de reset password
     public boolean requestPasswordReset(String email) {
         UserEntity user = userDao.findUserByEmail(email);
         if (user == null) {
@@ -125,7 +132,7 @@ public class UserService {
         user.setEmailToken(generateNewToken());
         user.setEmailTokenExpires(LocalDateTime.now().plusHours(1));
         userDao.merge(user);
-        String resetLink = "https://localhost:3000/reset-password/" + user.getEmailToken();
+        String resetLink = "http://localhost:3000/reset-password/" + user.getEmailToken();
         EmailSender.sendPasswordResetEmail(user.getEmail(), user.getFirstName(), resetLink);
         return true;
     }
@@ -135,10 +142,15 @@ public class UserService {
         if (user == null) {
             return false;
         }
+        System.out.println("entrou aqui");
+        System.out.println(newPassword);
+        System.out.println(user.getPassword());
         user.setPassword(BCrypt.hashpw(newPassword, BCrypt.gensalt()));
+        System.out.println(user.getPassword());
         user.setEmailToken(null);
         user.setEmailTokenExpires(null);
         userDao.merge(user);
+        System.out.println(user.getPassword());
         return true;
     }
 
@@ -159,5 +171,6 @@ public class UserService {
 
     // converter userDto em entity e vice versa
     // rever
+
 
 }

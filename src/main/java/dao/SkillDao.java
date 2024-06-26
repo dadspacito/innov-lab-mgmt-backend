@@ -1,3 +1,4 @@
+
 package dao;
 
 import entity.SkillEntity;
@@ -10,13 +11,10 @@ import java.time.LocalDateTime;
 @Stateless
 public class SkillDao extends AbstractDao<SkillEntity> {
 
-
-
         private static final long serialVersionUID = 1L;
 
         public SkillDao() {
             super(SkillEntity.class);
         }
-
 
 }

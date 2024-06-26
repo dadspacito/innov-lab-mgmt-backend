@@ -36,8 +36,10 @@ public class SkillEntity implements Serializable {
     private LocalDateTime createdAt;
 
 
+
     @ManyToMany(mappedBy = "skills")
     private Set<UserEntity> users = new HashSet<>();
+
 
     public SkillEntity() {
         this.createdAt = LocalDateTime.now();
@@ -90,15 +92,18 @@ public class SkillEntity implements Serializable {
 
 
     public Set<UserEntity> getUsers() {
+
         return users;
     }
 
     public void setUsers(Set<UserEntity> users) {
         this.users = users;
+
     }
 
     // Método para adicionar um user à skill
     public void addUser(UserEntity user) {
+
         this.users.add(user);
         user.getSkills().add(this);
     }
@@ -107,5 +112,7 @@ public class SkillEntity implements Serializable {
     public void removeUser(UserEntity user) {
         this.users.remove(user);
         user.getSkills().remove(this);
+
     }
 }
+

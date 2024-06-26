@@ -339,8 +339,10 @@ public class UserEntity implements Serializable {
     @JoinColumn(name = "workplace_id", nullable = false)
     private WorkplaceEntity workplace;
 
+
     @ManyToMany(mappedBy = "Skill")
     private List<SkillEntity> skills = new ArrayList<>();
+
 
 
     // COMENTÁRIO
@@ -483,6 +485,14 @@ public class UserEntity implements Serializable {
 
     public void  setWorkplace(WorkplaceEntity workplace) {
         this.workplace = workplace;
+    }
+
+    public List<SessionTokenEntity> getSessionToken() {
+        return sessionToken;
+    }
+
+    public void setSessionToken(List<SessionTokenEntity> sessionToken) {
+        this.sessionToken = sessionToken;
     }
 }
 */
