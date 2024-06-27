@@ -38,7 +38,7 @@ public class ProjectEntity implements Serializable {
      * skills- many to many
      * tasks- one to many
      */
-    @ManyToMany(mappedBy = "user")
+    //@ManyToMany(mappedBy = "user")
 
 
     public int getId() {
