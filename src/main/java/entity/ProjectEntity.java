@@ -1,5 +1,6 @@
 package entity;
 
+import enums.ProjectState;
 import jakarta.persistence.*;
 import net.bytebuddy.asm.Advice;
 
@@ -18,20 +19,28 @@ public class ProjectEntity implements Serializable {
     private int id;
     @Column(name="name", nullable = false, unique = true, updatable = false)
     private String name;
-    @Column(name="description", nullable = false, unique = true, updatable = false)
+    @Column(name="description", nullable = false, unique = false, updatable = true)
     private String description;
-    @Column(name="startDate", nullable = false, unique = true, updatable = false)
+    @Column(name="startDate", nullable = false, unique = false, updatable = true)
     private LocalDateTime startDate;
-    @Column(name="endDate", nullable = false, unique = true, updatable = false)
+    @Column(name="endDate", nullable = true, unique = false, updatable = true)
     private LocalDateTime endDate;
+    @Enumerated
+    @Column(name = "projectState", nullable = false, unique = false, updatable = true)
+    private ProjectState projectState;
+
 
     /**
      * o que é mapped
-     * users
-     * interests
-     * materials
-     * skills
+     * users-many to many
+     * interests- many to many
+     * materials-one to many
+     * skills- many to many
+     * tasks- one to many
      */
+    @ManyToMany(mappedBy = "user")
+
+
     public int getId() {
         return id;
     }
