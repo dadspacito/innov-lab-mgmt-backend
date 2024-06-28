@@ -88,6 +88,7 @@ public class UserEntity implements Serializable {
 
 
 
+
     public UserEntity() {
         this.createdAt = LocalDateTime.now();
     }

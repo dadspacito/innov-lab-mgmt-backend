@@ -14,7 +14,7 @@ import enums.MaterialType;
  * •  Observações
  */
 
-public class MaterialsDto {
+public class MaterialDto {
     private int id;
     private String name;
     private String brand;

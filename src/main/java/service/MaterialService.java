@@ -1,18 +1,17 @@
 package service;
 
 
-import dao.MaterialsDao;
-import dto.MaterialsDto;
-import entity.MaterialsEntity;
-import jakarta.ejb.EJB;
+import dao.MaterialDao;
+import dto.MaterialDto;
+import entity.MaterialEntity;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 
 import java.util.ArrayList;
 
-@Stateless public class MaterialsService {
+@Stateless public class MaterialService {
     @Inject
-    private MaterialsDao materialsDao;
+    private MaterialDao materialDao;
 
     //a lista que retorna do backend tem de ser transformada em DTO
     //adicionar material
@@ -20,10 +19,10 @@ import java.util.ArrayList;
     //retornar lista de materiais
 
     //função que recebe array entity backend e transforma em array dtos para mostrar no frontend
-    private ArrayList<MaterialsDto> convertMaterialsEntityToDTO(ArrayList<MaterialsEntity> materialsList){
-        ArrayList<MaterialsDto> materialsDtoList =  new ArrayList<>();
-        MaterialsDto materialDTO = new MaterialsDto();
-        for (MaterialsEntity material: materialsList){
+    private ArrayList<MaterialDto> convertMaterialsEntityToDTO(ArrayList<MaterialEntity> materialsList){
+        ArrayList<MaterialDto> materialsDtoList =  new ArrayList<>();
+        MaterialDto materialDTO = new MaterialDto();
+        for (MaterialEntity material: materialsList){
             materialDTO.setId(material.getId());
             materialDTO.setName(material.getName());
             materialDTO.setDescription(material.getDescription());
@@ -39,8 +38,8 @@ import java.util.ArrayList;
         return materialsDtoList;
     }
     //transforma um material DTO em material entity
-    private MaterialsEntity convertMaterialDTOtoEntity(MaterialsDto material){
-        MaterialsEntity me =  new MaterialsEntity();
+    private MaterialEntity convertMaterialDTOtoEntity(MaterialDto material){
+        MaterialEntity me =  new MaterialEntity();
         me.setName(material.getName());
         me.setBrand(material.getBrand());
         me.setDescription(material.getDescription());
@@ -54,13 +53,13 @@ import java.util.ArrayList;
     }
 
     //adiciona um material à base de dados
-    public void addMaterialToDB(MaterialsDto material){
-        materialsDao.persist(convertMaterialDTOtoEntity(material));
-        materialsDao.flush();
+    public void addMaterialToDB(MaterialDto material){
+        materialDao.persist(convertMaterialDTOtoEntity(material));
+        materialDao.flush();
     }
     //retorna todos os materiais em DTO
-    public ArrayList<MaterialsDto> getAllMaterials (){
-        return convertMaterialsEntityToDTO((ArrayList<MaterialsEntity>) materialsDao.findAll());
+    public ArrayList<MaterialDto> getAllMaterials (){
+        return convertMaterialsEntityToDTO((ArrayList<MaterialEntity>) materialDao.findAll());
     }
     //adicionar novo material À DB
 

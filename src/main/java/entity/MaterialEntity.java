@@ -1,7 +1,6 @@
 package entity;
 
 import enums.MaterialType;
-import enums.SkillType;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -12,10 +11,10 @@ import java.io.Serializable;
 //devolve os materiais que tenham o ID do projeto
 //devolver materiais por projeto id
 @NamedQueries({
-        @NamedQuery(name = "Material.findMaterialByID", query = "SELECT u FROM MaterialsEntity u WHERE u.id= :id")
+        @NamedQuery(name = "Material.findMaterialByID", query = "SELECT u FROM MaterialEntity u WHERE u.id= :id")
 
 })
-public class MaterialsEntity implements Serializable {
+public class MaterialEntity implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -168,8 +168,9 @@ public class UserService {
 
 
 
-    // converter userDto em entity e vice versa
-    // rever
+   //chama o edit user
+    //recebe os dados de user do frontend e faz merge
+    
 
 
 }

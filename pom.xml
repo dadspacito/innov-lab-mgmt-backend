@@ -175,16 +175,17 @@
         </dependency>
     </dependencies>
 
+    <!--
     <distributionManagement>
         <repository>
             <id>innov-lab-mgmt-backend</id>
             <url>file:///Users/utilizador/Desktop/Acertar o Rumo/projetoFinalAoR_Critical/projeto_final_backend/projeto_final_backend/innov-lab-mgmt-backend
             </url>
         </repository>
-
     </distributionManagement>
+    -->
 
-    <build>
+<!--    <build>
         <finalName>${project.artifactId}</finalName>
         <pluginManagement>
             <plugins>
@@ -238,12 +239,12 @@
                 </plugin>
             </plugins>
         </pluginManagement>
-        <!--<plugins>
+        &lt;!&ndash;<plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <version>3.4.0</version>
             </plugin>
-        </plugins>-->
-    </build>
+        </plugins>&ndash;&gt;
+    </build>-->
 </project>
