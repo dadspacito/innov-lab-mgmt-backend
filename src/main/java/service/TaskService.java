@@ -150,6 +150,8 @@ public class TaskService {
         return taskEnt;
     };
     //esta função é boa pratica construida desta maneira?
+    //alterar esta função para ver se este user está associado ao projeto.
+    //corre uma lista dos users no projeto e verificar se este id pertence a esta lista
     private boolean isValidUser(int ownerID){
         return userDao.findUserById(ownerID) != null;
     }

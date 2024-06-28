@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
         //aqui tem de haver queries que se insiram dentro do projeto?
         @NamedQuery(name = "task.findByProjectAndOwner", query = "select t from TaskEntity t where t.project = :project and t.owner = :owner order by t.startDate asc, t.state asc"),
         @NamedQuery(name = "task.findByProjectAndState", query = "select t from TaskEntity t where t.project = :project and t.state = :state order by t.startDate asc")
+        //que queries se inserem aqui relativamente ao is active?
 
 
 })
@@ -46,6 +47,8 @@ public class TaskEntity implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name = "state", nullable = false, unique = false, updatable = true)
     private TaskState state;
+    @Column(name ="isActive", nullable = false, unique = false, updatable = true)
+    private boolean isActive;
 
     /**
      * owner da task many to one- a user can have many tasks, but a task can only have one owner
@@ -118,6 +121,14 @@ public class TaskEntity implements Serializable {
 
     public TaskState getState() {
         return state;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 
     public void setState(TaskState state) {

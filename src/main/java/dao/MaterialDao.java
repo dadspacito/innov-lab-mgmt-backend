@@ -4,23 +4,22 @@ package dao;
 //adicionar materiais
 //remover materiais
 
-import entity.MaterialsEntity;
-import entity.SkillEntity;
+import entity.MaterialEntity;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.NoResultException;
 
-@Stateless  public class MaterialsDao extends AbstractDao<MaterialsEntity> {
+@Stateless  public class MaterialDao extends AbstractDao<MaterialEntity> {
     private static final long serialVersionUID = 1L;
 
-    public MaterialsDao() {
-        super(MaterialsEntity.class);
+    public MaterialDao() {
+        super(MaterialEntity.class);
     }
     //return material by id
     //return list of materials
     //find material by name?
-    public MaterialsEntity findMaterialByID(int id){
+    public MaterialEntity findMaterialByID(int id){
         try{
-            return (MaterialsEntity) em.createNamedQuery("Material.findMaterialByID")
+            return (MaterialEntity) em.createNamedQuery("Material.findMaterialByID")
                     .setParameter("id", id).getSingleResult();
         } catch (NoResultException e){
             return null;
