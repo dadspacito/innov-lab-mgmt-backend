@@ -58,18 +58,18 @@ public class ProjectEntity implements Serializable {
     )
     private Set<InterestEntity> interests = new HashSet<>();
 
-    // One-to-Many relationship with MaterialEntity
+    /*// One-to-Many relationship with MaterialEntity
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<MaterialEntity> materials = new HashSet<>();
+    private Set<MaterialEntity> materials = new HashSet<>();*/
 
     // Many-to-Many relationship with SkillEntity
-    @ManyToMany
+    /*@ManyToMany
     @JoinTable(
             name = "project_skills", // Join table name
             joinColumns = @JoinColumn(name = "project_id"), // Foreign key in join table referencing ProjectEntity
             inverseJoinColumns = @JoinColumn(name = "skill_id") // Foreign key in join table referencing SkillEntity
     )
-    private Set<SkillEntity> skills = new HashSet<>();
+    private Set<SkillEntity> skills = new HashSet<>();*/
 
     // One-to-Many relationship with TaskEntity
     /*@OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
