@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -44,9 +45,13 @@ public class InterestEntity implements Serializable
 
     @ManyToMany(mappedBy = "interests")
     private Set<UserEntity> users = new HashSet<>();
+    @ManyToMany(mappedBy = "interests")
+    private Set<ProjectEntity> projects = new HashSet<>();
 
 
-    // código para map de projetos
+//aqui será keywords ou simplesmente interesses?
+// código para map de projetos? Porque não ser so interesses no projeto que pode devolver um array de interesses e skills?
+
 //    @ManyToMany(mappedBy = "keywords")
 //    private Set<ProjectEntity> projects = new HashSet<>();
 //
@@ -116,6 +121,21 @@ public class InterestEntity implements Serializable
         this.users = users;
     }
 
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
+
+    public Set<ProjectEntity> getProjects() {
+        return projects;
+    }
+
+    public void setProjects(Set<ProjectEntity> projects) {
+        this.projects = projects;
+    }
     // MÉTODOS PARA AS LISTAS
     // método para adicionar um user ao interesse
 
@@ -132,6 +152,19 @@ public class InterestEntity implements Serializable
         this.users.remove(user);
         user.getInterests().remove(this);
     }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        InterestEntity that = (InterestEntity) o;
+        return id == that.id; // Compare based on ID for persisted entities
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id); // Use ID for hash code
+    }
+
 
 
 }

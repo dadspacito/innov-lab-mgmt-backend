@@ -7,6 +7,10 @@ import jdk.jfr.Name;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Objects;
+//as dependencias de outras tasks é aqui? Relação one to many?
+//uma task depende de outras
+//many to many dependency? uma task pode depender de vrias dependencias e uma dependencia pode depender de varias tasks
 
 @Entity
 @Table(name = "task")
@@ -141,5 +145,17 @@ public class TaskEntity implements Serializable {
 
     public void setProject(ProjectEntity project) {
         this.project = project;
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TaskEntity that = (TaskEntity) o;
+        return id == that.id; // Compare based on ID for persisted entities
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id); // Use ID for hash code
     }
 }

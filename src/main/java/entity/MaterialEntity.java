@@ -4,6 +4,7 @@ import enums.MaterialType;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 @Entity
 @Table(name="Material")
@@ -40,6 +41,9 @@ public class MaterialEntity implements Serializable {
     @Column(name = "observations", nullable = true, updatable = true)
     private String observations;
     //esta relaçõa é one to many com os projetos
+    @ManyToOne
+    @JoinColumn(name="project_id")//foreign key do projeto
+    private ProjectEntity project;
 
 
     public int getId() {
@@ -120,5 +124,25 @@ public class MaterialEntity implements Serializable {
 
     public void setObservations(String observations) {
         this.observations = observations;
+    }
+
+    public ProjectEntity getProject() {
+        return project;
+    }
+
+    public void setProject(ProjectEntity project) {
+        this.project = project;
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MaterialEntity that = (MaterialEntity) o;
+        return id == that.id; // Compare based on ID for persisted entities
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id); // Use ID for hash code
     }
 }

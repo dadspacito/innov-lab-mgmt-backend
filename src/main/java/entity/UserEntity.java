@@ -2,8 +2,11 @@ package entity;
 
 import java.time.LocalDateTime;
 import jakarta.persistence.*;
+import jdk.jfr.Name;
+
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -13,7 +16,11 @@ import java.util.Set;
         @NamedQuery(name = "User.findUserById", query = "SELECT u FROM UserEntity u WHERE u.id = :id"),
         @NamedQuery(name = "User.findAllUsers", query = "SELECT u FROM UserEntity u"),
         @NamedQuery(name = "User.findUserByEmailToken", query = "SELECT u FROM UserEntity u WHERE u.emailToken = :emailToken"),
-        @NamedQuery(name = "User.findUserByNickname", query = "SELECT u FROM UserEntity u WHERE u.nickname = :nickname")
+        @NamedQuery(name = "User.findUserByNickname", query = "SELECT u FROM UserEntity u WHERE u.nickname = :nickname"),
+        //query para retornar os projetos do user, faz join da tabela
+        @NamedQuery(name = "User.findUserProjects", query = "select u.projects from UserEntity u where u.id = :userID")
+        //query de tasks associadas a estes user
+
 })
 public class UserEntity implements Serializable {
 
@@ -86,8 +93,16 @@ public class UserEntity implements Serializable {
     )
     private Set<InterestEntity> interests = new HashSet<>();
 
+    @ManyToMany(mappedBy = "users")
+    private Set<ProjectEntity> projects;
 
+    public Set<ProjectEntity> getProjects() {
+        return projects;
+    }
 
+    public void setProjects(Set<ProjectEntity> projects) {
+        this.projects = projects;
+    }
 
     public UserEntity() {
         this.createdAt = LocalDateTime.now();
@@ -262,6 +277,18 @@ public class UserEntity implements Serializable {
     public void removeInterest(InterestEntity interest) {
         this.interests.remove(interest);
         interest.getUsers().remove(this);
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserEntity that = (UserEntity) o;
+        return id == that.id; // Compare based on ID for persisted entities
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id); // Use ID for hash code
     }
 }
 /*
