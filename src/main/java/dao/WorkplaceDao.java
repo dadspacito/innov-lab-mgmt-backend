@@ -33,4 +33,12 @@ public class WorkplaceDao extends AbstractDao<WorkplaceEntity> {
             return null;
         }
     }
+    public WorkplaceEntity getWorkplaceByID(int id){
+        try{
+            return em.createNamedQuery("Workplace.findWorkplaceByID", WorkplaceEntity.class).setParameter("id", id).getSingleResult();
+        }
+        catch (NoResultException e){
+            return null;
+        }
+    }
 }

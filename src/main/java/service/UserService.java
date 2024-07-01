@@ -8,17 +8,26 @@ import dao.WorkplaceDao;
 
 import dto.HeaderDto;
 
+import dto.ProjectMemberDto;
 import dto.UserDto;
 import entity.UserEntity;
 import enums.UserState;
+import jakarta.persistence.NoResultException;
 import org.mindrot.jbcrypt.BCrypt;
 import util.EmailSender;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 
+import java.lang.reflect.Array;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
+/**
+ * faltam funções de conversão de user entity em dto
+ */
 
 @Stateless
 public class UserService {
@@ -33,22 +42,15 @@ public class UserService {
     private WorkplaceDao workplaceDao;
     @EJB private SessionTokenDao sessionTokenDao;
 
-
-
-
-
-
 // função que vai adicionar user
     // recebe user dto
     // DTO vai ser válido quando chega aqui
     // incluir a validação das entidades associadas. Se workplace não existir, retornar NOT_FOUND
 
     public UserState registerUser(UserDto userDto) {
-
         if (userDao.findUserByEmail(userDto.getEmail()) != null) {
             return UserState.ALREADY_EXISTS;
         }
-
         UserEntity user = new UserEntity();
         // criar user entity com dados de dto
         // associar dados do DTO ao user
@@ -79,7 +81,6 @@ public class UserService {
         UserEntity user = userDao.findUserByEmailToken(emailToken);
         if (user == null) {
             System.out.println("entrei no activate user no user service");
-
             return false;
         }
         user.setConfirmed(true);
@@ -88,7 +89,6 @@ public class UserService {
         userDao.merge(user);
         return true;
     }
-
     // obter user pelo token (IMPORTANTE. função só chamada EM RESOURCE após validação de token, logo user existe)
     public UserEntity getUserByToken(String token) {
         return sessionTokenDao.findUserBySessionToken(token);
@@ -170,7 +170,61 @@ public class UserService {
 
    //chama o edit user
     //recebe os dados de user do frontend e faz merge
-    
+    /**
+     * falta retornar uma lista de user dto para projetos
+     * falta conversão desta lista em dto (user, post login, header)
+     * estes users tem de ser retornados based on location. Esta função depois é chamada no project consoante a
+     * location do projeto
+     */
+    /**
+     * duas opções, ou se cria um project member service com toda a lógica lá ou se faz tudo no user service,
+     * incluindo a gestão dos utilizadores
+     * @param workplaceID
+     * @return
+     */
 
+    public List<ProjectMemberDto> returnProjectMembers(int workplaceID) {
+        // Check if the workplace exists
+        if (workplaceDao.getWorkplaceByID(workplaceID) != null) {
+            // Fetch and convert users to ProjectMemberDto using Streams
+            return userDao.getUserByWorkplace(workplaceID).stream()
+                    .map(this::ConvertUserEntityToProjectMembers)
+                    .collect(Collectors.toList());
+        }
+        // Return an empty list if the workplace does not exist
+        return List.of();
+    }
+    public ProjectMemberDto ConvertUserEntityToProjectMembers(UserEntity u) {
+        if (userIsValid(u)) {
+            return new ProjectMemberDto(u.getId(), u.getFirstName(), u.getLastName(), u.getNickname(), LocalDateTime.now());
+        }
+        return null;
+    }
+
+    /**
+     * esta função é diferente porque quando um projeto é criado tem de ficar um user automaticamente associado.
+     * @param u
+     * @return
+     */
+    public UserEntity defineManager(ProjectMemberDto u){
+        try{
+            if (userDao.findUserById(u.getId())!= null){
+                return userDao.findUserById(u.getId());
+            }
+            return null;
+        }
+        catch (NoResultException e){
+            return null;
+        }
+    }
+    private boolean userIsValid (UserEntity u){
+        return userDao.findUserById(u.getId()) != null;
+    }
 
 }
+
+
+
+
+
+

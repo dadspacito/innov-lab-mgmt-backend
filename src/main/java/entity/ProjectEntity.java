@@ -25,13 +25,14 @@ import java.util.Set;
          *
          */
         @NamedQuery(name = "Project.getProjectByID", query = "select p from ProjectEntity p where p.id = :id" ),
-        @NamedQuery(name = "Project.getMembers", query ="select distinct u from ProjectEntity p join p.users u where p.id = :id"),
+        @NamedQuery(name = "Project.getMembers", query ="select distinct u from ProjectEntity p join p.projectMembers u where p.id = :id"),
         @NamedQuery(name = "Project.getInterests", query ="select distinct i from ProjectEntity p join p.interests i where p.id = :id"),
         @NamedQuery(name = "Project.getSkills", query = "select distinct s from ProjectEntity p join p.skills s where p.id = :id"),
         @NamedQuery(name = "Project.getMaterials", query="select m from MaterialEntity m where m.project.id = :id"),
         @NamedQuery(name = "Project.getTasks", query ="select t from TaskEntity t where t.project.id = :id"),
         //este get all retorna por ordem de data e por state
         @NamedQuery(name ="Project.getAll", query = "select p from ProjectEntity p order by p.startDate asc, p.projectState asc")
+        //falta query de get projects by workplace
 
 
 
@@ -66,16 +67,21 @@ public class ProjectEntity implements Serializable {
      * materials-one to many
      * skills- many to many
      * tasks- one to many
+     * workplaces many to one
      */
+    @ManyToOne
+    @JoinColumn(name = "manager_id", nullable = false)
+    private UserEntity manager;
 
     // Many-to-Many relationship with UserEntity
     @ManyToMany
     @JoinTable(
-            name = "project_users", // Join table name
+            name = "project_members", // Join table name
             joinColumns = @JoinColumn(name = "project_id"), // Foreign key in join table referencing ProjectEntity
             inverseJoinColumns = @JoinColumn(name = "user_id") // Foreign key in join table referencing UserEntity
+
     )
-    private Set<UserEntity> users = new HashSet<>();
+    private Set<UserEntity> projectMembers = new HashSet<>();
 
     // Many-to-Many relationship with InterestEntity
     @ManyToMany
@@ -102,6 +108,11 @@ public class ProjectEntity implements Serializable {
     // One-to-Many relationship with TaskEntity
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TaskEntity> tasks = new HashSet<>();
+
+    //one to many relationships with workplaces
+    @ManyToOne
+    @JoinColumn(name ="workplace_id", nullable = false)
+    private WorkplaceEntity workplace;
 
 
     //contrutor vazio
@@ -130,6 +141,14 @@ public class ProjectEntity implements Serializable {
         this.description = description;
     }
 
+    public UserEntity getManager() {
+        return manager;
+    }
+
+    public void setManager(UserEntity manager) {
+        this.manager = manager;
+    }
+
     public LocalDateTime getStartDate() {
         return startDate;
     }
@@ -155,11 +174,11 @@ public class ProjectEntity implements Serializable {
     }
 
     public Set<UserEntity> getUsers() {
-        return users;
+        return projectMembers;
     }
 
     public void setUsers(Set<UserEntity> users) {
-        this.users = users;
+        this.projectMembers = users;
     }
 
     public Set<InterestEntity> getInterests() {
@@ -194,6 +213,20 @@ public class ProjectEntity implements Serializable {
         this.tasks = tasks;
     }
 
+    public WorkplaceEntity getWorkplace() {
+        return workplace;
+    }
+
+    public void setWorkplace(WorkplaceEntity workplace) {
+        if (this.workplace != null){
+            this.workplace.removeProjectFromWorkplace(this);
+        }
+        this.workplace = workplace;
+        if (workplace != null){
+            workplace.addProjectToWorkplace(this);
+        }
+    }
+
     //faz se override ao equals e hashcode methods
     //este override o que faz é descriminar e dar consistencia aos equals que se utilizam para pesquisar, fazer merge
     //e outras funções que requerem comparação de elementos dentro da base de dados
@@ -218,14 +251,18 @@ public class ProjectEntity implements Serializable {
      * add/remove skill
      * add/remove task
      * add/remove user
+     *
+     *The point of these functions is to manage the entities related to Project entity through the
+     * project entity
+     * this encapsulates the logic within a specific entity;
      */
-    public void addUser(UserEntity user){
-        this.users.add(user);
-        user.getProjects().add(this);
+    public void addMember(UserEntity member){
+        this.projectMembers.add(member);
+        member.getProjects().add(this);
     }
-    public void removeUser(UserEntity user){
-        this.users.remove(user);
-        user.getProjects().remove(this);//may not contain? what does this mean?
+    public void removeMember(UserEntity member){
+        this.projectMembers.remove(member);
+        member.getProjects().remove(this);//
     }
     //em materiais a construção é diferente porque a relação é one to many
     //neste cenario o que o set project está a apontar é a referencia aos materiais
@@ -263,4 +300,33 @@ public class ProjectEntity implements Serializable {
         this.tasks.remove(task);
         task.setProject(null);
     }
+
+    //este método pode tendencialmente dar alguns problemas
+    public void addWorkplaceToProject(WorkplaceEntity w){
+        // Avoid setting the same workplace again
+        if (this.workplace != null && this.workplace.equals(w)) {
+            return;
+        }
+        // If there is an existing workplace, remove this project from it
+        if (this.workplace != null) {
+            this.workplace.removeProjectFromWorkplace(this);
+        }
+        // Set the new workplace for the project
+        this.setWorkplace(w);
+        // Add this project to the new workplace's set of projects
+        if (w != null) {
+            w.addProjectToWorkplace(this);
+        }
+    }
+    //faz sentido implementar aqui um remove projects?
+    public void removeWorkplaceFromProject(WorkplaceEntity w){
+        if (this.workplace != null) {
+            // Remove the project from the current workplace
+            this.workplace.removeProjectFromWorkplace(this);
+            // Set the workplace to null
+            this.workplace = null;
+        }
+    }
+
+
 }

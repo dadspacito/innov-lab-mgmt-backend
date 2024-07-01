@@ -13,7 +13,9 @@ import java.util.Set;
 @NamedQueries(
         {
                 @NamedQuery(name = "Interest.findInterestByName", query = "SELECT i FROM InterestEntity i WHERE i.name = :name"),
-                @NamedQuery(name = "Interest.findAllInterests", query = "SELECT i FROM InterestEntity i")
+                @NamedQuery(name = "Interest.findAllInterests", query = "SELECT i FROM InterestEntity i"),
+                @NamedQuery(name ="Interest.findInterestByID", query = "select i from InterestEntity i where i.id =:id")
+
         }
 )
 
@@ -68,6 +70,7 @@ public class InterestEntity implements Serializable
     {
         this.name = name;
         this.createdAt = LocalDateTime.now();
+        this.isActive =  true;
 
     }
 

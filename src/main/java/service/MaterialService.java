@@ -53,6 +53,7 @@ import java.util.ArrayList;
     }
 
     //adiciona um material à base de dados
+    //aqui tem de ser transacional
     public void addMaterialToDB(MaterialDto material){
         materialDao.persist(convertMaterialDTOtoEntity(material));
         materialDao.flush();
