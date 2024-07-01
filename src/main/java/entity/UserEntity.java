@@ -301,11 +301,11 @@ public class UserEntity implements Serializable {
     public void addProjectMember(ProjectEntity project){
         this.projects.add(project);
         //nao se devia chamar user mas sim member
-        project.addUser(this);
+        project.addMember(this);
     }
     public void removeProjectMember(ProjectEntity project){
         this.projects.remove(project);
-        project.removeUser(this);
+        project.removeMember(this);
     }
     //add and remove projects of this entity from a manager perspective
     public void addManagedProject(ProjectEntity project){

@@ -41,11 +41,12 @@ public class InterestService {
 
     }
     //aqui tem de receber interesses de um projetoDTO e trasforma-los em entities
-    public List<InterestEntity> projectInterests(InterestDto i){
+    //é apenas reference ao projeto
+    /*public List<InterestEntity> projectInterests(InterestDto i){
         //esta vai receber os project interests do frontend
 
         //converte-los e associa-los ao projeto
-    }
+    }*/
     public InterestDto returnInterestDto(InterestEntity interest){
         return mapInterestEntityToDto(interest);
     }
