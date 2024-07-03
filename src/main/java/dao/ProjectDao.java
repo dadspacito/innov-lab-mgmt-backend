@@ -1,11 +1,12 @@
 package dao;
 
 import entity.*;
+import jakarta.ejb.Stateless;
 import jakarta.persistence.NoResultException;
 
 import java.util.List;
-
-public class ProjectDao extends AbstractDao{
+@Stateless
+public class ProjectDao extends AbstractDao<ProjectEntity>{
     private static final long serialVersionUID = 1L;
     public ProjectDao() {
         super(ProjectEntity.class);

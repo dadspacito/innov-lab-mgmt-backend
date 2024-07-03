@@ -1,6 +1,7 @@
 package service;
 
 import dao.InterestDao;
+import dao.UserDao;
 import dto.InterestDto;
 
 import entity.InterestEntity;
@@ -14,7 +15,9 @@ import jakarta.transaction.TransactionScoped;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Stateless
@@ -22,11 +25,14 @@ public class InterestService {
 
     @EJB
     private InterestDao interestDao;
+    @EJB
+    private UserDao userDao;
 
     /**
      * falta a parte de criar interesses;
      * @return
      */
+
 
 
 
@@ -42,11 +48,13 @@ public class InterestService {
     }
     //aqui tem de receber interesses de um projetoDTO e trasforma-los em entities
     //é apenas reference ao projeto
-    /*public List<InterestEntity> projectInterests(InterestDto i){
-        //esta vai receber os project interests do frontend
-
-        //converte-los e associa-los ao projeto
-    }*/
+    //aqui foi definido como set, tem de ser retornado como set
+    public Set<InterestEntity> projectInterests(List<InterestDto> i ){
+        return i.stream()
+                .map(this::convertInterestDtoInEntity)
+                .collect(Collectors.toSet());
+    }
+    //traz o nome o id. É o que vai para o frontend
     public InterestDto returnInterestDto(InterestEntity interest){
         return mapInterestEntityToDto(interest);
     }
@@ -57,25 +65,47 @@ public class InterestService {
     private InterestDto mapInterestEntityToDto(InterestEntity interestEntity) {
         return new InterestDto(interestEntity.getName(), interestEntity.getId());
     }
+
+    //esta função cria um interest só para a db, sem definir users e projetos
     @Transactional
     public void createNewInterest(InterestDto interest){
         if (!isValidInterest(interestDao.find(interest.getId()))){
-            InterestEntity newInterest =  new InterestEntity(interest.getName());
-            interestDao.persist(newInterest);
+            interestDao.persist(convertInterestDtoInEntity(interest));
+            interestDao.flush();
         }
         else throw new EntityExistsException("That interest already exists " +  interest.getName());
     }
     @Transactional
     public void removeInterest(InterestDto i){
         if (isValidInterest(interestDao.find(i.getId()))){
-            interestDao.remove(interestDao.find(i.getId()));
+            interestDao.remove(convertInterestDtoInEntity(i));
+            interestDao.flush();
         }
         else throw new EntityNotFoundException("That interest was not found in the database");
+        //faz sentido aqui o logger?
     }
+
+    /**
+     * falta editar interesses
+     * falta tambem retornar uma lista de interesses consoante
+     * @param i
+     * @return
+     */
 
     private boolean isValidInterest(InterestEntity i){
         return interestDao.find(i.getId()) != null;
     }
+    //função para converter novo interesse
+    //tem de ter uma função de confirmar a identidade do user para ver se é permitido
+    private InterestEntity convertInterestDtoInEntity(InterestDto i){
+        InterestEntity iEnt = new InterestEntity();
+        iEnt.setName(i.getName());
+        iEnt.setCreatedAt(LocalDateTime.now());
+        iEnt.setActive(true);
+        return iEnt;
+    }
+    //associar um interest a um user;
+    //funções set user e projetos a esta interests
 
 
     // mapper interesse dto entidade

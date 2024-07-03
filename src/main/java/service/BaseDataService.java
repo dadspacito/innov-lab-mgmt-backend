@@ -1,138 +1,55 @@
+/*
 package service;
 
 import dao.*;
 import entity.*;
-
-import enums.MaterialType;
 import enums.SkillType;
+import enums.MaterialType;
+import jakarta.annotation.PostConstruct;
 import jakarta.ejb.EJB;
-import jakarta.ejb.Startup;
 import jakarta.ejb.Singleton;
+import jakarta.ejb.Startup;
+import jakarta.ejb.Stateless;
 import jakarta.transaction.Transactional;
 import org.mindrot.jbcrypt.BCrypt;
-import jakarta.annotation.PostConstruct;
+
+*/
+/**
+ * este serviço tem como objetivo fornecer dados à app para inicializar com alguns dados
+ * criar 5 users
+ * criar 5 skills
+ * criar 5 materials
+ * criar 5 interesses
+ *//*
 
 
-import java.time.LocalDateTime;
-
-
-@Singleton
-@Startup
-public class StartupService {
-
-     @EJB
-     private UserDao userDao;
-
-    @EJB
-    private SystemVariableDao systemVariableDao;
-    @EJB
-    private SessionTokenDao sessionTokenDao;
-    @EJB
-    private WorkplaceDao workplaceDao;
+@Stateless
+public class BaseDataService {
+    */
+/**
+     * inicializa aqui a create skills, interests, users e materials
+     * precisa dos dao's para fazer persist
+     *//*
 
     @EJB
     private InterestDao interestDao;
-
     @EJB
     private SkillDao skillDao;
-    //@EJB
-    //private BaseDataService baseDataService;
     @EJB
     private MaterialDao materialDao;
+    @EJB
+    private UserDao userDao;
+    @EJB
+    private WorkplaceDao workplaceDao;
 
-
-
-    @PostConstruct
-    public void init() {
-
-    // verificar se existe user admin, se não existir é porque tem de ser criado tudo
-
-     if (userDao.findUserByNickname("admin") == null) {
-
-
-         // criar variáveis de sistema
-
-         String[] workplaceNames = {"COIMBRA", "LISBOA", "PORTO", "VISEU", "TOMAR", "VILA REAL"};
-         for (String name : workplaceNames) {
-             WorkplaceEntity workplaceEntity = new WorkplaceEntity(name);
-             workplaceDao.persist(workplaceEntity);
-             workplaceDao.flush();
-         }
-
-
-         String[] systemVariableNames = {"session_timeout", "max_people_per_project"};
-         String [] systemVariableValues = {"15", "4"};
-
-         for (int i = 0; i < systemVariableNames.length; i++) {
-             SystemVariableEntity systemVariableEntity = new SystemVariableEntity(systemVariableNames[i], Integer.parseInt(systemVariableValues[i]));
-             systemVariableDao.persist(systemVariableEntity);
-         }
-
-         UserEntity userEntity = new UserEntity();
-
-       //    criar user admin
-
-        userEntity.setNickname("admin");
-        userEntity.setPassword(BCrypt.hashpw("admin", BCrypt.gensalt()));
-        userEntity.setFirstName("Admin");
-        userEntity.setLastName("Admin");
-        userEntity.setEmail("admin@innovlabmgmt.com");
-        userEntity.setAvatar("https://commons.wikimedia.org/wiki/File:Default_avatar_profile.jpg");
-        //userEntity.setCreatedAt(LocalDateTime.now());
-        userEntity.setAdmin(true);
-        userEntity.setConfirmed(true);
-        userEntity.setActive(true);
-        userEntity.setPublicProfile(false);
-        userEntity.setWorkplace(workplaceDao.findWorkplaceByLocation("COIMBRA"));
-        userDao.persist(userEntity);
-
-
-    }
-
-
-
-
-     // reset de tokens de sessão (falta reset de tokens de email)
-        sessionTokenDao.deleteAll();
-
-
-         // definir um token de sessão para o user admin, SEMPRE VÁLIDO PARA EFEITOS DE TESTE
-        // COMENTÁRIO MANTER ISTO APENAS EM DESENVOLVIMENTO
-
-      if (sessionTokenDao.findUserBySessionToken("admin") == null) {
-          SessionTokenEntity sessionTokenEntity = new SessionTokenEntity();
-          sessionTokenEntity.setToken("admin");
-         sessionTokenEntity.setTokenTimeout(LocalDateTime.now().plusYears(1));
-          sessionTokenEntity.setUser(userDao.findUserByNickname("admin"));
-          sessionTokenDao.persist(sessionTokenEntity);
-      }
-
-      // teste de criar skills e interesses
-
-        SkillEntity skillEntity = new SkillEntity("C", SkillType.SOFTWARE);
-        InterestEntity interestEntity = new InterestEntity("Ballet");
-        // não é obrigatorio por causa do cascade.
-        //interestDao.persist(interestEntity);
-      //  skillDao.persist(skillEntity);
-        UserEntity userEntity = userDao.findUserByNickname("admin");
-        userEntity.getSkills().add(skillEntity);
-        userEntity.getInterests().add(interestEntity);
-        userDao.merge(userEntity);
-
-
-        System.out.println("StartupService initialized.");
-
-
-        // NOTA. criar bean para start com criação de vários objetos
-
-        createSkills();
+    public void initializeBaseData(){
         createMaterials();
-        createUsers();
         createInterests();
-
-
-}
-    @Transactional
+        createSkills();
+        createUsers();
+    }
+    */
+/*@Transactional
     private void createSkills(){
         SkillEntity[] skills = {
                 new SkillEntity("Python", SkillType.SOFTWARE),
@@ -150,20 +67,20 @@ public class StartupService {
             skillDao.persist(skill);
 
         }
+    }*//*
 
-    }
     @Transactional
     private void createInterests(){
         InterestEntity[] interests={
-                new InterestEntity("Software architecture"),
-                new InterestEntity("Space exploration"),
-                new InterestEntity("Industry 4.0"),
-                new InterestEntity("Machine learning"),
-                new InterestEntity("Education"),
-                new InterestEntity("Nature and environment"),
-                new InterestEntity("game development"),
-                new InterestEntity("Sustainable food production"),
-                new InterestEntity("Renewable energies"),
+              new InterestEntity("Software architecture"),
+              new InterestEntity("Space exploration"),
+              new InterestEntity("Industry 4.0"),
+              new InterestEntity("Machine learning"),
+              new InterestEntity("Education"),
+              new InterestEntity("Nature and environment"),
+              new InterestEntity("game development"),
+              new InterestEntity("Sustainable food production"),
+              new InterestEntity("Renewable energies"),
         };
         for (InterestEntity interest : interests){
             interestDao.persist(interest);
@@ -276,5 +193,5 @@ public class StartupService {
     }
 
 
-
 }
+*/

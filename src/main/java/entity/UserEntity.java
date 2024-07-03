@@ -78,7 +78,15 @@ public class UserEntity implements Serializable {
     /**
      * relationships
      * falta aqui a relationship do seu role
+     * por aqui um construtpr de entidade com o minimo
+     * no constructor
      */
+    public UserEntity() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+
+
 
     @ManyToOne
     @JoinColumn(name = "workplace_id", nullable = false)
@@ -102,7 +110,7 @@ public class UserEntity implements Serializable {
 
 
     // many to many relationships with project entity (members)
-    @ManyToMany(mappedBy = "users")
+    @ManyToMany(mappedBy = "projectMembers")
     private Set<ProjectEntity> projects;
 
     // One-to-Many relationship with ProjectEntity (manager)
@@ -122,9 +130,7 @@ public class UserEntity implements Serializable {
         this.projects = projects;
     }
 
-    public UserEntity() {
-        this.createdAt = LocalDateTime.now();
-    }
+
 
 
 

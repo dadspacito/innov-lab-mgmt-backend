@@ -1,6 +1,7 @@
 package service;
 
 import api.SessionResource;
+import dao.ProjectDao;
 import dao.TaskDao;
 import dao.UserDao;
 import dto.TaskDto;
@@ -16,6 +17,9 @@ import org.apache.logging.log4j.Logger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * o que é que o task service precisa?
@@ -31,7 +35,7 @@ public class TaskService {
     @EJB
     private TaskDao taskDao;
     @EJB private UserDao userDao;
-    //@EJB private ProjectDao projectDao; ainda nao existe
+    @EJB private ProjectDao projectDao;
     private static final Logger LOGGER = LogManager.getLogger(TaskService.class);
 
     //create new task
@@ -83,11 +87,9 @@ public class TaskService {
         LOGGER.error("Error fetching task with id" + t.getOwner().getEmail(), LocalDateTime.now());
         return null;
     }
-    /*public ArrayList<TaskDto> taskListByProject(){
-
-        //aqui precisa de ir buscar o project id associado à task
-        retorna todas as tasks associadas a certo projeto
-    }*/
+    public Set<TaskEntity> getTasksFromProject(List<TaskDto> t){
+        return t.stream().map(this ::convertTaskDtoToEntity).collect(Collectors.toSet());
+    }
 
 
     //é preciso ter acesso aos members do projeto para definir o id que entra
@@ -152,10 +154,13 @@ public class TaskService {
     //esta função é boa pratica construida desta maneira?
     //alterar esta função para ver se este user está associado ao projeto.
     //corre uma lista dos users no projeto e verificar se este id pertence a esta lista
+    //devia ser is user project member
     private boolean isValidUser(int ownerID){
         return userDao.findUserById(ownerID) != null;
+
     }
     //função valid project
+
 
 
 

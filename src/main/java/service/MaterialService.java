@@ -6,8 +6,14 @@ import dto.MaterialDto;
 import entity.MaterialEntity;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Stateless public class MaterialService {
     @Inject
@@ -54,15 +60,36 @@ import java.util.ArrayList;
 
     //adiciona um material à base de dados
     //aqui tem de ser transacional
+    @Transactional
     public void addMaterialToDB(MaterialDto material){
-        materialDao.persist(convertMaterialDTOtoEntity(material));
-        materialDao.flush();
+        if (!materialIsValid(materialDao.findMaterialByID(material.getId()))) {
+            materialDao.persist(convertMaterialDTOtoEntity(material));
+            materialDao.flush();
+        }
+        throw new EntityExistsException("this material already exists");
     }
     //retorna todos os materiais em DTO
     public ArrayList<MaterialDto> getAllMaterials (){
         return convertMaterialsEntityToDTO((ArrayList<MaterialEntity>) materialDao.findAll());
     }
     //adicionar novo material À DB
+    @Transactional
+    public void removeMaterialFromDB(MaterialDto m){
+        if (materialIsValid(materialDao.findMaterialByID(m.getId()))){
+            materialDao.remove(materialDao.findMaterialByID(m.getId()));
+            materialDao.flush();
+        }
+        throw new EntityNotFoundException("material does not exist");
+
+    }
+
+
+    private boolean materialIsValid(MaterialEntity m){
+        return materialDao.findMaterialByID(m.getId())!= null;
+    }
+    public Set<MaterialEntity> returnProjectMaterials(List<MaterialDto> m){
+        return m.stream().map(this::convertMaterialDTOtoEntity).collect(Collectors.toSet());
+    }
 
     //apagar material da DB
 

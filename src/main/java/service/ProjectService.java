@@ -1,8 +1,10 @@
 package service;
 
+import dao.ProjectDao;
 import dto.BasicProjectDto;
 import dto.DetailedProjectDto;
 import entity.ProjectEntity;
+import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.persistence.Id;
@@ -11,8 +13,13 @@ import jakarta.transaction.Transactional;
 @Stateless
 public class ProjectService {
     @Inject
-    InterestService interestService;
-    @Inject UserService userService;
+    private InterestService interestService;
+    @Inject private UserService userService;
+    @Inject private TaskService taskService;
+    @Inject private SkillService skillService;
+    @Inject private MaterialService materialService;
+    @EJB
+    private ProjectDao projectDao;
 
     /**
      * que EJB's é que são precisos aqui?
@@ -33,8 +40,9 @@ public class ProjectService {
      */
     @Transactional
     public void createNewProject(DetailedProjectDto p){
+        //tem que ser validado aqui pelos atributos do projeto (ver se não são null)
 
-
+        projectDao.persist(convertProjectDtoToEntity(p));
     }
 
     /**
@@ -45,9 +53,13 @@ public class ProjectService {
      *metodo privado é ver role do user no projeto para determinar permissões
      * role manager ser true = poder executar funções de adicionar ou tirar pessoas do projeto
      * pensar na estruturação dos passos para a criação do
+     * aqui tem de poder criar materiais e adicioná-los ao projeto
+     * o mesmo para as skills, tasks, e interesses
+     * estes serviços são puxados dos serviços das entidades expecificas e adicionadas ao projeto
      */
 
     //para fazer persist de um novo projeto
+
     private ProjectEntity convertProjectDtoToEntity (DetailedProjectDto p){
         ProjectEntity pEnt = new ProjectEntity();
         pEnt.setName(p.getName());
@@ -56,13 +68,19 @@ public class ProjectService {
         pEnt.setEndDate(p.getEndDate());
         //esta função retorna um user entity to user service atraves de um project member dto
         pEnt.setManager((userService.defineManager(p.getProjectManager())));
-        pEnt.addWorkplaceToProject(p.getWorkplace());
-
-        //é preciso todos os services de interests e tasks que convertam as entidades em dtos e vice versa
-
+        pEnt.setWorkplace(p.getWorkplace());
+        //aqui retorna um set. Poderá dar problemas mais tarde.
+        pEnt.setInterests(interestService.projectInterests(p.getProjectInterests()));
+        pEnt.setSkills(skillService.returnProjectSkills(p.getProjectSkills()));
+        pEnt.setMaterials(materialService.returnProjectMaterials(p.getProjectMaterials()));
+        pEnt.setTasks(taskService.getTasksFromProject(p.getProjectTasks()));
+        pEnt.setUsers(userService.returnMembersEntity(p.getProjectMembers()));
         return pEnt;
-
     }
+    /**
+     * que verificações privadas se podem por aqui?
+     * pode ver se existe o interesse, a skill, o material e o manager
+     */
 
 
 

@@ -59,7 +59,6 @@ public class ProjectEntity implements Serializable {
     @Column(name = "projectState", nullable = false, unique = false, updatable = true)
     private ProjectState projectState;
 
-
     /**
      * o que é mapped
      * users-many to many

@@ -10,6 +10,7 @@ import jakarta.validation.*;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Stateless
@@ -20,7 +21,7 @@ public class SkillService {
 
     // COMENTÁRIO serviços crud para a entidade Skill
     // acrescentar pra apagar, ou editar, ou listar, ou pesquisar, ou criar, ou ativar/desativar
-
+    //faltam métodos de verificação privados
     // MAS MAIS IMPORTANTE, associar a entidade Skill a User, para que fique já associada ao user que cria
     // e que possa ser associada a outros users, e obter lista de users com a skill , para sugerir projetos ou stats.
 
@@ -39,6 +40,10 @@ public class SkillService {
 
         // persistir dao
         skillDao.persist(skillEntity);
+    }
+    //método que retorna lista de DTO's e transforma em Set
+    public Set<SkillEntity> returnProjectSkills(List<SkillDto> s){
+        return s.stream().map(this :: mapSkillDtoToEntity).collect(Collectors.toSet());
     }
 
 
@@ -69,6 +74,8 @@ public class SkillService {
     }
 
     // mapper skill dto entidade
+
+    //método tem de ser privado
 
     public SkillEntity mapSkillDtoToEntity(SkillDto skillDto) {
         SkillEntity skillEntity = new SkillEntity();

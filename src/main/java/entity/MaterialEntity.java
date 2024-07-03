@@ -41,6 +41,23 @@ public class MaterialEntity implements Serializable {
     @Column(name = "observations", nullable = true, updatable = true)
     private String observations;
     //esta relaçõa é one to many com os projetos
+
+
+    public MaterialEntity() {}
+
+    public MaterialEntity(String name, String brand, MaterialType type, String description, int serialNumber, String supplier, int supplierContact, int quantity, String observations) {
+        this.id = id;
+        this.name = name;
+        this.brand = brand;
+        this.type = type;
+        this.description = description;
+        this.serialNumber = serialNumber;
+        this.supplier = supplier;
+        this.supplierContact = supplierContact;
+        this.quantity = quantity;
+        this.observations = observations;
+    }
+
     @ManyToOne
     @JoinColumn(name="project_id")//foreign key do projeto
     private ProjectEntity project;

@@ -12,6 +12,8 @@ public class DetailedProjectDto {
      * este DTO contem toda a informação sobre projectos para users que estejam logged in
      *id, name, description, Start date, end date, project state, manager,
      * members [], interests[], skills[], tasks[], materiais[]
+     * cada vez que houver uma alteração em qualquer projeto, tem de haver uma notificação que alerta para a
+     * mudança e o user que mudou;
      */
     private String name;
     private String description;

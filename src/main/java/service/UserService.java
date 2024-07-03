@@ -22,6 +22,7 @@ import java.lang.reflect.Array;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -182,7 +183,7 @@ public class UserService {
      * @param workplaceID
      * @return
      */
-
+    //esta função nao faz muito sentido
     public List<ProjectMemberDto> returnProjectMembers(int workplaceID) {
         // Check if the workplace exists
         if (workplaceDao.getWorkplaceByID(workplaceID) != null) {
@@ -216,6 +217,13 @@ public class UserService {
         catch (NoResultException e){
             return null;
         }
+    }
+    public UserEntity getUserEntityFromProjectMember(ProjectMemberDto p){
+        return userDao.findUserById(p.getId());
+    }
+    public Set<UserEntity> returnMembersEntity(List<ProjectMemberDto> p){
+        return p.stream().map(this::getUserEntityFromProjectMember).collect(Collectors.toSet());
+
     }
     private boolean userIsValid (UserEntity u){
         return userDao.findUserById(u.getId()) != null;

@@ -17,4 +17,13 @@ public class SkillDao extends AbstractDao<SkillEntity> {
             super(SkillEntity.class);
         }
 
+        public SkillEntity findSkillByName(String name){
+            try {
+                return em.createNamedQuery("Skill.findSkillByName", SkillEntity.class).setParameter("name", name).getSingleResult();
+            }
+            catch(NoResultException e) {
+                return null;
+            }
+        }
+
 }

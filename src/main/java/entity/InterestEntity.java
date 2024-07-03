@@ -45,8 +45,11 @@ public class InterestEntity implements Serializable
     @Column (name = "createdAt", nullable = false, unique = false, updatable = false)
     private LocalDateTime createdAt;
 
+    //para users
     @ManyToMany(mappedBy = "interests")
     private Set<UserEntity> users = new HashSet<>();
+
+    //para projetos
     @ManyToMany(mappedBy = "interests")
     private Set<ProjectEntity> projects = new HashSet<>();
 
