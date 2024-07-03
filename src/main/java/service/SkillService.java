@@ -6,6 +6,7 @@ import dao.SkillDao;
 import enums.SkillType;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
+import jakarta.transaction.Transactional;
 import jakarta.validation.*;
 import jakarta.validation.constraints.NotNull;
 
@@ -26,17 +27,11 @@ public class SkillService {
     // e que possa ser associada a outros users, e obter lista de users com a skill , para sugerir projetos ou stats.
 
 
-    public void createSkill(@NotNull SkillDto skillDto) {
-
-        SkillType skillType;
-        try {
-            skillType = SkillType.fromString(skillDto.getType());
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid skill type provided: " + skillDto.getType());
-        }
-
+    @Transactional
+    public void createSkill(SkillDto skillDto) {
+        SkillType skillType = mapStringToSkillType(skillDto.getType());
         SkillEntity skillEntity = new SkillEntity(skillDto.getName(), skillType);
-       // skillEntity.setIsActive(skillDto.getIsActive());
+        skillEntity.setIsActive(true);
 
         // persistir dao
         skillDao.persist(skillEntity);
@@ -69,7 +64,7 @@ public class SkillService {
         SkillDto skillDto = new SkillDto();
         skillDto.setId(skillEntity.getId());
         skillDto.setName(skillEntity.getName());
-        skillDto.setType(skillEntity.getType().toString());
+        skillDto.setType(skillEntity.getType().name());
         return skillDto;
     }
 
@@ -81,8 +76,15 @@ public class SkillService {
         SkillEntity skillEntity = new SkillEntity();
         skillEntity.setId(skillDto.getId());
         skillEntity.setName(skillDto.getName());
-        skillEntity.setType(SkillType.fromString(skillDto.getType()));
+        skillEntity.setType(SkillType.valueOf(skillDto.getType()));
         return skillEntity;
+    }
+    private SkillType mapStringToSkillType(String type){
+        try{
+            return SkillType.valueOf(type.toUpperCase());
+        }catch (IllegalArgumentException e){
+            throw new IllegalArgumentException("invalid skill type provided: " +  type);
+        }
     }
 
 

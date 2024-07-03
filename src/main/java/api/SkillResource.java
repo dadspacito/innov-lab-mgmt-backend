@@ -3,11 +3,9 @@ package api;
 
 import dto.SkillDto;
 import entity.SkillEntity;
+import enums.SkillType;
 import jakarta.ejb.EJB;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.HeaderParam;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
@@ -20,9 +18,13 @@ import java.util.List;
 @Path("/skills")
 public class SkillResource {
 
-    // endpoint para obter todas as skills
-
-    // endpoint para obter uma skill
+    /**
+     * que endpoints faltam aqui?
+     * retornar users por skill selecionada
+     * adicionar skill
+     * remover skill
+     *
+     */
 
     @EJB
     private SkillService skillService;
@@ -42,11 +44,18 @@ public class SkillResource {
                 return Response.status(Response.Status.OK).entity(skills).build();
             }
             return Response.status(Response.Status.BAD_REQUEST).entity("Invalid token").build();
-            }
 
-
-
-
+            };
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response createSkill(@HeaderParam("token") String token, SkillDto skill){
+        if (sessionService.isTokenValid(token)){
+            System.out.println(skill);
+            skillService.createSkill(skill);
+            return Response.status(201).entity("Skill was succesfully added to db").build();
+        }
+        return Response.status(400).entity("Skill was not added DB").build();
+    }
 
 }
 

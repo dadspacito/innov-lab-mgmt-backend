@@ -1,5 +1,7 @@
 package dto;
 
+import enums.SkillType;
+
 public class SkillDto {
 
     private String name;
@@ -14,6 +16,11 @@ public class SkillDto {
         this.name = name;
         this.type = type;
         this.id = id;
+    }
+
+    public SkillDto(String name, String type) {
+        this.name = name;
+        this.type = type;
     }
 
     public String getName() {
