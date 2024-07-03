@@ -52,7 +52,7 @@ public class WorkplaceEntity implements Serializable {
     @OneToMany(mappedBy = "workplace")
     private List<UserEntity> users;
     // One-to-Many relationship to Project
-    @OneToMany(mappedBy = "workplace", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "projectWorkplace", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ProjectEntity> projects = new HashSet<>();
 
 
@@ -119,14 +119,20 @@ public class WorkplaceEntity implements Serializable {
      */
     //adicionar projetos a este workplace
     public void addProjectToWorkplace(ProjectEntity p){
-        projects.add(p);
-        p.setWorkplace(this);
+        if (!this.projects.contains(p)) {
+            this.projects.add(p);
+            if (p.getProjectWorkplace() != this) {
+                p.setProjectWorkplace(this);
+            }
+        }
     }
     //remover projetos deste workplace
     public void removeProjectFromWorkplace(ProjectEntity p){
-        projects.remove(p);
-        if (p.getWorkplace() == this){
-            p.setWorkplace(null);
+        if (this.projects.contains(p)) {
+            this.projects.remove(p);
+            if (p.getProjectWorkplace() == this) {
+                p.setProjectWorkplace(null);
+            }
         }
     }
 

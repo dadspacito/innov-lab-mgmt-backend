@@ -68,13 +68,13 @@ public class ProjectService {
         pEnt.setEndDate(p.getEndDate());
         //esta função retorna um user entity to user service atraves de um project member dto
         pEnt.setManager((userService.defineManager(p.getProjectManager())));
-        pEnt.setWorkplace(p.getWorkplace());
+        pEnt.setProjectWorkplace(p.getWorkplace());
         //aqui retorna um set. Poderá dar problemas mais tarde.
         pEnt.setInterests(interestService.projectInterests(p.getProjectInterests()));
         pEnt.setSkills(skillService.returnProjectSkills(p.getProjectSkills()));
         pEnt.setMaterials(materialService.returnProjectMaterials(p.getProjectMaterials()));
         pEnt.setTasks(taskService.getTasksFromProject(p.getProjectTasks()));
-        pEnt.setUsers(userService.returnMembersEntity(p.getProjectMembers()));
+        pEnt.setProjectMembers(userService.returnMembersEntity(p.getProjectMembers()));
         return pEnt;
     }
     /**

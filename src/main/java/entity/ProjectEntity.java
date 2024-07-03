@@ -59,6 +59,7 @@ public class ProjectEntity implements Serializable {
     @Column(name = "projectState", nullable = false, unique = false, updatable = true)
     private ProjectState projectState;
 
+
     /**
      * o que é mapped
      * users-many to many
@@ -68,6 +69,7 @@ public class ProjectEntity implements Serializable {
      * tasks- one to many
      * workplaces many to one
      */
+
     @ManyToOne
     @JoinColumn(name = "manager_id", nullable = false)
     private UserEntity manager;
@@ -111,7 +113,7 @@ public class ProjectEntity implements Serializable {
     //one to many relationships with workplaces
     @ManyToOne
     @JoinColumn(name ="workplace_id", nullable = false)
-    private WorkplaceEntity workplace;
+    private WorkplaceEntity projectWorkplace;
 
 
     //contrutor vazio
@@ -172,11 +174,11 @@ public class ProjectEntity implements Serializable {
         this.projectState = projectState;
     }
 
-    public Set<UserEntity> getUsers() {
+    public Set<UserEntity> getProjectMembers() {
         return projectMembers;
     }
 
-    public void setUsers(Set<UserEntity> users) {
+    public void setProjectMembers(Set<UserEntity> users) {
         this.projectMembers = users;
     }
 
@@ -212,17 +214,17 @@ public class ProjectEntity implements Serializable {
         this.tasks = tasks;
     }
 
-    public WorkplaceEntity getWorkplace() {
-        return workplace;
+    public WorkplaceEntity getProjectWorkplace() {
+        return projectWorkplace;
     }
 
-    public void setWorkplace(WorkplaceEntity workplace) {
-        if (this.workplace != null){
-            this.workplace.removeProjectFromWorkplace(this);
+    public void setProjectWorkplace(WorkplaceEntity workplace) {
+        if (this.projectWorkplace != null && this.projectWorkplace != workplace) {
+            this.projectWorkplace.removeProjectFromWorkplace(this);
         }
-        this.workplace = workplace;
-        if (workplace != null){
-            workplace.addProjectToWorkplace(this);
+        this.projectWorkplace = workplace;
+        if (workplace != null && !workplace.getProjects().contains(this)) {
+            workplace.getProjects().add(this);
         }
     }
 
@@ -244,16 +246,10 @@ public class ProjectEntity implements Serializable {
     }
     //metodo para listas
     //metodos para adicionar interesses, skills, tasks, materiais e users ao projeto.
+
     /**
-     * add/remove material
-     * add/remove user
-     * add/remove skill
-     * add/remove task
-     * add/remove user
-     *
-     *The point of these functions is to manage the entities related to Project entity through the
-     * project entity
-     * this encapsulates the logic within a specific entity;
+     * metodos set
+     * @param member
      */
     public void addMember(UserEntity member){
         this.projectMembers.add(member);
@@ -301,30 +297,17 @@ public class ProjectEntity implements Serializable {
     }
 
     //este método pode tendencialmente dar alguns problemas
-    public void addWorkplaceToProject(WorkplaceEntity w){
-        // Avoid setting the same workplace again
-        if (this.workplace != null && this.workplace.equals(w)) {
-            return;
-        }
-        // If there is an existing workplace, remove this project from it
-        if (this.workplace != null) {
-            this.workplace.removeProjectFromWorkplace(this);
-        }
-        // Set the new workplace for the project
-        this.setWorkplace(w);
-        // Add this project to the new workplace's set of projects
-        if (w != null) {
-            w.addProjectToWorkplace(this);
-        }
-    }
     //faz sentido implementar aqui um remove projects?
     public void removeWorkplaceFromProject(WorkplaceEntity w){
-        if (this.workplace != null) {
             // Remove the project from the current workplace
-            this.workplace.removeProjectFromWorkplace(this);
+            this.projectWorkplace.removeProjectFromWorkplace(this);
             // Set the workplace to null
-            this.workplace = null;
-        }
+            this.projectWorkplace = null;
+
+    }
+    public void addProjectManager(UserEntity manager){
+        this.setManager(manager);
+        manager.getManagedProjects().add(this);
     }
 
 

@@ -266,6 +266,14 @@ public class UserEntity implements Serializable {
         return skills;
     }
 
+    public Set<ProjectEntity> getManagedProjects() {
+        return managedProjects;
+    }
+
+    public void setManagedProjects(Set<ProjectEntity> managedProjects) {
+        this.managedProjects = managedProjects;
+    }
+
     public void setSkills(Set<SkillEntity> skills) {
         this.skills = skills;
     }

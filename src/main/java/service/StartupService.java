@@ -4,16 +4,20 @@ import dao.*;
 import entity.*;
 
 import enums.MaterialType;
+import enums.ProjectState;
 import enums.SkillType;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Startup;
 import jakarta.ejb.Singleton;
+import jakarta.persistence.NoResultException;
 import jakarta.transaction.Transactional;
 import org.mindrot.jbcrypt.BCrypt;
 import jakarta.annotation.PostConstruct;
 
 
 import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.Timer;
 
 
 @Singleton
@@ -35,10 +39,11 @@ public class StartupService {
 
     @EJB
     private SkillDao skillDao;
-    //@EJB
-    //private BaseDataService baseDataService;
+
     @EJB
     private MaterialDao materialDao;
+    @EJB private ProjectDao projectDao;
+    private boolean initializationComplete = false;
 
 
 
@@ -85,6 +90,7 @@ public class StartupService {
         userEntity.setPublicProfile(false);
         userEntity.setWorkplace(workplaceDao.findWorkplaceByLocation("COIMBRA"));
         userDao.persist(userEntity);
+        userDao.persist(userEntity);
 
 
     }
@@ -121,17 +127,22 @@ public class StartupService {
 
 
         System.out.println("StartupService initialized.");
-
+        createSkills();
+        createInterests();
+        createUsers();
+        createMaterials();
+        initializationComplete = true;
+        //createProject(1);
 
         // NOTA. criar bean para start com criação de vários objetos
 
-        createSkills();
-        createMaterials();
-        createUsers();
-        createInterests();
+
+
+
 
 
 }
+
     @Transactional
     private void createSkills(){
         SkillEntity[] skills = {
@@ -148,6 +159,7 @@ public class StartupService {
         };
         for (SkillEntity skill : skills){
             skillDao.persist(skill);
+            skillDao.flush();
 
         }
 
@@ -167,6 +179,8 @@ public class StartupService {
         };
         for (InterestEntity interest : interests){
             interestDao.persist(interest);
+            interestDao.flush();
+
 
         }
     }
@@ -227,6 +241,8 @@ public class StartupService {
         // Persist each material entity using the materialDao
         for (MaterialEntity material : materials) {
             materialDao.persist(material);
+            materialDao.flush();
+
 
         }
     }
@@ -254,6 +270,8 @@ public class StartupService {
         };
         for (UserEntity user : users) {
             userDao.persist(user);
+            userDao.flush();
+
 
         }
     }
@@ -274,7 +292,35 @@ public class StartupService {
         userEntity.getInterests().add(interest);
         return userEntity;
     }
-
-
+  //o problema desta classe é que esta a iniciar ao mesmo tempo que as outras
+    //tem de iniciar só apos
+    @Transactional
+    private void createProject(int managerID){
+        if (!initializationComplete) {
+            throw new IllegalStateException("initialization steps not completed");
+        }
+                ProjectEntity startupProject = new ProjectEntity();
+                startupProject.setName("Projecto teste");
+                startupProject.setDescription("projeto inicial para ver se as tabelas estão funcionais");
+                startupProject.setStartDate(LocalDateTime.now());
+                startupProject.setEndDate(LocalDateTime.now().plusDays(2));
+                startupProject.setProjectWorkplace(workplaceDao.findWorkplaceByLocation("COIMBRA"));
+                startupProject.setProjectState(ProjectState.PLANNING);
+                UserEntity manager = userDao.findUserById(managerID);
+                startupProject.addProjectManager(manager);
+                for (UserEntity member : userDao.getUserByWorkplace(1)) {//os membros escolhidos vem num array e é preciso correr o ciclo e adiciona-los ao projeto
+                    startupProject.addMember(member);
+                }
+                for (SkillEntity skill : skillDao.findAll()) {
+                    startupProject.addSkill(skill);
+                }
+                for (InterestEntity interest : interestDao.findAll()) {
+                    startupProject.addInterest(interest);
+                }
+                for (MaterialEntity material : materialDao.findAll()) {
+                    startupProject.addMaterial(material);
+                }
+                projectDao.persist(startupProject);
+            }
 
 }
