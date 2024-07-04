@@ -69,32 +69,33 @@ public class InterestService {
     //esta função cria um interest só para a db, sem definir users e projetos
     @Transactional
     public void createNewInterest(InterestDto interest){
-        if (!isValidInterest(interestDao.find(interest.getId()))){
+        if (!isValidInterestName(interest.getName())){
             interestDao.persist(convertInterestDtoInEntity(interest));
             interestDao.flush();
         }
         else throw new EntityExistsException("That interest already exists " +  interest.getName());
     }
     @Transactional
-    public void removeInterest(InterestDto i){
-        if (isValidInterest(interestDao.find(i.getId()))){
-            interestDao.remove(convertInterestDtoInEntity(i));
+    public void removeInterest(int id){
+        System.out.println(id);
+        if (isValidInterestID(id)){
+            System.out.println(interestDao.findInterestByID(id));
+            interestDao.remove(interestDao.findInterestByID(id));
             interestDao.flush();
         }
         else throw new EntityNotFoundException("That interest was not found in the database");
         //faz sentido aqui o logger?
     }
 
-    /**
-     * falta editar interesses
-     * falta tambem retornar uma lista de interesses consoante
-     * @param i
-     * @return
-     */
-
-    private boolean isValidInterest(InterestEntity i){
-        return interestDao.find(i.getId()) != null;
+    private boolean isValidInterestID(int id){
+        return interestDao.findInterestByID(id) != null;
     }
+    private boolean isValidInterestName(String name){
+        return interestDao.findInterestByName(name) != null;
+    }
+
+
+
     //função para converter novo interesse
     //tem de ter uma função de confirmar a identidade do user para ver se é permitido
     private InterestEntity convertInterestDtoInEntity(InterestDto i){

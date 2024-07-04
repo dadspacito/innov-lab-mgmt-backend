@@ -85,7 +85,8 @@ import java.util.stream.Collectors;
             materialDao.remove(materialDao.findMaterialByID(id));
             materialDao.flush();
         }
-        System.err.println("material does not exist");
+
+        //System.err.println("material does not exist");
 
     }
 
