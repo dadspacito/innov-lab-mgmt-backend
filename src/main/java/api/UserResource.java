@@ -7,6 +7,7 @@ import jakarta.json.JsonObject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import service.SessionService;
 import service.UserService;
 import enums.UserState;
 
@@ -35,6 +36,7 @@ public class UserResource {
 
     @EJB
     private UserService userService;
+    @EJB private SessionService sessionService;
 
     // PERMITE O REGISTO
     // vamos considerar que DTO é válido para já
@@ -47,13 +49,6 @@ public class UserResource {
         else return Response.status(400).entity("User already exists").build();
 
 }
-
-// acrescentar endpoint de foto de perfil
-
-    // endpoint para ativar a conta
-    // verificar siuação de quando já foi feito set.. ( n faz mal pq função só ativa e não desativa)
-
-
 
     @Path("/activations/{emailtoken}")
     @PUT
@@ -98,8 +93,21 @@ public class UserResource {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUser(@PathParam("token") String token){
-        //mecanismos de segurança aqui dentro 
-        return Response.status(200).entity(userService.getUserByToken(token)).build();
+        //mecanismos de segurança aqui dentro
+        if (sessionService.isTokenValid(token)) {
+            return Response.status(200).entity(userService.getUserByToken(token)).build();
+        }
+        return Response.status(400).entity("user not found").build();
+    }
+    //get all users
+    @Path("/available")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllUsers(@HeaderParam("token") String token){
+        if (sessionService.isTokenValid(token)){
+            return Response.status(Response.Status.OK).entity(userService.membersAvailableProjects()).build();
+        }
+        return Response.status(Response.Status.UNAUTHORIZED).entity("invalid token").build();
     }
 
 

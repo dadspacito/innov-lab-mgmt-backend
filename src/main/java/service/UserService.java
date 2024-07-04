@@ -9,6 +9,7 @@ import dao.WorkplaceDao;
 import dto.HeaderDto;
 
 import dto.ProjectMemberDto;
+import dto.SelectProjectMembersDto;
 import dto.UserDto;
 import entity.UserEntity;
 import enums.UserState;
@@ -91,9 +92,22 @@ public class UserService {
         return true;
     }
     // obter user pelo token (IMPORTANTE. função só chamada EM RESOURCE após validação de token, logo user existe)
+    //aqui tem de vir o header dto
+
     public UserEntity getUserByToken(String token) {
         return sessionTokenDao.findUserBySessionToken(token);
     }
+    //get user list (only active) - para adicionar ao projeto
+    public List<SelectProjectMembersDto> membersAvailableProjects(){
+        List<UserEntity> userEntList = userDao.findAll();
+        return userEntList.stream().map(this::convertUserEntToMemberAvailable).collect(Collectors.toList());
+    }
+    //get specific user para profile page
+
+
+
+    //get user list (all users) - for admin
+
 
 
     public UserState checkUserState (String email) {
@@ -116,11 +130,7 @@ public class UserService {
 
 
 
-    // gerar token para email
 
-    private String generateNewToken() {
-        return UUID.randomUUID().toString();
-    }
 
 
     //função que envia mail ao user para seguir para o link de reset password
@@ -166,24 +176,7 @@ public class UserService {
         headerDto.setAvatar(user.getAvatar());
         return headerDto;
     }
-
-
-
-   //chama o edit user
-    //recebe os dados de user do frontend e faz merge
-    /**
-     * falta retornar uma lista de user dto para projetos
-     * falta conversão desta lista em dto (user, post login, header)
-     * estes users tem de ser retornados based on location. Esta função depois é chamada no project consoante a
-     * location do projeto
-     */
-    /**
-     * duas opções, ou se cria um project member service com toda a lógica lá ou se faz tudo no user service,
-     * incluindo a gestão dos utilizadores
-     * @param workplaceID
-     * @return
-     */
-    //esta função nao faz muito sentido
+    //so retorna os membros do projeto quando é feita a query
     public List<ProjectMemberDto> returnProjectMembers(int workplaceID) {
         // Check if the workplace exists
         if (workplaceDao.getWorkplaceByID(workplaceID) != null) {
@@ -225,8 +218,21 @@ public class UserService {
         return p.stream().map(this::getUserEntityFromProjectMember).collect(Collectors.toSet());
 
     }
+    // gerar token para email
+
+    private String generateNewToken() {
+        return UUID.randomUUID().toString();
+    }
     private boolean userIsValid (UserEntity u){
         return userDao.findUserById(u.getId()) != null;
+    }
+    private SelectProjectMembersDto convertUserEntToMemberAvailable(UserEntity user){
+        SelectProjectMembersDto member = new SelectProjectMembersDto();
+        member.setId(user.getId());
+        member.setName(user.getFirstName() + " " + user.getLastName());
+        member.setNickname(user.getNickname());
+        member.setEmail(user.getEmail());
+        return member;
     }
 
 }
