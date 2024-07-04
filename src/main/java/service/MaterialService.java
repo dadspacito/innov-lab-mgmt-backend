@@ -25,10 +25,10 @@ import java.util.stream.Collectors;
     //retornar lista de materiais
 
     //função que recebe array entity backend e transforma em array dtos para mostrar no frontend
-    private ArrayList<MaterialDto> convertMaterialsEntityToDTO(ArrayList<MaterialEntity> materialsList){
-        ArrayList<MaterialDto> materialsDtoList =  new ArrayList<>();
-        MaterialDto materialDTO = new MaterialDto();
+    private List<MaterialDto> convertMaterialsEntityToDTO(List<MaterialEntity> materialsList){
+        List<MaterialDto> materialsDtoList =  new ArrayList<>();
         for (MaterialEntity material: materialsList){
+            MaterialDto materialDTO = new MaterialDto();
             materialDTO.setId(material.getId());
             materialDTO.setName(material.getName());
             materialDTO.setDescription(material.getDescription());
@@ -39,6 +39,7 @@ import java.util.stream.Collectors;
             materialDTO.setSupplierContact(material.getSupplierContact());
             materialDTO.setQuantity(material.getQuantity());
             materialDTO.setObservations(material.getObservations());
+            //aqui falta depois o get project
             materialsDtoList.add(materialDTO);
         }
         return materialsDtoList;
@@ -62,31 +63,41 @@ import java.util.stream.Collectors;
     //aqui tem de ser transacional
     @Transactional
     public void addMaterialToDB(MaterialDto material){
-        if (!materialIsValid(materialDao.findMaterialByID(material.getId()))) {
+        if (!materialNameIsValid(material.getName())){
             materialDao.persist(convertMaterialDTOtoEntity(material));
             materialDao.flush();
         }
-        throw new EntityExistsException("this material already exists");
     }
+
+
     //retorna todos os materiais em DTO
-    public ArrayList<MaterialDto> getAllMaterials (){
-        return convertMaterialsEntityToDTO((ArrayList<MaterialEntity>) materialDao.findAll());
+    public List<MaterialDto> getAllMaterials (){
+        return convertMaterialsEntityToDTO(materialDao.findAll());
+
+
     }
     //adicionar novo material À DB
     @Transactional
-    public void removeMaterialFromDB(MaterialDto m){
-        if (materialIsValid(materialDao.findMaterialByID(m.getId()))){
-            materialDao.remove(materialDao.findMaterialByID(m.getId()));
+    public void removeMaterialFromDB(int id){
+        System.out.println(id);
+        if (materialIDIsValid(id)){
+            System.out.println(materialDao.findMaterialByID(id));
+            materialDao.remove(materialDao.findMaterialByID(id));
             materialDao.flush();
         }
-        throw new EntityNotFoundException("material does not exist");
+        System.err.println("material does not exist");
 
     }
 
 
-    private boolean materialIsValid(MaterialEntity m){
-        return materialDao.findMaterialByID(m.getId())!= null;
+    private boolean materialNameIsValid(String name){
+        return materialDao.findMaterialByName(name)!= null;
     }
+    private boolean materialIDIsValid(int id){
+        return materialDao.findMaterialByID(id)!= null;
+    }
+
+    //isto nao estara bem feito porque precisa de pre validações sobre projeto onde esta inserido e afins
     public Set<MaterialEntity> returnProjectMaterials(List<MaterialDto> m){
         return m.stream().map(this::convertMaterialDTOtoEntity).collect(Collectors.toSet());
     }

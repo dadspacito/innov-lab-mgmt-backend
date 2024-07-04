@@ -25,4 +25,12 @@ import jakarta.persistence.NoResultException;
             return null;
         }
     }
+    public MaterialEntity findMaterialByName(String name){
+        try{
+            return em.createNamedQuery("Material.findMaterialByName", MaterialEntity.class).setParameter("name",name).getSingleResult();
+        }
+        catch(NoResultException e){
+            return null;
+        }
+    }
 }

@@ -12,7 +12,8 @@ import java.util.Objects;
 //devolve os materiais que tenham o ID do projeto
 //devolver materiais por projeto id
 @NamedQueries({
-        @NamedQuery(name = "Material.findMaterialByID", query = "SELECT u FROM MaterialEntity u WHERE u.id= :id")
+        @NamedQuery(name = "Material.findMaterialByID", query = "SELECT m FROM MaterialEntity m WHERE m.id= :id"),
+        @NamedQuery(name = "Material.findMaterialByName", query ="select m from MaterialEntity m where m.name = :name")
 
 })
 public class MaterialEntity implements Serializable {
