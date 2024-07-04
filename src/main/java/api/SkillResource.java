@@ -23,6 +23,12 @@ public class SkillResource {
      * retornar users por skill selecionada
      * adicionar skill
      * remover skill
+     * adicionar skill a user
+     * remove skill de user
+     *
+     * QUANDO PROJETOS ESTIVEREM OPERACIONAIS
+     * adicionar skill a projeto
+     * remover skill de projeto
      *
      */
 
@@ -33,7 +39,6 @@ public class SkillResource {
     private SessionService sessionService;
 
     private static final Logger LOGGER = LogManager.getLogger(HeaderResource.class);
-
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -50,11 +55,23 @@ public class SkillResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createSkill(@HeaderParam("token") String token, SkillDto skill){
         if (sessionService.isTokenValid(token)){
-            System.out.println(skill);
             skillService.createSkill(skill);
             return Response.status(201).entity("Skill was succesfully added to db").build();
         }
         return Response.status(400).entity("Skill was not added DB").build();
+    }
+    @Path("/{id}")
+    @DELETE
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response deleteSkill(@HeaderParam("token") String token, @PathParam("id") int id){
+        if(sessionService.isTokenValid(token)){
+                skillService.deleteSkill(id);
+                //colocar aqui logger
+                return Response.status(200).entity("Skill was sucessfully deleted").build();
+        }
+        return Response.status(400).entity("that user is not valid" +  id).build();
+        //colocar aqui logger
+
     }
 
 }

@@ -25,6 +25,8 @@ public abstract class AbstractDao<T extends Serializable> implements Serializabl
         this.clazz = clazz;
     }
 
+
+    //aqui faz pelo object id e nao por uma int
     public T find(Object id) {
         return em.find(clazz, id);
     }

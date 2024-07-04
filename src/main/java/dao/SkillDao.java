@@ -25,5 +25,13 @@ public class SkillDao extends AbstractDao<SkillEntity> {
                 return null;
             }
         }
-
+        public SkillEntity findSkillByID(int id){
+            try {
+                return em.createNamedQuery("Skill.findSkillByID", SkillEntity.class).setParameter("id", id).getSingleResult();
+            }
+            catch (NoResultException e){
+                System.err.println("Skill does not exist in the Database");
+                return null;
+            }
+        }
 }
