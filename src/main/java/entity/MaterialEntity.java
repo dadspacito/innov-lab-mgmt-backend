@@ -4,6 +4,7 @@ import enums.MaterialType;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 @Entity
 @Table(name="Material")
@@ -11,7 +12,8 @@ import java.io.Serializable;
 //devolve os materiais que tenham o ID do projeto
 //devolver materiais por projeto id
 @NamedQueries({
-        @NamedQuery(name = "Material.findMaterialByID", query = "SELECT u FROM MaterialEntity u WHERE u.id= :id")
+        @NamedQuery(name = "Material.findMaterialByID", query = "SELECT m FROM MaterialEntity m WHERE m.id= :id"),
+        @NamedQuery(name = "Material.findMaterialByName", query ="select m from MaterialEntity m where m.name = :name")
 
 })
 public class MaterialEntity implements Serializable {
@@ -40,6 +42,26 @@ public class MaterialEntity implements Serializable {
     @Column(name = "observations", nullable = true, updatable = true)
     private String observations;
     //esta relaçõa é one to many com os projetos
+
+
+    public MaterialEntity() {}
+
+    public MaterialEntity(String name, String brand, MaterialType type, String description, int serialNumber, String supplier, int supplierContact, int quantity, String observations) {
+        this.id = id;
+        this.name = name;
+        this.brand = brand;
+        this.type = type;
+        this.description = description;
+        this.serialNumber = serialNumber;
+        this.supplier = supplier;
+        this.supplierContact = supplierContact;
+        this.quantity = quantity;
+        this.observations = observations;
+    }
+
+    @ManyToOne
+    @JoinColumn(name="project_id")//foreign key do projeto
+    private ProjectEntity project;
 
 
     public int getId() {
@@ -120,5 +142,25 @@ public class MaterialEntity implements Serializable {
 
     public void setObservations(String observations) {
         this.observations = observations;
+    }
+
+    public ProjectEntity getProject() {
+        return project;
+    }
+
+    public void setProject(ProjectEntity project) {
+        this.project = project;
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MaterialEntity that = (MaterialEntity) o;
+        return id == that.id; // Compare based on ID for persisted entities
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id); // Use ID for hash code
     }
 }

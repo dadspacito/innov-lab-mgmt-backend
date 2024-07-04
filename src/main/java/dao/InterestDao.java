@@ -23,7 +23,15 @@ public class InterestDao extends AbstractDao<InterestEntity> {
             return null;
         }
     }
+    public InterestEntity findInterestByID(int id){
+        try{
+            return em.createNamedQuery("Interest.findInterestByID", InterestEntity.class).setParameter("id", id).getSingleResult();
+        }
+        catch (NoResultException e){
+            return null;
+        }
 
+    }
 
 }
 

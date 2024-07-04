@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import enums.SkillType;
 
@@ -11,7 +12,8 @@ import enums.SkillType;
 @Table(name = "Skill")
 @NamedQueries({
         @NamedQuery(name = "Skill.findSkillByName", query = "SELECT s FROM SkillEntity s WHERE s.name = :name"),
-        @NamedQuery(name = "Skill.findAllSkills", query = "SELECT s FROM SkillEntity s")
+        @NamedQuery(name = "Skill.findAllSkills", query = "SELECT s FROM SkillEntity s order by s.createdAt asc"),
+        @NamedQuery(name = "Skill.findSkillByID", query = "select s from SkillEntity  s where s.id = :id")
 })
 public class SkillEntity implements Serializable {
 
@@ -21,24 +23,21 @@ public class SkillEntity implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, unique = true, updatable = false)
     private int id;
-
     @Column(name = "name", nullable = false, unique = true, updatable = true)
     private String name;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false, updatable = true)
     private SkillType type;
-
     @Column(name = "isActive", nullable = false, updatable = true)
     private boolean isActive = true;
-
     @Column (name = "createdAt", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
 
-
     @ManyToMany(mappedBy = "skills")
     private Set<UserEntity> users = new HashSet<>();
+    @ManyToMany(mappedBy = "skills")
+    private Set<ProjectEntity> projects = new HashSet<>();
 
 
     public SkillEntity() {
@@ -113,6 +112,38 @@ public class SkillEntity implements Serializable {
         this.users.remove(user);
         user.getSkills().remove(this);
 
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Set<ProjectEntity> getProjects() {
+        return projects;
+    }
+
+    public void setProjects(Set<ProjectEntity> projects) {
+        this.projects = projects;
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SkillEntity that = (SkillEntity) o;
+        return id == that.id; // Compare based on ID for persisted entities
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id); // Use ID for hash code
     }
 }
 

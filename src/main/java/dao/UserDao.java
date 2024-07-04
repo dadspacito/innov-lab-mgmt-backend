@@ -67,5 +67,13 @@ public class UserDao extends AbstractDao<UserEntity> {
             return null;
         }
     }
+    public List<UserEntity> getUserByWorkplace(int workplaceID){
+        try{
+            return em.createNamedQuery("User.findUserByWorkplace", UserEntity.class).setParameter("workplaceID", workplaceID).getResultList();
+        }
+        catch(NoResultException e){
+            return null;
+        }
+    }
 }
 

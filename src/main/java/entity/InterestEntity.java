@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -12,7 +13,9 @@ import java.util.Set;
 @NamedQueries(
         {
                 @NamedQuery(name = "Interest.findInterestByName", query = "SELECT i FROM InterestEntity i WHERE i.name = :name"),
-                @NamedQuery(name = "Interest.findAllInterests", query = "SELECT i FROM InterestEntity i")
+                @NamedQuery(name = "Interest.findAllInterests", query = "SELECT i FROM InterestEntity i"),
+                @NamedQuery(name ="Interest.findInterestByID", query = "select i from InterestEntity i where i.id =:id")
+
         }
 )
 
@@ -42,11 +45,18 @@ public class InterestEntity implements Serializable
     @Column (name = "createdAt", nullable = false, unique = false, updatable = false)
     private LocalDateTime createdAt;
 
+    //para users
     @ManyToMany(mappedBy = "interests")
     private Set<UserEntity> users = new HashSet<>();
 
+    //para projetos
+    @ManyToMany(mappedBy = "interests")
+    private Set<ProjectEntity> projects = new HashSet<>();
 
-    // código para map de projetos
+
+//aqui será keywords ou simplesmente interesses?
+// código para map de projetos? Porque não ser so interesses no projeto que pode devolver um array de interesses e skills?
+
 //    @ManyToMany(mappedBy = "keywords")
 //    private Set<ProjectEntity> projects = new HashSet<>();
 //
@@ -63,6 +73,7 @@ public class InterestEntity implements Serializable
     {
         this.name = name;
         this.createdAt = LocalDateTime.now();
+        this.isActive =  true;
 
     }
 
@@ -116,6 +127,21 @@ public class InterestEntity implements Serializable
         this.users = users;
     }
 
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
+
+    public Set<ProjectEntity> getProjects() {
+        return projects;
+    }
+
+    public void setProjects(Set<ProjectEntity> projects) {
+        this.projects = projects;
+    }
     // MÉTODOS PARA AS LISTAS
     // método para adicionar um user ao interesse
 
@@ -132,6 +158,19 @@ public class InterestEntity implements Serializable
         this.users.remove(user);
         user.getInterests().remove(this);
     }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        InterestEntity that = (InterestEntity) o;
+        return id == that.id; // Compare based on ID for persisted entities
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id); // Use ID for hash code
+    }
+
 
 
 }

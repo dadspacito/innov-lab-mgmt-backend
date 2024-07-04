@@ -2,8 +2,11 @@ package entity;
 
 import java.time.LocalDateTime;
 import jakarta.persistence.*;
+import jdk.jfr.Name;
+
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -13,7 +16,13 @@ import java.util.Set;
         @NamedQuery(name = "User.findUserById", query = "SELECT u FROM UserEntity u WHERE u.id = :id"),
         @NamedQuery(name = "User.findAllUsers", query = "SELECT u FROM UserEntity u"),
         @NamedQuery(name = "User.findUserByEmailToken", query = "SELECT u FROM UserEntity u WHERE u.emailToken = :emailToken"),
-        @NamedQuery(name = "User.findUserByNickname", query = "SELECT u FROM UserEntity u WHERE u.nickname = :nickname")
+        @NamedQuery(name = "User.findUserByNickname", query = "SELECT u FROM UserEntity u WHERE u.nickname = :nickname"),
+        //query para retornar os projetos do user, faz join da tabela
+        @NamedQuery(name = "User.findUserProjects", query = "select u.projects from UserEntity u where u.id = :userID"),
+        //esta query ao retornar os users por location é usada quando se forem selecionar os users para os projectos consoante a localização do projeto
+        @NamedQuery(name ="User.findUserByWorkplace", query = "select u from UserEntity u where u.workplace.id = :workplaceID")
+        //query de tasks associadas a estes user
+
 })
 public class UserEntity implements Serializable {
 
@@ -66,6 +75,19 @@ public class UserEntity implements Serializable {
     @Column(name = "emailTokenExpires", nullable = true)
     private LocalDateTime emailTokenExpires;
 
+    /**
+     * relationships
+     * falta aqui a relationship do seu role
+     * por aqui um construtpr de entidade com o minimo
+     * no constructor
+     */
+    public UserEntity() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+
+
+
     @ManyToOne
     @JoinColumn(name = "workplace_id", nullable = false)
     private WorkplaceEntity workplace;
@@ -87,13 +109,30 @@ public class UserEntity implements Serializable {
     private Set<InterestEntity> interests = new HashSet<>();
 
 
+    // many to many relationships with project entity (members)
+    @ManyToMany(mappedBy = "projectMembers")
+    private Set<ProjectEntity> projects;
 
+    // One-to-Many relationship with ProjectEntity (manager)
+    @OneToMany(mappedBy = "manager", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ProjectEntity> managedProjects = new HashSet<>();
 
-    public UserEntity() {
-        this.createdAt = LocalDateTime.now();
+    /**
+     * getters and setters
+     * @return
+     */
+
+    public Set<ProjectEntity> getProjects() {
+        return projects;
     }
 
-    // Getters and setters
+    public void setProjects(Set<ProjectEntity> projects) {
+        this.projects = projects;
+    }
+
+
+
+
 
     public int getId() {
         return id;
@@ -227,6 +266,14 @@ public class UserEntity implements Serializable {
         return skills;
     }
 
+    public Set<ProjectEntity> getManagedProjects() {
+        return managedProjects;
+    }
+
+    public void setManagedProjects(Set<ProjectEntity> managedProjects) {
+        this.managedProjects = managedProjects;
+    }
+
     public void setSkills(Set<SkillEntity> skills) {
         this.skills = skills;
     }
@@ -263,7 +310,55 @@ public class UserEntity implements Serializable {
         this.interests.remove(interest);
         interest.getUsers().remove(this);
     }
+
+    //add remove projects where this entity is a member
+    public void addProjectMember(ProjectEntity project){
+        this.projects.add(project);
+        //nao se devia chamar user mas sim member
+        project.addMember(this);
+    }
+    public void removeProjectMember(ProjectEntity project){
+        this.projects.remove(project);
+        project.removeMember(this);
+    }
+    //add and remove projects of this entity from a manager perspective
+    public void addManagedProject(ProjectEntity project){
+        this.managedProjects.add(project);
+        project.setManager(this);
+    }
+    public void removeManagedProject(ProjectEntity project){
+        this.managedProjects.remove(project);
+        project.setManager(null);
+    }
+
+    /**
+     * métodos para equals e hashcodes
+     * @param o
+     * @return
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserEntity that = (UserEntity) o;
+        return id == that.id; // Compare based on ID for persisted entities
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id); // Use ID for hash code
+    }
+
 }
+
+
+
+
+
+
+
+
+
 /*
 package entity;
 
