@@ -46,8 +46,8 @@ public class SkillService {
     }
 
     //método que retorna lista de DTO's e transforma em Set
-    public Set<SkillEntity> returnProjectSkills(List<SkillDto> s){
-        return s.stream().map(this :: mapSkillDtoToEntity).collect(Collectors.toSet());
+    public Set<SkillEntity> returnProjectSkills(Set<Integer> skillID){
+        return skillID.stream().map(this :: getSkillByID).collect(Collectors.toSet());
     }
     //delete skill
     @Transactional
@@ -67,7 +67,6 @@ public class SkillService {
     //verifica se skill existe metodo privado
     private boolean isValidSkill(int id){
         try {
-            System.out.println(skillDao.findSkillByID(id));
             return skillDao.findSkillByID(id) != null;
         }
         catch (NoResultException e){
@@ -75,7 +74,16 @@ public class SkillService {
             return false;
         }
     }
+    private SkillEntity getSkillByID(int id){
+        try{
+            return skillDao.findSkillByID(id);
+        }
+        catch(NoResultException e){
+            System.err.println("skill does not exist" + id);
+            return null;
+        }
 
+    }
 
 
 
@@ -121,6 +129,7 @@ public class SkillService {
             throw new IllegalArgumentException("invalid skill type provided: " +  type);
         }
     }
+
 
 
 

@@ -1,11 +1,14 @@
 package dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import entity.*;
 import enums.ProjectState;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 public class DetailedProjectDto {
     /**
@@ -20,28 +23,17 @@ public class DetailedProjectDto {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private ProjectState projectState;
-    private ProjectMemberDto projectManager;
+    private int projectManager;
     //este recebe a projectMembersDto
-    private List<ProjectMemberDto> projectMembers;
-    private List<InterestDto> projectInterests;
-    private List<SkillDto> projectSkills;
-    private List<MaterialDto> projectMaterials;
-    private List<TaskDto> projectTasks;
-    private WorkplaceEntity workplace;
+    private Set<Integer> projectMembers;
+    private Set<Integer> projectInterests;
+    private Set<Integer> projectSkills;
+    private Set<Integer> projectMaterials;
+    //private Set<Integer> projectTasks;
+    @JsonProperty("workplaceID")
+    private int workplaceID;
 
     public DetailedProjectDto(){}
-    public DetailedProjectDto(String name,String description, LocalDateTime startDate, LocalDateTime endDate,
-     ProjectState projectState, ProjectMemberDto projectManager, List<ProjectMemberDto> projectMembers, List<InterestDto> projectInterests,
-                              List<SkillDto> projectSkills, List<MaterialDto> projectMaterials, List<TaskDto> projectTasks){
-        this.name = name;
-        this.description = description;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.projectState = projectState;
-        this.projectManager = projectManager;
-
-
-    }
 
     public String getName() {
         return name;
@@ -83,60 +75,60 @@ public class DetailedProjectDto {
         this.projectState = projectState;
     }
 
-    public ProjectMemberDto getProjectManager() {
+    public int getProjectManager() {
         return projectManager;
     }
 
-    public void setProjectManager(ProjectMemberDto projectManager) {
+    public void setProjectManager(int projectManager) {
         this.projectManager = projectManager;
     }
 
-    public List<ProjectMemberDto> getProjectMembers() {
+    public Set<Integer> getProjectMembers() {
         return projectMembers;
     }
 
-    public void setProjectMembers(List<ProjectMemberDto> projectMembers) {
+    public void setProjectMembers(Set<Integer> projectMembers) {
         this.projectMembers = projectMembers;
     }
 
-    public List<InterestDto> getProjectInterests() {
+    public Set<Integer> getProjectInterests() {
         return projectInterests;
     }
 
-    public void setProjectInterests(List<InterestDto> projectInterests) {
+    public void setProjectInterests(Set<Integer> projectInterests) {
         this.projectInterests = projectInterests;
     }
 
-    public List<SkillDto> getProjectSkills() {
+    public Set<Integer> getProjectSkills() {
         return projectSkills;
     }
 
-    public void setProjectSkills(List<SkillDto> projectSkills) {
+    public void setProjectSkills(Set<Integer> projectSkills) {
         this.projectSkills = projectSkills;
     }
 
-    public List<MaterialDto> getProjectMaterials() {
+    public Set<Integer> getProjectMaterials() {
         return projectMaterials;
     }
 
-    public void setProjectMaterials(List<MaterialDto> projectMaterials) {
+    public void setProjectMaterials(Set<Integer> projectMaterials) {
         this.projectMaterials = projectMaterials;
     }
 
-    public List<TaskDto> getProjectTasks() {
+   /* public Set<Integer> getProjectTasks() {
         return projectTasks;
     }
 
-    public void setProjectTasks(List<TaskDto> projectTasks) {
+    public void setProjectTasks(Set<Integer> projectTasks) {
         this.projectTasks = projectTasks;
+    }*/
+
+    public int getWorkplace() {
+        return workplaceID;
     }
 
-    public WorkplaceEntity getWorkplace() {
-        return workplace;
-    }
-
-    public void setWorkplace(WorkplaceEntity workplace) {
-        this.workplace = workplace;
+    public void setWorkplace(int workplace) {
+        this.workplaceID = workplace;
     }
 
 }

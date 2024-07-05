@@ -4,11 +4,15 @@ import dao.ProjectDao;
 import dto.BasicProjectDto;
 import dto.DetailedProjectDto;
 import entity.ProjectEntity;
+import entity.WorkplaceEntity;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.persistence.Id;
+import jakarta.persistence.NoResultException;
 import jakarta.transaction.Transactional;
+
+import java.util.List;
 
 @Stateless
 public class ProjectService {
@@ -20,6 +24,7 @@ public class ProjectService {
     @Inject private MaterialService materialService;
     @EJB
     private ProjectDao projectDao;
+    @EJB WorkplaceService workplaceService;
 
     /**
      * que EJB's é que são precisos aqui?
@@ -40,9 +45,22 @@ public class ProjectService {
      */
     @Transactional
     public void createNewProject(DetailedProjectDto p){
-        //tem que ser validado aqui pelos atributos do projeto (ver se não são null)
-
+        try{
         projectDao.persist(convertProjectDtoToEntity(p));
+        }
+        catch(IllegalArgumentException e){
+            System.err.println(p.getProjectManager());
+            System.err.println(p.getProjectInterests());
+        }
+    }
+    public List<ProjectEntity> getProjects(){
+        try{
+           return projectDao.getAllProjectsOrdered();
+        }
+        catch (NoResultException e){
+            System.err.println("No projects were found");
+            return null;
+        }
     }
 
     /**
@@ -66,14 +84,23 @@ public class ProjectService {
         pEnt.setDescription(p.getDescription());
         pEnt.setStartDate(p.getStartDate());
         pEnt.setEndDate(p.getEndDate());
+        pEnt.setProjectState(p.getProjectState());
         //esta função retorna um user entity to user service atraves de um project member dto
         pEnt.setManager((userService.defineManager(p.getProjectManager())));
-        pEnt.setProjectWorkplace(p.getWorkplace());
+        //workplace é por id
+
+        pEnt.setProjectWorkplace(workplaceService.getWorkplaceByID(p.getWorkplace()));
         //aqui retorna um set. Poderá dar problemas mais tarde.
-        pEnt.setInterests(interestService.projectInterests(p.getProjectInterests()));
-        pEnt.setSkills(skillService.returnProjectSkills(p.getProjectSkills()));
-        pEnt.setMaterials(materialService.returnProjectMaterials(p.getProjectMaterials()));
-        pEnt.setTasks(taskService.getTasksFromProject(p.getProjectTasks()));
+        //tem de ir buscar os interesses primeiro e so depois fazer set
+        pEnt.getInterests().addAll(interestService.projectInterests(p.getProjectInterests()));
+        //skills é por id
+        pEnt.getSkills().addAll(skillService.returnProjectSkills(p.getProjectSkills()));
+        //materiais é por id
+        pEnt.getMaterials().addAll(materialService.returnProjectMaterials(p.getProjectMaterials()));
+        //as tasks funcionam de maneira diferente porque nao existem de maneira preemptiva na base de dados para se
+        //adicionar ao projeto. Os id's das tasks servem para retorno da task, mas quando se cria um projeto este não vem com
+        //tasks
+        //pEnt.setTasks(taskService.getTasksFromProject(p.getProjectTasks()));
         pEnt.setProjectMembers(userService.returnMembersEntity(p.getProjectMembers()));
         return pEnt;
     }
