@@ -29,7 +29,7 @@ public class DetailedProjectDto {
     private Set<Integer> projectInterests;
     private Set<Integer> projectSkills;
     private Set<Integer> projectMaterials;
-    //private Set<Integer> projectTasks;
+    private Set<Integer> projectTasks;
     @JsonProperty("workplaceID")
     private int workplaceID;
 
@@ -115,13 +115,13 @@ public class DetailedProjectDto {
         this.projectMaterials = projectMaterials;
     }
 
-   /* public Set<Integer> getProjectTasks() {
+   public Set<Integer> getProjectTasks() {
         return projectTasks;
     }
 
     public void setProjectTasks(Set<Integer> projectTasks) {
         this.projectTasks = projectTasks;
-    }*/
+    }
 
     public int getWorkplace() {
         return workplaceID;

@@ -16,8 +16,20 @@ public class TaskDto {
     private LocalDateTime endDate;
     private TaskState state;
     //precisa de retornar isto?ou so precisa de existir na entity?
-    //private int projectID;
+    private int projectID;
     private int ownerID;
+
+    //para construir a task inicial
+    public TaskDto(LocalDateTime startDate, LocalDateTime endDate, int ownerID) {
+        this.id = 1;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.state = TaskState.PLANNED;
+        this.ownerID = ownerID;
+    }
+
+    public TaskDto() {
+    }
 
     public int getId() {
         return id;
@@ -67,13 +79,13 @@ public class TaskDto {
         this.state = state;
     }
 
-   /* public int getProjectID() {
+    public int getProjectID() {
         return projectID;
     }
 
     public void setProjectID(int projectID) {
         this.projectID = projectID;
-    }*/
+    }
 
     public int getOwnerID() {
         return ownerID;

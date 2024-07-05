@@ -1,8 +1,10 @@
 package service;
 
 import dao.ProjectDao;
+import dao.TaskDao;
 import dto.BasicProjectDto;
 import dto.DetailedProjectDto;
+import dto.TaskDto;
 import entity.ProjectEntity;
 import entity.WorkplaceEntity;
 import jakarta.ejb.EJB;
@@ -24,6 +26,8 @@ public class ProjectService {
     @Inject private MaterialService materialService;
     @EJB
     private ProjectDao projectDao;
+    @EJB
+    private TaskDao taskDao;
     @EJB WorkplaceService workplaceService;
 
     /**
@@ -46,7 +50,12 @@ public class ProjectService {
     @Transactional
     public void createNewProject(DetailedProjectDto p){
         try{
-        projectDao.persist(convertProjectDtoToEntity(p));
+            //esta presentation task só existe para o criar projeto
+            TaskDto presentationTask = taskService.createPresentationTask(p);
+            p.getProjectTasks().add(presentationTask.getId());
+            //aqui tem de fazer persist à task na db da task
+
+            projectDao.persist(convertProjectDtoToEntity(p));
         }
         catch(IllegalArgumentException e){
             System.err.println(p.getProjectManager());
@@ -88,7 +97,6 @@ public class ProjectService {
         //esta função retorna um user entity to user service atraves de um project member dto
         pEnt.setManager((userService.defineManager(p.getProjectManager())));
         //workplace é por id
-
         pEnt.setProjectWorkplace(workplaceService.getWorkplaceByID(p.getWorkplace()));
         //aqui retorna um set. Poderá dar problemas mais tarde.
         //tem de ir buscar os interesses primeiro e so depois fazer set
@@ -100,6 +108,7 @@ public class ProjectService {
         //as tasks funcionam de maneira diferente porque nao existem de maneira preemptiva na base de dados para se
         //adicionar ao projeto. Os id's das tasks servem para retorno da task, mas quando se cria um projeto este não vem com
         //tasks
+        pEnt.getTasks().addAll(taskService.returnProjectTasks(p.getProjectTasks()));
         //pEnt.setTasks(taskService.getTasksFromProject(p.getProjectTasks()));
         pEnt.setProjectMembers(userService.returnMembersEntity(p.getProjectMembers()));
         return pEnt;

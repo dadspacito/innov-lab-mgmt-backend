@@ -4,9 +4,11 @@ import api.SessionResource;
 import dao.ProjectDao;
 import dao.TaskDao;
 import dao.UserDao;
+import dto.DetailedProjectDto;
 import dto.TaskDto;
 import entity.TaskEntity;
 import entity.UserEntity;
+import enums.TaskState;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.NoResultException;
@@ -27,7 +29,7 @@ import java.util.stream.Collectors;
  * retornar tarefas por projeto (retorna todas as tarefas de um projeto)
  * retornar tarefas por projeto e user(retorna todas as tarefas de um user dentro de um projeto)
  * falta projeto
- *
+ *aqui cria a task inicial
  */
 
 @Stateless
@@ -68,6 +70,8 @@ public class TaskService {
         LOGGER.error("There was an error deleting task " + userDao.findUserById(task.getOwnerID()).getEmail(),LocalDateTime.now()  );
         return false;
     }
+    //@Transactional
+    //public void addTaskToProject()
 
     /**
      * retornos:
@@ -160,6 +164,29 @@ public class TaskService {
 
     }
     //função valid project
+
+
+    //função que retorna a task inicial cujo start date é um dia antes do fim do projeto e end date na data de fim do projeto
+    //implica que end date no projeto nao pode ser null
+    //recebe um projeto
+
+    //public TaskEntity createPresentationTask(){};
+    public TaskDto createPresentationTask(DetailedProjectDto p){
+        return new TaskDto(p.getEndDate().minusDays(1),p.getEndDate(),p.getProjectManager());
+    };
+    public Set<TaskEntity> returnProjectTasks(Set<Integer> t){
+        return t.stream().map(this::getTaskByID).collect(Collectors.toSet());
+    }
+    public TaskEntity getTaskByID(int id){
+        try{
+            return taskDao.returnTaskByID(id);
+        }
+        catch (NoResultException e){
+            System.err.println("that task does not exist");
+            return null;
+        }
+    }
+
 
 
 
