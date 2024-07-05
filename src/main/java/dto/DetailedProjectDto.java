@@ -18,6 +18,7 @@ public class DetailedProjectDto {
      * cada vez que houver uma alteração em qualquer projeto, tem de haver uma notificação que alerta para a
      * mudança e o user que mudou;
      */
+    private int id;
     private String name;
     private String description;
     private LocalDateTime startDate;
@@ -34,6 +35,22 @@ public class DetailedProjectDto {
     private int workplaceID;
 
     public DetailedProjectDto(){}
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getWorkplaceID() {
+        return workplaceID;
+    }
+
+    public void setWorkplaceID(int workplaceID) {
+        this.workplaceID = workplaceID;
+    }
 
     public String getName() {
         return name;
