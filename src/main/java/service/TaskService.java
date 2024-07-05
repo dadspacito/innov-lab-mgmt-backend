@@ -142,16 +142,15 @@ public class TaskService {
         //taskDto.setProjectID();
         return taskDto;
     }
-    private TaskEntity convertTaskDtoToEntity(TaskDto taskDto){
+    //não é preciso associar aqui ao projeto, associa-se na task service
+    public TaskEntity convertTaskDtoToEntity(TaskDto taskDto){
         TaskEntity taskEnt =  new TaskEntity();
+        taskEnt.setActive(true);
         taskEnt.setName(taskDto.getName());
         taskEnt.setDescription(taskDto.getDescription());
         taskEnt.setStartDate(taskDto.getStartDate());
         taskEnt.setEndDate(taskDto.getEndDate());
-        UserEntity owner = userDao.findUserById(taskDto.getOwnerID());
-        taskEnt.setOwner(owner);
-        //ProjectEntity project = projectDao.findProjectByID(taskDto.getProjectByID());
-        //taskEnt.setProject(taskDto.getProjectID());
+        taskEnt.setOwner(userDao.findUserById(taskDto.getOwnerID()));
         taskEnt.setState(taskDto.getState());
         return taskEnt;
     };
@@ -172,7 +171,15 @@ public class TaskService {
 
     //public TaskEntity createPresentationTask(){};
     public TaskDto createPresentationTask(DetailedProjectDto p){
-        return new TaskDto(p.getEndDate().minusDays(1),p.getEndDate(),p.getProjectManager());
+        TaskDto presentationTask = new TaskDto();
+        presentationTask.setProjectID(p.getId());
+        presentationTask.setName("Project Presentation");
+        presentationTask.setDescription("Presentation of the project to the company");
+        presentationTask.setStartDate(p.getEndDate().minusDays(1));
+        presentationTask.setEndDate(p.getEndDate());
+        presentationTask.setOwnerID(p.getProjectManager());
+        presentationTask.setState(TaskState.PLANNED);
+        return presentationTask;
     };
     public Set<TaskEntity> returnProjectTasks(Set<Integer> t){
         return t.stream().map(this::getTaskByID).collect(Collectors.toSet());

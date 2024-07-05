@@ -6,6 +6,7 @@ import dto.BasicProjectDto;
 import dto.DetailedProjectDto;
 import dto.TaskDto;
 import entity.ProjectEntity;
+import entity.TaskEntity;
 import entity.WorkplaceEntity;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
@@ -13,7 +14,9 @@ import jakarta.inject.Inject;
 import jakarta.persistence.Id;
 import jakarta.persistence.NoResultException;
 import jakarta.transaction.Transactional;
+import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
 
+import java.sql.SQLException;
 import java.util.List;
 
 @Stateless
@@ -50,16 +53,24 @@ public class ProjectService {
     @Transactional
     public void createNewProject(DetailedProjectDto p){
         try{
-            //esta presentation task só existe para o criar projeto
-            TaskDto presentationTask = taskService.createPresentationTask(p);
-            p.getProjectTasks().add(presentationTask.getId());
-            //aqui tem de fazer persist à task na db da task
-
-            projectDao.persist(convertProjectDtoToEntity(p));
+            //creates and persist initial project
+            ProjectEntity projectEntity = convertProjectDtoToEntity(p);
+            projectDao.persist(projectEntity);
+            projectDao.flush();
+            //creates initial task and associates the id of the project
+            TaskDto initialTaskDto = taskService.createPresentationTask(p);
+            TaskEntity initialTaskEntity = taskService.convertTaskDtoToEntity(initialTaskDto);
+            initialTaskEntity.setProject(projectEntity);
+            taskDao.persist(initialTaskEntity);
+            taskDao.flush();
+            //associate the task with the project
+            projectEntity.getTasks().add(initialTaskEntity);
+            projectDao.merge(projectEntity);
+            projectDao.flush();
         }
         catch(IllegalArgumentException e){
-            System.err.println(p.getProjectManager());
-            System.err.println(p.getProjectInterests());
+            System.err.println("error setting the project");
+            e.printStackTrace();
         }
     }
     public List<ProjectEntity> getProjects(){
@@ -107,9 +118,6 @@ public class ProjectService {
         pEnt.getMaterials().addAll(materialService.returnProjectMaterials(p.getProjectMaterials()));
         //as tasks funcionam de maneira diferente porque nao existem de maneira preemptiva na base de dados para se
         //adicionar ao projeto. Os id's das tasks servem para retorno da task, mas quando se cria um projeto este não vem com
-        //tasks
-        pEnt.getTasks().addAll(taskService.returnProjectTasks(p.getProjectTasks()));
-        //pEnt.setTasks(taskService.getTasksFromProject(p.getProjectTasks()));
         pEnt.setProjectMembers(userService.returnMembersEntity(p.getProjectMembers()));
         return pEnt;
     }
