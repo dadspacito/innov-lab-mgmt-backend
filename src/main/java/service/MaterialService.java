@@ -8,6 +8,7 @@ import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.NoResultException;
 import jakarta.transaction.Transactional;
 
 import java.util.ArrayList;
@@ -99,8 +100,17 @@ import java.util.stream.Collectors;
     }
 
     //isto nao estara bem feito porque precisa de pre validações sobre projeto onde esta inserido e afins
-    public Set<MaterialEntity> returnProjectMaterials(List<MaterialDto> m){
-        return m.stream().map(this::convertMaterialDTOtoEntity).collect(Collectors.toSet());
+    public Set<MaterialEntity> returnProjectMaterials(Set<Integer> m){
+        return m.stream().map(this::getMaterialsByID).collect(Collectors.toSet());
+    }
+    private MaterialEntity getMaterialsByID(int id){
+        try{
+            return materialDao.findMaterialByID(id);
+        }
+        catch (NoResultException e){
+            System.err.println("that material does not exist" + id);
+            return null;
+        }
     }
 
     //apagar material da DB

@@ -218,6 +218,7 @@ public class ProjectEntity implements Serializable {
         return projectWorkplace;
     }
 
+    //recebe um id e associa aqui a localização
     public void setProjectWorkplace(WorkplaceEntity workplace) {
         if (this.projectWorkplace != null && this.projectWorkplace != workplace) {
             this.projectWorkplace.removeProjectFromWorkplace(this);

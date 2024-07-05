@@ -195,15 +195,10 @@ public class UserService {
         return null;
     }
 
-    /**
-     * esta função é diferente porque quando um projeto é criado tem de ficar um user automaticamente associado.
-     * @param u
-     * @return
-     */
-    public UserEntity defineManager(ProjectMemberDto u){
+    public UserEntity defineManager(int managerID){
         try{
-            if (userDao.findUserById(u.getId())!= null){
-                return userDao.findUserById(u.getId());
+            if (userDao.findUserById(managerID)!= null){
+                return userDao.findUserById(managerID);
             }
             return null;
         }
@@ -211,11 +206,13 @@ public class UserService {
             return null;
         }
     }
-    public UserEntity getUserEntityFromProjectMember(ProjectMemberDto p){
-        return userDao.findUserById(p.getId());
+    //metodo privado
+    public UserEntity getUserEntityFromProjectMember(int memberID){
+        return userDao.findUserById(memberID);
     }
-    public Set<UserEntity> returnMembersEntity(List<ProjectMemberDto> p){
-        return p.stream().map(this::getUserEntityFromProjectMember).collect(Collectors.toSet());
+    //transforma o set de id's em entidades de user
+    public Set<UserEntity> returnMembersEntity(Set<Integer> memberIDs){
+        return memberIDs.stream().map(this::getUserEntityFromProjectMember).collect(Collectors.toSet());
 
     }
     // gerar token para email

@@ -49,9 +49,10 @@ public class InterestService {
     //aqui tem de receber interesses de um projetoDTO e trasforma-los em entities
     //é apenas reference ao projeto
     //aqui foi definido como set, tem de ser retornado como set
-    public Set<InterestEntity> projectInterests(List<InterestDto> i ){
+    //aqui recebe um set de id's e tranforma-os en interesses
+    public Set<InterestEntity> projectInterests(Set<Integer> i ){
         return i.stream()
-                .map(this::convertInterestDtoInEntity)
+                .map(this::getInterestByID)
                 .collect(Collectors.toSet());
     }
     //traz o nome o id. É o que vai para o frontend
@@ -105,8 +106,19 @@ public class InterestService {
         iEnt.setActive(true);
         return iEnt;
     }
+
     //associar um interest a um user;
     //funções set user e projetos a esta interests
+
+    private InterestEntity getInterestByID(int id){
+        try {
+            return interestDao.findInterestByID(id);
+        }
+        catch(NoResultException e){
+            System.err.println("interest does not exist");
+            return null;
+        }
+    }
 
 
     // mapper interesse dto entidade
