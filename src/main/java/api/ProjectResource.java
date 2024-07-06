@@ -2,6 +2,7 @@ package api;
 
 import dto.DetailedProjectDto;
 import jakarta.ejb.EJB;
+import jakarta.ejb.NoSuchEntityException;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -42,5 +43,20 @@ public class ProjectResource {
         else return Response.status(Response.Status.UNAUTHORIZED).build();
     }
 
+    @Path("/{id}")
+    @DELETE//apagar tarefas
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response removeTaskFromProject(@HeaderParam("token") String token, @PathParam("id") int projectID, int taskID){
+        if (sessionService.isTokenValid(token)){
+            try{
+                projectService.removeTaskFromProject(taskID, projectID);
+                return Response.status(200).entity("rask removed").build();
+            }
+            catch (NoSuchEntityException e){
+                return Response.status(400).entity("problem").build();
+            }
+        }
+        return Response.status(401).entity("invalid token").build();
+    }
 
 }

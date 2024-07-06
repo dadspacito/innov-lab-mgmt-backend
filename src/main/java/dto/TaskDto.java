@@ -20,13 +20,6 @@ public class TaskDto {
     private int ownerID;
 
     //para construir a task inicial
-    public TaskDto(LocalDateTime startDate, LocalDateTime endDate, int ownerID) {
-        this.id = 1;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.state = TaskState.PLANNED;
-        this.ownerID = ownerID;
-    }
 
     public TaskDto() {
     }
