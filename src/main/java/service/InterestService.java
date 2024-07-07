@@ -50,10 +50,14 @@ public class InterestService {
     //é apenas reference ao projeto
     //aqui foi definido como set, tem de ser retornado como set
     //aqui recebe um set de id's e tranforma-os en interesses
-    public Set<InterestEntity> projectInterests(Set<Integer> i ){
+    public Set<InterestEntity> listProjectInterestsDtoToEntity(Set<InterestDto> i ){
         return i.stream()
-                .map(this::getInterestByID)
+                .map(interestDto -> interestDao.findInterestByID(interestDto.getId()))
                 .collect(Collectors.toSet());
+    }
+    //transforma entities em set dto
+    public Set<InterestDto> listProjectEntityToDto(Set<InterestEntity> i){
+        return i.stream().map(this :: mapInterestEntityToDto).collect(Collectors.toSet());
     }
     //traz o nome o id. É o que vai para o frontend
     public InterestDto returnInterestDto(InterestEntity interest){
@@ -66,6 +70,7 @@ public class InterestService {
     private InterestDto mapInterestEntityToDto(InterestEntity interestEntity) {
         return new InterestDto(interestEntity.getName(), interestEntity.getId());
     }
+
 
     //esta função cria um interest só para a db, sem definir users e projetos
     @Transactional
@@ -106,6 +111,7 @@ public class InterestService {
         iEnt.setActive(true);
         return iEnt;
     }
+
 
     //associar um interest a um user;
     //funções set user e projetos a esta interests

@@ -1,6 +1,7 @@
 package api;
 
 import dto.DetailedProjectDto;
+import dto.TaskDto;
 import jakarta.ejb.EJB;
 import jakarta.ejb.NoSuchEntityException;
 import jakarta.ws.rs.*;
@@ -21,6 +22,8 @@ public class ProjectResource {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createNewProject(@HeaderParam("token") String token, DetailedProjectDto project){
+        System.out.println(project);
+        System.out.println(project.getProjectMembers());
         if (sessionService.isTokenValid(token)) {
             try {
                 projectService.createNewProject(project);
@@ -43,10 +46,10 @@ public class ProjectResource {
         else return Response.status(Response.Status.UNAUTHORIZED).build();
     }
 
-    @Path("/{id}")
+    @Path("/{projectID}/task/{taskID}")
     @DELETE//apagar tarefas
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response removeTaskFromProject(@HeaderParam("token") String token, @PathParam("id") int projectID, int taskID){
+    public Response removeTaskFromProject(@HeaderParam("token") String token, @PathParam("projectID") int projectID,@PathParam("taskID") int taskID){
         if (sessionService.isTokenValid(token)){
             try{
                 projectService.removeTaskFromProject(taskID, projectID);
@@ -57,6 +60,22 @@ public class ProjectResource {
             }
         }
         return Response.status(401).entity("invalid token").build();
+    }
+    @Path("/{projectID}")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response addTaskToProject(@HeaderParam("token") String token, @PathParam("projectID") int projectID, TaskDto task){
+        if (sessionService.isTokenValid(token)){
+            try{
+                projectService.addNewTaskProject(projectID, task);
+                return Response.status(200).entity("Task was sucessfully added to project").build();
+            }
+            catch (Exception e){
+                System.err.println("Project does not exist");
+                return Response.status(401).entity("Project does not exist").build();
+            }
+        }
+        return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid token").build();
     }
 
 }

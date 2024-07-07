@@ -26,9 +26,7 @@ import java.util.stream.Collectors;
     //retornar lista de materiais
 
     //função que recebe array entity backend e transforma em array dtos para mostrar no frontend
-    private List<MaterialDto> convertMaterialsEntityToDTO(List<MaterialEntity> materialsList){
-        List<MaterialDto> materialsDtoList =  new ArrayList<>();
-        for (MaterialEntity material: materialsList){
+    private MaterialDto convertMaterialsEntityToDTO(MaterialEntity material){
             MaterialDto materialDTO = new MaterialDto();
             materialDTO.setId(material.getId());
             materialDTO.setName(material.getName());
@@ -41,9 +39,8 @@ import java.util.stream.Collectors;
             materialDTO.setQuantity(material.getQuantity());
             materialDTO.setObservations(material.getObservations());
             //aqui falta depois o get project
-            materialsDtoList.add(materialDTO);
-        }
-        return materialsDtoList;
+            //materialsDtoList.add(materialDTO);
+            return materialDTO;
     }
     //transforma um material DTO em material entity
     private MaterialEntity convertMaterialDTOtoEntity(MaterialDto material){
@@ -72,10 +69,9 @@ import java.util.stream.Collectors;
 
 
     //retorna todos os materiais em DTO
-    public List<MaterialDto> getAllMaterials (){
-        return convertMaterialsEntityToDTO(materialDao.findAll());
-
-
+    public Set<MaterialDto> getAllMaterials (){
+        List<MaterialEntity> m = materialDao.findAll();
+        return m.stream().map(this::convertMaterialsEntityToDTO).collect(Collectors.toSet());
     }
     //adicionar novo material À DB
     @Transactional
@@ -86,12 +82,7 @@ import java.util.stream.Collectors;
             materialDao.remove(materialDao.findMaterialByID(id));
             materialDao.flush();
         }
-
-        //System.err.println("material does not exist");
-
     }
-
-
     private boolean materialNameIsValid(String name){
         return materialDao.findMaterialByName(name)!= null;
     }
@@ -100,8 +91,11 @@ import java.util.stream.Collectors;
     }
 
     //isto nao estara bem feito porque precisa de pre validações sobre projeto onde esta inserido e afins
-    public Set<MaterialEntity> returnProjectMaterials(Set<Integer> m){
-        return m.stream().map(this::getMaterialsByID).collect(Collectors.toSet());
+    public Set<MaterialEntity> listProjectMaterialsDtoToEntity(Set<MaterialDto> m){
+        return m.stream().map(materialDto -> materialDao.findMaterialByID(materialDto.getId())).collect(Collectors.toSet());
+    }
+    public Set<MaterialDto> listProjectMaterialEntityToDto(Set<MaterialEntity> m){
+        return m.stream().map(this ::convertMaterialsEntityToDTO).collect(Collectors.toSet());
     }
     private MaterialEntity getMaterialsByID(int id){
         try{

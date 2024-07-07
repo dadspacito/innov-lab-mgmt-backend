@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import entity.*;
 import enums.ProjectState;
+import org.hibernate.jdbc.Work;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,15 +25,14 @@ public class DetailedProjectDto {
     private LocalDateTime startDate;
     private LocalDateTime endDate;
     private ProjectState projectState;
-    private int projectManager;
+    private ProjectManagerDto projectManager;
     //este recebe a projectMembersDto
-    private Set<Integer> projectMembers;
-    private Set<Integer> projectInterests;
-    private Set<Integer> projectSkills;
-    private Set<Integer> projectMaterials;
-    private Set<Integer> projectTasks;
-    @JsonProperty("workplaceID")
-    private int workplaceID;
+    private Set<ProjectMemberDto> projectMembers;
+    private Set<InterestDto> projectInterests;
+    private Set<SkillDto> projectSkills;
+    private Set<MaterialDto> projectMaterials;
+    private Set<TaskDto> projectTasks;
+    private WorkplaceDto projectWorkplace;
 
     public DetailedProjectDto(){}
 
@@ -42,14 +42,6 @@ public class DetailedProjectDto {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public int getWorkplaceID() {
-        return workplaceID;
-    }
-
-    public void setWorkplaceID(int workplaceID) {
-        this.workplaceID = workplaceID;
     }
 
     public String getName() {
@@ -92,60 +84,60 @@ public class DetailedProjectDto {
         this.projectState = projectState;
     }
 
-    public int getProjectManager() {
+    public ProjectManagerDto getProjectManager() {
         return projectManager;
     }
 
-    public void setProjectManager(int projectManager) {
+    public void setProjectManager(ProjectManagerDto projectManager) {
         this.projectManager = projectManager;
     }
 
-    public Set<Integer> getProjectMembers() {
+    public Set<ProjectMemberDto> getProjectMembers() {
         return projectMembers;
     }
 
-    public void setProjectMembers(Set<Integer> projectMembers) {
+    public void setProjectMembers(Set<ProjectMemberDto> projectMembers) {
         this.projectMembers = projectMembers;
     }
 
-    public Set<Integer> getProjectInterests() {
+    public Set<InterestDto> getProjectInterests() {
         return projectInterests;
     }
 
-    public void setProjectInterests(Set<Integer> projectInterests) {
+    public void setProjectInterests(Set<InterestDto> projectInterests) {
         this.projectInterests = projectInterests;
     }
 
-    public Set<Integer> getProjectSkills() {
+    public Set<SkillDto> getProjectSkills() {
         return projectSkills;
     }
 
-    public void setProjectSkills(Set<Integer> projectSkills) {
+    public void setProjectSkills(Set<SkillDto> projectSkills) {
         this.projectSkills = projectSkills;
     }
 
-    public Set<Integer> getProjectMaterials() {
+    public Set<MaterialDto> getProjectMaterials() {
         return projectMaterials;
     }
 
-    public void setProjectMaterials(Set<Integer> projectMaterials) {
+    public void setProjectMaterials(Set<MaterialDto> projectMaterials) {
         this.projectMaterials = projectMaterials;
     }
 
-   public Set<Integer> getProjectTasks() {
+   public Set<TaskDto> getProjectTasks() {
         return projectTasks;
     }
 
-    public void setProjectTasks(Set<Integer> projectTasks) {
+    public void setProjectTasks(Set<TaskDto> projectTasks) {
         this.projectTasks = projectTasks;
     }
 
-    public int getWorkplace() {
-        return workplaceID;
+    public WorkplaceDto getProjectWorkplace() {
+        return projectWorkplace;
     }
 
-    public void setWorkplace(int workplace) {
-        this.workplaceID = workplace;
+    public void setProjectWorkplace(WorkplaceDto workplace) {
+        this.projectWorkplace = workplace;
     }
 
 }

@@ -6,11 +6,8 @@ import dao.UserDao;
 import dao.SystemVariableDao;
 import dao.WorkplaceDao;
 
-import dto.HeaderDto;
+import dto.*;
 
-import dto.ProjectMemberDto;
-import dto.SelectProjectMembersDto;
-import dto.UserDto;
 import entity.UserEntity;
 import enums.UserState;
 import jakarta.persistence.NoResultException;
@@ -21,10 +18,7 @@ import jakarta.ejb.Stateless;
 
 import java.lang.reflect.Array;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -36,6 +30,7 @@ public class UserService {
 
     @EJB
     private UserDao userDao;
+    @EJB private WorkplaceService workplaceService;
 
     @EJB
     private SystemVariableDao systemVariableDao;
@@ -126,7 +121,21 @@ public class UserService {
         return UserState.ACTIVE;
     }
 
-    // métodos privados, de classe
+    public ProjectMemberDto convertManagerToMember(ProjectManagerDto manager){
+        if (userIsValid(userDao.findUserById(manager.getId()))){
+            ProjectMemberDto member =  new ProjectMemberDto();
+            member.setName(manager.getName());
+            member.setId(manager.getId());
+            return member;
+        }
+        return null;
+    }
+    private UserEntity getUserEntityFromManager(ProjectManagerDto manager){
+        if (userIsValid(userDao.findUserById(manager.getId()))){
+            return userDao.findUserById(manager.getId());
+        }
+        return null;
+    }
 
 
 
@@ -194,11 +203,21 @@ public class UserService {
         }
         return null;
     }
+    public ProjectManagerDto convertUserEntityToProjectManager(UserEntity u){
+        if (userIsValid(u)){
+            ProjectManagerDto manager = new ProjectManagerDto();
+            manager.setId(u.getId());
+            manager.setName(u.getFirstName() + " " + u.getLastName());
+            manager.setManagerWorkplace(workplaceService.getWorkplaceDto(u.getWorkplace()));
+            return manager;
+        }
+        return null;
+    }
 
-    public UserEntity defineManager(int managerID){
+    public UserEntity defineManager(ProjectManagerDto manager){
         try{
-            if (userDao.findUserById(managerID)!= null){
-                return userDao.findUserById(managerID);
+            if (userDao.findUserById(manager.getId())!= null){
+                return userDao.findUserById(manager.getId());
             }
             return null;
         }
@@ -207,13 +226,23 @@ public class UserService {
         }
     }
     //metodo privado
-    public UserEntity getUserEntityFromProjectMember(int memberID){
-        return userDao.findUserById(memberID);
+    public UserEntity getUserEntityFromProjectMember(ProjectMemberDto member){
+        return userDao.findUserById(member.getId());
+    }
+    //mudar nome depois
+    public Set<UserEntity> transformIdIntoUserEntity(Set<Integer> membersIDs){
+        Set<UserEntity> members = new HashSet<>();
+        for (int i : membersIDs){
+            members.add(userDao.findUserById(i));
+        }
+        return members;
     }
     //transforma o set de id's em entidades de user
-    public Set<UserEntity> returnMembersEntity(Set<Integer> memberIDs){
-        return memberIDs.stream().map(this::getUserEntityFromProjectMember).collect(Collectors.toSet());
-
+    public Set<UserEntity> listMembersDtoToEntity(Set<ProjectMemberDto> member){
+        return member.stream().map(userDto -> userDao.findUserById(userDto.getId())).collect(Collectors.toSet());
+    }
+    public Set<ProjectMemberDto> listUserEntityToMemberDto(Set<UserEntity> user){
+        return user.stream().map(this :: ConvertUserEntityToProjectMembers).collect(Collectors.toSet());
     }
     // gerar token para email
 
@@ -223,6 +252,8 @@ public class UserService {
     private boolean userIsValid (UserEntity u){
         return userDao.findUserById(u.getId()) != null;
     }
+
+    //para que é que isto aqui está seu burro (estou a falar para mim)
     private SelectProjectMembersDto convertUserEntToMemberAvailable(UserEntity user){
         SelectProjectMembersDto member = new SelectProjectMembersDto();
         member.setId(user.getId());

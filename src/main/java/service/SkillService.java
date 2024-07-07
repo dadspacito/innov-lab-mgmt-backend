@@ -17,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -46,8 +47,13 @@ public class SkillService {
     }
 
     //método que retorna lista de DTO's e transforma em Set
-    public Set<SkillEntity> returnProjectSkills(Set<Integer> skillID){
-        return skillID.stream().map(this :: getSkillByID).collect(Collectors.toSet());
+    public Set<SkillEntity> listProjectSkillsDtoToEntity(Set<SkillDto> skillDtos) {
+        return skillDtos.stream()
+                .map(skillDto -> skillDao.findSkillByID(skillDto.getId()))
+                .collect(Collectors.toSet());
+    }
+    public Set<SkillDto> listProjectSkillEntityToDto(Set<SkillEntity> skill){
+        return skill.stream().map(this :: mapSkillEntityToDto).collect(Collectors.toSet());
     }
     //delete skill
     @Transactional
@@ -114,7 +120,8 @@ public class SkillService {
     // mapper skill dto entidade
 
     //método tem de ser privado
-
+    //método para criação de um novo skill, que depois faz map
+    //atenção aos null pointers exception
     public SkillEntity mapSkillDtoToEntity(SkillDto skillDto) {
         SkillEntity skillEntity = new SkillEntity();
         skillEntity.setId(skillDto.getId());

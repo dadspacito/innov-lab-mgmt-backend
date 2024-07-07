@@ -4,7 +4,9 @@ import dao.ProjectDao;
 import dao.TaskDao;
 import dto.BasicProjectDto;
 import dto.DetailedProjectDto;
+import dto.MaterialDto;
 import dto.TaskDto;
+import entity.MaterialEntity;
 import entity.ProjectEntity;
 import entity.TaskEntity;
 import entity.WorkplaceEntity;
@@ -18,6 +20,8 @@ import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Stateless
 public class ProjectService {
@@ -55,17 +59,14 @@ public class ProjectService {
     //adicionar uma nova task ao projeto
     @Transactional
     public void addNewTaskProject(int projectID, TaskDto task){
+        System.out.println(task);
         if (projectIsValid(projectID)){
-            //retornar o projeto pelo id
             ProjectEntity pEnt = projectDao.getProjectByID(projectID);
-            //task entity
+            task.setProjectID(projectID);
             TaskEntity tEnt = taskService.convertTaskDtoToEntity(task);
-            //fazer persist da task
             taskDao.persist(tEnt);
             taskDao.flush();
-            //adicionar a task ao projeto
             pEnt.getTasks().add(tEnt);
-            //fazer merge ao projeto
             projectDao.merge(pEnt);
             projectDao.flush();
         }
@@ -74,16 +75,18 @@ public class ProjectService {
     public void removeTaskFromProject(int taskID, int projectID){
         if (projectIsValid(projectID)){
             //tambem tem de remover a task do array dos projetos
-            ProjectEntity pEnt = projectDao.getProjectByID(projectID);
-            pEnt.getTasks().remove(taskService.getTaskByID(taskID));
-            //taskDao.remove(taskDao.returnTaskByID(taskID));
+            //ProjectEntity pEnt = projectDao.getProjectByID(projectID);
+            //pEnt.getTasks().remove(taskService.getTaskByID(taskID));
+            taskDao.remove(taskDao.returnTaskByID(taskID));
             taskDao.flush();
 
         }
     }
-    public List<ProjectEntity> getProjects(){
+    public Set<DetailedProjectDto> getProjects(){
         try{
-           return projectDao.getAllProjectsOrdered();
+            List<ProjectEntity> p = projectDao.getAllProjectsOrdered();
+            System.out.println(p);
+           return p.stream().map(this::convertProjectEntityTodetailedProjectDto).collect(Collectors.toSet());
         }
         catch (NoResultException e){
             System.err.println("No projects were found");
@@ -98,13 +101,36 @@ public class ProjectService {
         pEnt.setEndDate(p.getEndDate());
         pEnt.setProjectState(p.getProjectState());
         pEnt.setManager((userService.defineManager(p.getProjectManager())));
-        pEnt.setProjectWorkplace(workplaceService.getWorkplaceByID(p.getWorkplace()));
-        pEnt.getInterests().addAll(interestService.projectInterests(p.getProjectInterests()));
-        pEnt.getSkills().addAll(skillService.returnProjectSkills(p.getProjectSkills()));
-        pEnt.getMaterials().addAll(materialService.returnProjectMaterials(p.getProjectMaterials()));
-        pEnt.setProjectMembers(userService.returnMembersEntity(p.getProjectMembers()));
+        pEnt.setProjectWorkplace(workplaceService.getWorkplaceByID(p.getProjectWorkplace().getId()));
+        pEnt.getInterests().addAll(interestService.listProjectInterestsDtoToEntity(p.getProjectInterests()));
+        pEnt.getSkills().addAll(skillService.listProjectSkillsDtoToEntity(p.getProjectSkills()));
+        Set<MaterialEntity> materialEntities = materialService.listProjectMaterialsDtoToEntity(p.getProjectMaterials());
+        for (MaterialEntity material : materialEntities){
+            material.setProject(pEnt);
+            pEnt.getMaterials().add(material);
+        }
+        pEnt.getProjectMembers().addAll(userService.listMembersDtoToEntity(p.getProjectMembers()));
+        //pEnt.getTasks().addAll(taskService.returnProjectTasksEntity(p.getProjectTasks()));
         return pEnt;
     }
+    private DetailedProjectDto convertProjectEntityTodetailedProjectDto(ProjectEntity p){
+        DetailedProjectDto detailedProjectDto =  new DetailedProjectDto();
+        detailedProjectDto.setId(p.getId());
+        detailedProjectDto.setName(p.getName());
+        detailedProjectDto.setDescription(p.getDescription());
+        detailedProjectDto.setStartDate(p.getStartDate());
+        detailedProjectDto.setEndDate(p.getEndDate());
+        detailedProjectDto.setProjectWorkplace(workplaceService.getWorkplaceDto(p.getProjectWorkplace()));
+        detailedProjectDto.setProjectState(p.getProjectState());
+        detailedProjectDto.setProjectManager(userService.convertUserEntityToProjectManager(p.getManager()));
+        detailedProjectDto.setProjectInterests(interestService.listProjectEntityToDto(p.getInterests()));
+        detailedProjectDto.setProjectMembers(userService.listUserEntityToMemberDto(p.getProjectMembers()));
+        detailedProjectDto.setProjectMaterials(materialService.listProjectMaterialEntityToDto(p.getMaterials()));
+        detailedProjectDto.setProjectSkills(skillService.listProjectSkillEntityToDto(p.getSkills()));
+        detailedProjectDto.setProjectTasks(taskService.returnProjectTasksDto(p.getTasks()));
+        return detailedProjectDto;
+    }
+    //private BasicProjectDto basicProjectDto(ProjectEntity p){}
     //validação de existencia de projeto
     private boolean projectIsValid(int projectID){
         return projectDao.getProjectByID(projectID) != null;

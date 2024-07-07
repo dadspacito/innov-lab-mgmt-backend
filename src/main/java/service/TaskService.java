@@ -38,6 +38,7 @@ public class TaskService {
     private TaskDao taskDao;
     @EJB private UserDao userDao;
     @EJB private ProjectDao projectDao;
+    @EJB private UserService userService;
     private static final Logger LOGGER = LogManager.getLogger(TaskService.class);
 
     //create new task
@@ -45,10 +46,10 @@ public class TaskService {
     @Transactional
     public boolean createNewTask(TaskDto task){
         //falta adicionar a parte da verificação se o projeto não é null
-        if (isValidUser(task.getOwnerID())){
+        if (isValidUser(task.getOwner().getId())){
             taskDao.persist(convertTaskDtoToEntity(task));
             taskDao.flush();
-            LOGGER.info("Task was created " + userDao.findUserById(task.getOwnerID()).getEmail() + "at " +  LocalDateTime.now());
+            LOGGER.info("Task was created " + userDao.findUserById(task.getOwner().getId()).getEmail() + "at " +  LocalDateTime.now());
             return true;
         }
         else
@@ -61,13 +62,13 @@ public class TaskService {
 
     @Transactional
     public boolean deleteTask(TaskDto task){
-        if (isValidUser(task.getOwnerID())){
+        if (isValidUser(task.getOwner().getId())){
             taskDao.remove(convertTaskDtoToEntity(task));
             taskDao.flush();
-            LOGGER.info("task was sucessfully removed by " +userDao.findUserById(task.getOwnerID()).getEmail() + "at" + LocalDateTime.now() );
+            LOGGER.info("task was sucessfully removed by " +userDao.findUserById(task.getOwner().getId()).getEmail() + "at" + LocalDateTime.now() );
             return true;
         }
-        LOGGER.error("There was an error deleting task " + userDao.findUserById(task.getOwnerID()).getEmail(),LocalDateTime.now()  );
+        LOGGER.error("There was an error deleting task " + userDao.findUserById(task.getOwner().getId()).getEmail(),LocalDateTime.now()  );
         return false;
     }
     //@Transactional
@@ -138,20 +139,22 @@ public class TaskService {
         taskDto.setState(taskEnt.getState());
         taskDto.setStartDate(taskEnt.getStartDate());
         taskDto.setEndDate(taskEnt.getEndDate());
-        taskDto.setOwnerID(taskEnt.getOwner().getId());
-        //taskDto.setProjectID();
+        taskDto.setOwner(userService.ConvertUserEntityToProjectMembers(userDao.findUserById(taskEnt.getOwner().getId())));
+        taskDto.setProjectID(taskEnt.getProject().getId());
         return taskDto;
     }
     //não é preciso associar aqui ao projeto, associa-se na task service
     public TaskEntity convertTaskDtoToEntity(TaskDto taskDto){
         TaskEntity taskEnt =  new TaskEntity();
+
         taskEnt.setActive(true);
         taskEnt.setName(taskDto.getName());
         taskEnt.setDescription(taskDto.getDescription());
         taskEnt.setStartDate(taskDto.getStartDate());
         taskEnt.setEndDate(taskDto.getEndDate());
-        taskEnt.setOwner(userDao.findUserById(taskDto.getOwnerID()));
+        taskEnt.setOwner(userDao.findUserById(taskDto.getOwner().getId()));
         taskEnt.setState(taskDto.getState());
+        taskEnt.setProject(projectDao.getProjectByID(taskDto.getProjectID()));
         return taskEnt;
     };
     //esta função é boa pratica construida desta maneira?
@@ -177,12 +180,17 @@ public class TaskService {
         presentationTask.setDescription("Presentation of the project to the company");
         presentationTask.setStartDate(p.getEndDate().minusDays(1));
         presentationTask.setEndDate(p.getEndDate());
-        presentationTask.setOwnerID(p.getProjectManager());
+        //aqui tem de ser um dto de project member
+        presentationTask.setOwner(userService.convertManagerToMember(p.getProjectManager()));
         presentationTask.setState(TaskState.PLANNED);
         return presentationTask;
     };
-    public Set<TaskEntity> returnProjectTasks(Set<Integer> t){
-        return t.stream().map(this::getTaskByID).collect(Collectors.toSet());
+    //retorna as tasks para a conversão de Dto em entidade
+    public Set<TaskEntity> returnProjectTasksEntity(Set<TaskDto> t){
+        return t.stream().map(this::convertTaskDtoToEntity).collect(Collectors.toSet());
+    }
+    public Set<TaskDto> returnProjectTasksDto(Set<TaskEntity> t){
+        return t.stream().map(this :: convertTaskEntityToDto).collect(Collectors.toSet());
     }
     public TaskEntity getTaskByID(int id){
         try{

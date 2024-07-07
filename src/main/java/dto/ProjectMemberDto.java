@@ -9,15 +9,14 @@ import java.time.LocalDateTime;
  */
 public class ProjectMemberDto {
     int id;
-    private String firstName;
-    private String lastName;
+    private String name;
+    ;
     private String nickname;
 
     private LocalDateTime projectEntry;
     //caso seja preciso
     //private LocalDateTime projectLeave;
-    private boolean isManager = true;
-    private String projectRole = "manager";
+    private String projectRole;
 
 
     /**
@@ -29,12 +28,10 @@ public class ProjectMemberDto {
 
     public ProjectMemberDto(int id, String firstName, String lastName, String nickname, LocalDateTime projectEntry) {
         this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
+        this.name = firstName + " " + lastName;
         this.nickname = nickname;
         this.projectEntry = projectEntry;
-        //this.isManager = isManager;
-        //this.projectRole = projectRole;
+        this.projectRole = projectRole;
     }
 
     public int getId() {
@@ -45,21 +42,14 @@ public class ProjectMemberDto {
         this.id = id;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getName() {
+        return name;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
 
     public String getNickname() {
         return nickname;
@@ -75,14 +65,6 @@ public class ProjectMemberDto {
 
     public void setProjectEntry(LocalDateTime projectEntry) {
         this.projectEntry = projectEntry;
-    }
-
-    public boolean isManager() {
-        return isManager;
-    }
-
-    public void setManager(boolean manager) {
-        isManager = manager;
     }
 
     public String getProjectRole() {
