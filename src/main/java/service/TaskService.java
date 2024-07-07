@@ -22,14 +22,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 /**
- * o que é que o task service precisa?
- * retornar tarefas por user (retorna todas as tarefas de um user)
- * retornar tarefas por projeto (retorna todas as tarefas de um projeto)
- * retornar tarefas por projeto e user(retorna todas as tarefas de um user dentro de um projeto)
- * falta projeto
- *aqui cria a task inicial
+ * Service class for managing tasks within projects.
+ * <p>
+ * This class provides methods for retrieving, creating, and converting tasks between DTOs (Data Transfer Objects) and entities.
+ * It interacts with DAOs (Data Access Objects) to perform CRUD operations on tasks and handles task-related business logic.
+ * </p>
+ *
+ * @author Your Name
+ * @version 1.0
  */
 
 @Stateless
@@ -41,47 +42,14 @@ public class TaskService {
     @EJB private UserService userService;
     private static final Logger LOGGER = LogManager.getLogger(TaskService.class);
 
-    //create new task
-    //aqui tem de verificar se user não é null e se projeto existe
-    @Transactional
-    public boolean createNewTask(TaskDto task){
-        //falta adicionar a parte da verificação se o projeto não é null
-        if (isValidUser(task.getOwner().getId())){
-            taskDao.persist(convertTaskDtoToEntity(task));
-            taskDao.flush();
-            LOGGER.info("Task was created " + userDao.findUserById(task.getOwner().getId()).getEmail() + "at " +  LocalDateTime.now());
-            return true;
-        }
-        else
-        {
-            LOGGER.error("task was no created " + LocalDateTime.now());
-            return false;
-        }
-    }
-    //delete task
-
-    @Transactional
-    public boolean deleteTask(TaskDto task){
-        if (isValidUser(task.getOwner().getId())){
-            taskDao.remove(convertTaskDtoToEntity(task));
-            taskDao.flush();
-            LOGGER.info("task was sucessfully removed by " +userDao.findUserById(task.getOwner().getId()).getEmail() + "at" + LocalDateTime.now() );
-            return true;
-        }
-        LOGGER.error("There was an error deleting task " + userDao.findUserById(task.getOwner().getId()).getEmail(),LocalDateTime.now()  );
-        return false;
-    }
-    //@Transactional
-    //public void addTaskToProject()
 
     /**
-     * retornos:
-     * task by id;
-     * tasks by user;
-     * tasks by project;
-     * tasks by project and owner
+     * Retrieves a task DTO by its associated entity.
+     *
+     * @param t The {@link TaskEntity} object representing the task to retrieve.
+     *          This parameter should not be {@code null}.
+     * @return The {@link TaskDto} representing the retrieved task, or {@code null} if the task does not exist or the user is invalid.
      */
-    //vai buscar uma task por id
     public TaskDto getTaskByID(TaskEntity t){
         if (isValidUser(t.getId())){
             taskDao.returnTaskByID(t.getId());
@@ -92,12 +60,24 @@ public class TaskService {
         LOGGER.error("Error fetching task with id" + t.getOwner().getEmail(), LocalDateTime.now());
         return null;
     }
+    /**
+     * Retrieves a set of task entities from a list of task DTOs.
+     *
+     * @param t The list of {@link TaskDto} objects representing tasks to convert.
+     *          This parameter should not be {@code null}.
+     * @return A set of {@link TaskEntity} objects converted from the provided task DTOs.
+     */
     public Set<TaskEntity> getTasksFromProject(List<TaskDto> t){
         return t.stream().map(this ::convertTaskDtoToEntity).collect(Collectors.toSet());
     }
-
-
-    //é preciso ter acesso aos members do projeto para definir o id que entra
+    /**
+     * Retrieves a list of task DTOs associated with a specific user.
+     *
+     * @param u The {@link UserEntity} object representing the user whose tasks to retrieve.
+     *          This parameter should not be {@code null}.
+     * @return An {@link ArrayList} of {@link TaskDto} objects representing tasks owned by the specified user,
+     *         or {@code null} if the user does not exist or has no tasks.
+     */
     public ArrayList<TaskDto> taskByOwner(UserEntity u){
         if(isValidUser(u.getId())){
             try {
@@ -116,20 +96,12 @@ public class TaskService {
         }
         return null;
     }
-    //aqui faz se a verificação de que o projeto é válido
-    //public ArrayList<TaskDto> getTasksByProjectAndState()
     /**
-     * faltam tasks por owner e project
+     * Converts a task entity to a task DTO.
      *
-     */
-
-
-    /**
-     * serviços privados de validação
-     * verificação se user pertence a projeto
-     * verify user
-     * verify projects
-     * conversão dao-dto e viceversa
+     * @param taskEnt The {@link TaskEntity} object representing the task entity to convert.
+     *                This parameter should not be {@code null}.
+     * @return The {@link TaskDto} object representing the converted task DTO.
      */
     private TaskDto convertTaskEntityToDto(TaskEntity taskEnt){
         TaskDto taskDto = new TaskDto();
@@ -143,7 +115,14 @@ public class TaskService {
         taskDto.setProjectID(taskEnt.getProject().getId());
         return taskDto;
     }
-    //não é preciso associar aqui ao projeto, associa-se na task service
+
+    /**
+     * Converts a task DTO to a task entity.
+     *
+     * @param taskDto The {@link TaskDto} object representing the task DTO to convert.
+     *                This parameter should not be {@code null}.
+     * @return The {@link TaskEntity} object representing the converted task entity.
+     */
     public TaskEntity convertTaskDtoToEntity(TaskDto taskDto){
         TaskEntity taskEnt =  new TaskEntity();
 
@@ -157,22 +136,22 @@ public class TaskService {
         taskEnt.setProject(projectDao.getProjectByID(taskDto.getProjectID()));
         return taskEnt;
     };
-    //esta função é boa pratica construida desta maneira?
-    //alterar esta função para ver se este user está associado ao projeto.
-    //corre uma lista dos users no projeto e verificar se este id pertence a esta lista
-    //devia ser is user project member
+    /**
+     * Checks if a user with the specified owner ID exists.
+     *
+     * @param ownerID The ID of the user to check.
+     * @return {@code true} if the user exists, {@code false} otherwise.
+     */
     private boolean isValidUser(int ownerID){
         return userDao.findUserById(ownerID) != null;
-
     }
-    //função valid project
-
-
-    //função que retorna a task inicial cujo start date é um dia antes do fim do projeto e end date na data de fim do projeto
-    //implica que end date no projeto nao pode ser null
-    //recebe um projeto
-
-    //public TaskEntity createPresentationTask(){};
+    /**
+     * Creates a presentation task for a detailed project DTO.
+     *
+     * @param p The {@link DetailedProjectDto} object representing the detailed project for which to create the presentation task.
+     *          This parameter should not be {@code null}.
+     * @return The {@link TaskDto} object representing the created presentation task.
+     */
     public TaskDto createPresentationTask(DetailedProjectDto p){
         TaskDto presentationTask = new TaskDto();
         presentationTask.setProjectID(p.getId());
@@ -185,13 +164,32 @@ public class TaskService {
         presentationTask.setState(TaskState.PLANNED);
         return presentationTask;
     };
-    //retorna as tasks para a conversão de Dto em entidade
+    /**
+     * Converts a set of task DTOs to a set of task entities.
+     *
+     * @param t The set of {@link TaskDto} objects representing task DTOs to convert.
+     *          This parameter should not be {@code null}.
+     * @return A set of {@link TaskEntity} objects converted from the provided task DTOs.
+     */
     public Set<TaskEntity> returnProjectTasksEntity(Set<TaskDto> t){
         return t.stream().map(this::convertTaskDtoToEntity).collect(Collectors.toSet());
     }
+    /**
+     * Converts a set of task entities to a set of task DTOs.
+     *
+     * @param t The set of {@link TaskEntity} objects representing task entities to convert.
+     *          This parameter should not be {@code null}.
+     * @return A set of {@link TaskDto} objects converted from the provided task entities.
+     */
     public Set<TaskDto> returnProjectTasksDto(Set<TaskEntity> t){
         return t.stream().map(this :: convertTaskEntityToDto).collect(Collectors.toSet());
     }
+    /**
+     * Retrieves a task entity by its ID.
+     *
+     * @param id The ID of the task to retrieve.
+     * @return The {@link TaskEntity} object representing the retrieved task, or {@code null} if the task does not exist.
+     */
     public TaskEntity getTaskByID(int id){
         try{
             return taskDao.returnTaskByID(id);
@@ -200,12 +198,5 @@ public class TaskService {
             System.err.println("that task does not exist");
             return null;
         }
-
     }
-
-
-
-
-
-
 }
