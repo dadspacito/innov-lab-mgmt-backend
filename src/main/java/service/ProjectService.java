@@ -2,6 +2,7 @@ package service;
 
 import dao.ProjectDao;
 import dao.TaskDao;
+import dao.UserDao;
 import dto.BasicProjectDto;
 import dto.DetailedProjectDto;
 import dto.MaterialDto;
@@ -67,6 +68,11 @@ public class ProjectService {
      * EJB (Enterprise JavaBean) for accessing workplace-related services.
      */
     @EJB WorkplaceService workplaceService;
+    /**
+     * EJB (Enterprise JavaBean) for accessing user data in the database
+     */
+    @EJB
+    private UserDao userDao;
 
 
     /**
@@ -189,6 +195,31 @@ public class ProjectService {
 
         }
     }
+    @Transactional
+    public void removeProjectMembers(int projectID, int memberID){
+        /**
+         * vai ver se o projeto existe
+         * vai ver se nos membros do projeto existe algum membro com aquele id
+         * remove o user do set do projeto
+         * faz merge ao projeto
+         */
+        if (projectIsValid(projectID)){
+            ProjectEntity p = projectDao.getProjectByID(projectID);
+            if (p.getProjectMembers().contains(userDao.findUserById(memberID))){
+                System.out.println(p.getProjectMembers().contains(userDao.findUserById(memberID)));
+                p.getProjectMembers().remove(userDao.findUserById(memberID));
+                projectDao.merge(p);
+            }
+        }
+    }
+    @Transactional
+    public void addProjectMember(int projectID, int memberID){
+        if (projectIsValid(projectID)){
+            ProjectEntity p = projectDao.getProjectByID(projectID);
+                p.getProjectMembers().add(userDao.findUserById(memberID));
+                projectDao.merge(p);
+        }
+    }
     /**
      * Retrieves all projects as a set of {@link DetailedProjectDto} objects.
      * <p>
@@ -302,5 +333,12 @@ public class ProjectService {
      */
     private boolean projectIsValid(int projectID){
         return projectDao.getProjectByID(projectID) != null;
+    }
+    public boolean projectIsFull(int projectID){
+        ProjectEntity p = projectDao.getProjectByID(projectID);
+        if (p.getProjectMembers().size()<4){
+            return false;
+        }
+        else return true;
     }
 }

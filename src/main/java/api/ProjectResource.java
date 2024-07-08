@@ -61,7 +61,7 @@ public class ProjectResource {
         }
         return Response.status(401).entity("invalid token").build();
     }
-    @Path("/{projectID}")
+    @Path("/{projectID}/task/add")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Response addTaskToProject(@HeaderParam("token") String token, @PathParam("projectID") int projectID, TaskDto task){
@@ -76,6 +76,33 @@ public class ProjectResource {
             }
         }
         return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid token").build();
+    }
+    //adicionar membros
+    //teoricamente tem de ser convidar membros e não adicionar diretamente
+    @Path("/{projectID}/members/{userID}")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response addMemberToProject(@HeaderParam("token") String token, @PathParam("projectID") int projectID, @PathParam("userID") int userID){
+        if (sessionService.isTokenValid(token)){
+            if (!projectService.projectIsFull(projectID)) {
+                projectService.addProjectMember(projectID, userID);
+                return Response.status(200).entity("Member added to the project").build();
+            }
+            else return Response.status(400).entity("Project is already full").build();
+        }
+        else return Response.status(401).entity("Token is invalid").build();
+    }
+
+    //remover membro de projeto
+    @Path("/{projectID}/members/{memberID}")
+    @DELETE
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response removeMemberFromProject(@HeaderParam("token") String token, @PathParam("projectID") int projectID, @PathParam("memberID") int memberID){
+        if (sessionService.isTokenValid(token)){
+            projectService.removeProjectMembers(projectID, memberID);
+            return Response.status(200).entity("Member was removed from project").build();
+        }
+        else return Response.status(400).entity("User was not found").build();
     }
 
 }
