@@ -109,23 +109,14 @@ public class UserResource {
         }
         return Response.status(Response.Status.UNAUTHORIZED).entity("invalid token").build();
     }
-
-
-
-
-
-
-    // verify (confirm) account
-
-
-    //
-
-    // PATCH /activations/{emailtoken}: Verificação de conta.
-
-
-
-
-
+    @Path("/profile/{userID}")
+    @GET@Produces(MediaType.APPLICATION_JSON)
+    public Response getUserProfile(@HeaderParam("token") String token, @PathParam("userID") int userID){
+        if (sessionService.isTokenValid(token)){
+            return Response.status(200).entity(userService.getUserProfileDto(userID)).build();
+        }
+        return Response.status(400).entity("Token not valid").build();
+    }
 
 }
 

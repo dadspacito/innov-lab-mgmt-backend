@@ -150,7 +150,6 @@ public class ProjectService {
      */
     @Transactional
     public void addNewTaskProject(int projectID, TaskDto task){
-        System.out.println(task);
         if (projectIsValid(projectID)){
             ProjectEntity pEnt = projectDao.getProjectByID(projectID);
             task.setProjectID(projectID);
@@ -206,7 +205,6 @@ public class ProjectService {
         if (projectIsValid(projectID)){
             ProjectEntity p = projectDao.getProjectByID(projectID);
             if (p.getProjectMembers().contains(userDao.findUserById(memberID))){
-                System.out.println(p.getProjectMembers().contains(userDao.findUserById(memberID)));
                 p.getProjectMembers().remove(userDao.findUserById(memberID));
                 projectDao.merge(p);
             }
@@ -233,17 +231,23 @@ public class ProjectService {
      * @see ProjectEntity
      * @see DetailedProjectDto
      */
-    public Set<DetailedProjectDto> getProjects(){
-        try{
-            List<ProjectEntity> p = projectDao.getAllProjectsOrdered();
-            System.out.println(p);
-           return p.stream().map(this::convertProjectEntityTodetailedProjectDto).collect(Collectors.toSet());
-        }
-        catch (NoResultException e){
-            System.err.println("No projects were found");
-            return null;
-        }
+    public DetailedProjectDto getDetailedProject(int projectID) {
+       if (projectIsValid(projectID)){
+           return convertProjectEntityTodetailedProjectDto(projectDao.getProjectByID(projectID));
+       }
+        System.err.println("project does not exist");
+       return null;
     }
+        public Set<BasicProjectDto> getBasicProjects() {
+            try{
+                Set<ProjectEntity> p = projectDao.getAllProjectsOrdered();
+                return p.stream().map(this::convertProjectEntityToBasicProjectDto).collect(Collectors.toSet());
+            }
+            catch (NoResultException e){
+                System.err.println("No projects were found");
+                return null;
+            }
+        }
     /**
      * Converts a {@link DetailedProjectDto} to a {@link ProjectEntity}.
      * <p>
@@ -279,7 +283,6 @@ public class ProjectService {
             pEnt.getMaterials().add(material);
         }
         pEnt.getProjectMembers().addAll(userService.listMembersDtoToEntity(p.getProjectMembers()));
-        //pEnt.getTasks().addAll(taskService.returnProjectTasksEntity(p.getProjectTasks()));
         return pEnt;
     }
     /**
@@ -336,9 +339,34 @@ public class ProjectService {
     }
     public boolean projectIsFull(int projectID){
         ProjectEntity p = projectDao.getProjectByID(projectID);
-        if (p.getProjectMembers().size()<4){
-            return false;
-        }
-        else return true;
+        return p.getProjectMembers().size() >= 4;
     }
+    /**
+     * invite users to projects
+     * criar uma set list nos users
+     * é preciso uma set list nos projectos
+     *
+     */
+    /**
+     * tem que receber a query
+     * @param p
+     * @return
+     */
+    public Set<BasicProjectDto> listProjectEntityToBasicProject(Set<ProjectEntity> p){
+        //isto aqui tem de ser uma query do dao em que vai buscar os projetos que pertencem ao id dele
+        return p.stream().map(this::convertProjectEntityToBasicProjectDto).collect(Collectors.toSet());
+    }
+
+    //isto é para o carrosel
+    private BasicProjectDto convertProjectEntityToBasicProjectDto(ProjectEntity p){
+        BasicProjectDto basicProject =  new BasicProjectDto();
+        basicProject.setId(p.getId());
+        basicProject.setName(p.getName());
+        basicProject.setDescription(p.getDescription());
+        basicProject.setProjectState(p.getProjectState());
+        basicProject.setProjectSkills(skillService.listProjectSkillEntityToDto(p.getSkills()));
+        basicProject.setProjectInterests(interestService.listProjectEntityToDto(p.getInterests()));
+        return basicProject;
+    }
+
 }

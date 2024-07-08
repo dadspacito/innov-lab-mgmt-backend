@@ -36,7 +36,7 @@ public class ProjectResource {
         }
         return Response.status(Response.Status.UNAUTHORIZED).entity("invalid token").build();
     }
-    @GET//retornar todos os projetos
+/*    @GET//retornar todos os projetos
     @Produces(MediaType.APPLICATION_JSON)
     public Response getProjects(@HeaderParam("token") String token){
         if (sessionService.isTokenValid(token)){
@@ -44,7 +44,7 @@ public class ProjectResource {
             return Response.status(Response.Status.OK).entity(projectService.getProjects()).build();
         }
         else return Response.status(Response.Status.UNAUTHORIZED).build();
-    }
+    }*/
 
     @Path("/{projectID}/task/{taskID}")
     @DELETE//apagar tarefas
@@ -105,4 +105,20 @@ public class ProjectResource {
         else return Response.status(400).entity("User was not found").build();
     }
 
+    //este método devolve todos os projetos que user e nao users podem ver
+    @Path("/basicProject")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getAllBasicProjects(){
+        return Response.status(200).entity(projectService.getBasicProjects()).build();
+    }
+    @Path("/detailedProject/{projectID}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getDetailedProject(@HeaderParam("token") String token, @PathParam("projectID") int projectID){
+        if (sessionService.isTokenValid(token)){
+            return Response.status(200).entity(projectService.getDetailedProject(projectID)).build();
+        }
+        return Response.status(400).entity("invalid token").build();
+    }
 }

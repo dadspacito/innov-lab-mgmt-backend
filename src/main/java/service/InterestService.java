@@ -125,12 +125,4 @@ public class InterestService {
             return null;
         }
     }
-
-
-    // mapper interesse dto entidade
-
-    //retornar interesses do projeto
-
-
-
 }

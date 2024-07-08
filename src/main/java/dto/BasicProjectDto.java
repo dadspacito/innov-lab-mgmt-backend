@@ -5,6 +5,7 @@ import entity.SkillEntity;
 import enums.ProjectState;
 
 import java.util.List;
+import java.util.Set;
 
 public class BasicProjectDto {
     /**
@@ -13,23 +14,16 @@ public class BasicProjectDto {
      * detalhes
      *interesses e skills em forma de keywords? ou poe se so interesses e skills
      */
+    private int id;
 
     private String name;
     private String description;
-    private List<InterestDto> projectInterests;
-    private List<SkillDto> projectSkills;
+    private Set<InterestDto> projectInterests;
+    private Set<SkillDto> projectSkills;
     private ProjectState projectState;
 
 
     public BasicProjectDto(){}
-    public BasicProjectDto(String name, String description, List<InterestDto> projectInterests, List<SkillDto> projectSkills,
-                           ProjectState projectState){
-        this.name = name;
-        this.description = description;
-        this.projectInterests = projectInterests;
-        this.projectSkills = projectSkills;
-        this.projectState = projectState;
-    }
 
     public String getName() {
         return name;
@@ -47,19 +41,19 @@ public class BasicProjectDto {
         this.description = description;
     }
 
-    public List<InterestDto> getProjectInterests() {
+    public Set<InterestDto> getProjectInterests() {
         return projectInterests;
     }
 
-    public void setProjectInterests(List<InterestDto> interests) {
+    public void setProjectInterests(Set<InterestDto> interests) {
         this.projectInterests = interests;
     }
 
-    public List<SkillDto> getProjectSkills() {
+    public Set<SkillDto> getProjectSkills() {
         return projectSkills;
     }
 
-    public void setProjectSkills(List<SkillDto> skills) {
+    public void setProjectSkills(Set<SkillDto> skills) {
         this.projectSkills = skills;
     }
 
@@ -69,5 +63,13 @@ public class BasicProjectDto {
 
     public void setProjectState(ProjectState projectState) {
         this.projectState = projectState;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

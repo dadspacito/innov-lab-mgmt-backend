@@ -4,7 +4,11 @@ import entity.*;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.NoResultException;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 @Stateless
 public class ProjectDao extends AbstractDao<ProjectEntity>{
     private static final long serialVersionUID = 1L;
@@ -72,12 +76,13 @@ public class ProjectDao extends AbstractDao<ProjectEntity>{
             return null;
         }
     }
-    public List<ProjectEntity> getAllProjectsOrdered(){
+    public Set<ProjectEntity> getAllProjectsOrdered(){
         try{
-            return em.createNamedQuery("Project.getAll", ProjectEntity.class).getResultList();
+            List<ProjectEntity> projects = em.createNamedQuery("Project.getAll", ProjectEntity.class).getResultList();
+            return new HashSet<>(projects);
         }
         catch(NoResultException e){
-            return null;
+            return Collections.emptySet();
         }
     }
 

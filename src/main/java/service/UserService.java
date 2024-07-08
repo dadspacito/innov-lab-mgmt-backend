@@ -8,9 +8,11 @@ import dao.WorkplaceDao;
 
 import dto.*;
 
+import entity.ProjectEntity;
 import entity.UserEntity;
 import enums.UserState;
 import jakarta.persistence.NoResultException;
+import jakarta.transaction.Transactional;
 import org.mindrot.jbcrypt.BCrypt;
 import util.EmailSender;
 import jakarta.ejb.EJB;
@@ -23,6 +25,11 @@ import java.util.stream.Collectors;
 
 /**
  * faltam funções de conversão de user entity em dto
+ * falta mudar perfis para privados/publicos
+ * falta adicionar ou remover interesses e skills de users;
+ * falta criar uma lista de convites que os users tem quando se convidam para projeto
+ *  -convite tem de ter um id para quando o user aceita poder entrar no projecto especifico
+ *
  */
 
 @Stateless
@@ -38,12 +45,14 @@ public class UserService {
     @EJB
     private WorkplaceDao workplaceDao;
     @EJB private SessionTokenDao sessionTokenDao;
+    @EJB private ProjectService projectService;
 
 // função que vai adicionar user
     // recebe user dto
     // DTO vai ser válido quando chega aqui
     // incluir a validação das entidades associadas. Se workplace não existir, retornar NOT_FOUND
 
+    @Transactional
     public UserState registerUser(UserDto userDto) {
         if (userDao.findUserByEmail(userDto.getEmail()) != null) {
             return UserState.ALREADY_EXISTS;
@@ -97,13 +106,6 @@ public class UserService {
         List<UserEntity> userEntList = userDao.findAll();
         return userEntList.stream().map(this::convertUserEntToMemberAvailable).collect(Collectors.toList());
     }
-    //get specific user para profile page
-
-
-
-    //get user list (all users) - for admin
-
-
 
     public UserState checkUserState (String email) {
 
@@ -262,7 +264,33 @@ public class UserService {
         member.setEmail(user.getEmail());
         return member;
     }
-
+    private UserProfileDto convertUserEntityToProfileDto(UserEntity u){
+        if (userDao.findUserById(u.getId()) != null){
+            UserProfileDto userProfile = new UserProfileDto();
+            userProfile.setId(u.getId());
+            userProfile.setFirstName(u.getFirstName());
+            userProfile.setLastName(u.getLastName());
+            userProfile.setNickname(u.getNickname());
+            userProfile.setEmail(u.getEmail());
+            userProfile.setBio(u.getBio());
+            userProfile.setAvatar(u.getAvatar());
+            userProfile.setPublicProfile(u.isPublicProfile());
+            userProfile.setWorkplace(workplaceService.getWorkplaceDto(u.getWorkplace()));
+            //Retorna uma lista de projectos em que o user está inserido.
+            //userProfile.setIsInProject(projectService.listUserProfileProjectsDto(u.getProjects()));
+            userProfile.setIsInProject(projectService.listProjectEntityToBasicProject(userDao.getUserProjects(u.getId())));
+            return userProfile;
+        }
+        return null;
+    }
+    public UserProfileDto getUserProfileDto(int userID){
+        if (userIsValid(userDao.findUserById(userID))){
+            return convertUserEntityToProfileDto(userDao.findUserById(userID));
+        }
+        System.err.println("user does not exist");
+        //aqui é que tem de se usar o null pointer exception?
+        return null;
+    }
 }
 
 
