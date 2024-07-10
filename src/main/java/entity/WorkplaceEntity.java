@@ -1,8 +1,6 @@
 package entity;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.LazyCollection;
@@ -11,7 +9,6 @@ import org.hibernate.annotations.LazyToOne;
 
 
 import java.io.Serializable;
-import java.util.Set;
 
 
 @Entity
@@ -19,7 +16,7 @@ import java.util.Set;
 @NamedQueries(
         {
                 @NamedQuery(name = "Workplace.findWorkplaceByLocation", query = "SELECT w FROM WorkplaceEntity w WHERE w.location = :location"),
-                @NamedQuery(name = "Workplace.findAllWorkplaces", query = "SELECT w FROM WorkplaceEntity w"),
+                @NamedQuery(name = "Workplace.findAllWorkplaces", query = "SELECT w FROM WorkplaceEntity w order by w.id asc"),
                 @NamedQuery(name = "Workplace.findWorkplaceByID", query = "select w from WorkplaceEntity w where w.id = :id")
         }
 )
@@ -49,8 +46,8 @@ public class WorkplaceEntity implements Serializable {
      * faz sentido retornar uma lista ou simplesmente um user?
      * a query retorna sempe uma lista, depois no dao e no transactional é que filtramos desse array o valor que queremos
      */
-    @OneToMany(mappedBy = "workplace")
-    private List<UserEntity> users;
+    @OneToMany(mappedBy = "workplace", cascade = CascadeType.ALL)
+    private Set<UserEntity> users;
     // One-to-Many relationship to Project
     @OneToMany(mappedBy = "projectWorkplace", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<ProjectEntity> projects = new HashSet<>();
@@ -61,8 +58,10 @@ public class WorkplaceEntity implements Serializable {
 
 
 
+
     public WorkplaceEntity() {
     }
+
 
     public WorkplaceEntity (String location) {
         this.location = location;
@@ -93,18 +92,6 @@ public class WorkplaceEntity implements Serializable {
 
     }
 
-    public boolean isActive() {
-        return active;
-    }
-
-    public List<UserEntity> getUsers() {
-        return users;
-    }
-
-    public void setUsers(List<UserEntity> users) {
-        this.users = users;
-    }
-
     public Set<ProjectEntity> getProjects() {
         return projects;
     }
@@ -113,27 +100,35 @@ public class WorkplaceEntity implements Serializable {
         this.projects = projects;
     }
 
+    public boolean isActive() {
+        return active;
+    }
+
+    public Set<UserEntity> getUsers() {
+        return users;
+    }
+
+    public void setUsers(Set<UserEntity> users) {
+        this.users = users;
+    }
+
+
     /**
      * estas funções tem como objetivo adicionar ou remover projetos e workplaces da lista de projetos
-     * @param p
+     * @param
      */
     //adicionar projetos a este workplace
-    public void addProjectToWorkplace(ProjectEntity p){
-        if (!this.projects.contains(p)) {
-            this.projects.add(p);
-            if (p.getProjectWorkplace() != this) {
-                p.setProjectWorkplace(this);
-            }
-        }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        WorkplaceEntity that = (WorkplaceEntity) o;
+        return id == that.id; // Compare based on ID for persisted entities
     }
-    //remover projetos deste workplace
-    public void removeProjectFromWorkplace(ProjectEntity p){
-        if (this.projects.contains(p)) {
-            this.projects.remove(p);
-            if (p.getProjectWorkplace() == this) {
-                p.setProjectWorkplace(null);
-            }
-        }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id); // Use ID for hash code
     }
 
 }

@@ -220,13 +220,7 @@ public class ProjectEntity implements Serializable {
 
     //recebe um id e associa aqui a localização
     public void setProjectWorkplace(WorkplaceEntity workplace) {
-        if (this.projectWorkplace != null && this.projectWorkplace != workplace) {
-            this.projectWorkplace.removeProjectFromWorkplace(this);
-        }
         this.projectWorkplace = workplace;
-        if (workplace != null && !workplace.getProjects().contains(this)) {
-            workplace.getProjects().add(this);
-        }
     }
 
     //faz se override ao equals e hashcode methods
@@ -297,15 +291,6 @@ public class ProjectEntity implements Serializable {
         task.setProject(null);
     }
 
-    //este método pode tendencialmente dar alguns problemas
-    //faz sentido implementar aqui um remove projects?
-    public void removeWorkplaceFromProject(WorkplaceEntity w){
-            // Remove the project from the current workplace
-            this.projectWorkplace.removeProjectFromWorkplace(this);
-            // Set the workplace to null
-            this.projectWorkplace = null;
-
-    }
     public void addProjectManager(UserEntity manager){
         this.setManager(manager);
         manager.getManagedProjects().add(this);

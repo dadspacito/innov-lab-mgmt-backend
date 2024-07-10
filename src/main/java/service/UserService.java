@@ -9,6 +9,7 @@ import dao.WorkplaceDao;
 import dto.*;
 
 import entity.ProjectEntity;
+import entity.SkillEntity;
 import entity.UserEntity;
 import enums.UserState;
 import jakarta.persistence.NoResultException;
@@ -24,28 +25,27 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * faltam funções de conversão de user entity em dto
+ *
  * falta mudar perfis para privados/publicos
  * falta adicionar ou remover interesses e skills de users;
  * falta criar uma lista de convites que os users tem quando se convidam para projeto
  *  -convite tem de ter um id para quando o user aceita poder entrar no projecto especifico
+ *  falta poder editar um perfil;
+ *
  *
  */
 
 @Stateless
 public class UserService {
 
-    @EJB
-    private UserDao userDao;
+    @EJB private UserDao userDao;
     @EJB private WorkplaceService workplaceService;
-
-    @EJB
-    private SystemVariableDao systemVariableDao;
-
-    @EJB
-    private WorkplaceDao workplaceDao;
+    @EJB private SystemVariableDao systemVariableDao;
+    @EJB private WorkplaceDao workplaceDao;
     @EJB private SessionTokenDao sessionTokenDao;
     @EJB private ProjectService projectService;
+    @EJB private InterestService interestService;
+    @EJB private SkillService skillService;
 
 // função que vai adicionar user
     // recebe user dto
@@ -80,8 +80,12 @@ public class UserService {
 
     }
 
-    // função que vai ativar user
-    //
+    public UserEntity getUserByID(int id){
+        if (userIsValid(userDao.findUserById(id))){
+            return userDao.findUserById(id);
+        }
+        else return null;
+    }
 
     public boolean confirmUser(String emailToken) {
         UserEntity user = userDao.findUserByEmailToken(emailToken);
@@ -276,8 +280,9 @@ public class UserService {
             userProfile.setAvatar(u.getAvatar());
             userProfile.setPublicProfile(u.isPublicProfile());
             userProfile.setWorkplace(workplaceService.getWorkplaceDto(u.getWorkplace()));
-            //Retorna uma lista de projectos em que o user está inserido.
-            //userProfile.setIsInProject(projectService.listUserProfileProjectsDto(u.getProjects()));
+            userProfile.setSkills(skillService.listProjectSkillEntityToDto(u.getSkills()));
+            userProfile.setInterests(interestService.listProjectEntityToDto(u.getInterests()));
+            userProfile.setIsInProject(projectService.listProjectEntityToBasicProject(u.getProjects()));
             userProfile.setIsInProject(projectService.listProjectEntityToBasicProject(userDao.getUserProjects(u.getId())));
             return userProfile;
         }
@@ -291,6 +296,41 @@ public class UserService {
         //aqui é que tem de se usar o null pointer exception?
         return null;
     }
+
+    /**
+     * Edits the profile of a user.
+     *
+     * @param userDto Data Transfer Object containing updated user profile information.
+     */
+    @Transactional
+    public void editProfile(UserProfileDto userDto){
+        //recebe o user
+        if (userIsValid(userDao.findUserById(userDto.getId()))) {
+            UserEntity p = convertProfileDtoInUserEnt(userDto);
+            userDao.persist(p);
+        }
+
+    }
+    /**
+     * Converts a UserProfileDto object to a UserEntity object.
+     *
+     * @param userDto Data Transfer Object containing user profile information.
+     * Does not edit the user interests and skill, see ${function} for that.
+     * @return UserEntity object with updated profile information.
+     */
+    private UserEntity convertProfileDtoInUserEnt(UserProfileDto userDto){
+        UserEntity u = userDao.findUserById(userDto.getId());
+        u.setFirstName(userDto.getFirstName());
+        u.setLastName(userDto.getLastName());
+        u.setNickname(userDto.getNickname());
+        //u.setEmail();
+        u.setAvatar(userDto.getAvatar());
+        u.setPublicProfile(userDto.isPublicProfile());
+        u.setBio(userDto.getBio());
+        return u;
+    }
+    //falta me algo que reverta a lista dos projetos do user para poder integrar
+
 }
 
 

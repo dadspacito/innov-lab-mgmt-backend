@@ -17,11 +17,11 @@ import java.util.Set;
         @NamedQuery(name = "User.findAllUsers", query = "SELECT u FROM UserEntity u"),
         @NamedQuery(name = "User.findUserByEmailToken", query = "SELECT u FROM UserEntity u WHERE u.emailToken = :emailToken"),
         @NamedQuery(name = "User.findUserByNickname", query = "SELECT u FROM UserEntity u WHERE u.nickname = :nickname"),
-        //query para retornar os projetos do user, faz join da tabela
         @NamedQuery(name = "User.findUserProjects", query = "SELECT p FROM ProjectEntity p JOIN p.projectMembers u WHERE u.id = :userID"),
-        //esta query ao retornar os users por location é usada quando se forem selecionar os users para os projectos consoante a localização do projeto
-        @NamedQuery(name ="User.findUserByWorkplace", query = "select u from UserEntity u where u.workplace.id = :workplaceID")
-        //query de tasks associadas a estes user
+        @NamedQuery(name =  "User.findUserByWorkplace", query = "select u from UserEntity u where u.workplace.id = :workplaceID")
+        /**
+         * queries que faltam:
+         */
 
 })
 public class UserEntity implements Serializable {
@@ -83,11 +83,12 @@ public class UserEntity implements Serializable {
      */
     public UserEntity() {
         this.createdAt = LocalDateTime.now();
+        this.skills = new HashSet<>();
+        this.interests = new HashSet<>();
+        this.projects = new HashSet<>();
+        this.managedProjects = new HashSet<>();
+
     }
-
-
-
-
     @ManyToOne
     @JoinColumn(name = "workplace_id", nullable = false)
     private WorkplaceEntity workplace;

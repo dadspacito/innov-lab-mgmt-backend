@@ -19,6 +19,9 @@ public class UserProfileDto {
     private WorkplaceDto workplace;
     private Set<BasicProjectDto> isInProject;
     //lista de convites para projetos
+    //falta ver se é admin de um projeto
+    private Set<SkillDto> skills;
+    private Set<InterestDto> interests;
 
     public UserProfileDto() {
     }
@@ -103,4 +106,19 @@ public class UserProfileDto {
         this.email = email;
     }
 
+    public Set<SkillDto> getSkills() {
+        return skills;
+    }
+
+    public void setSkills(Set<SkillDto> skills) {
+        this.skills = skills;
+    }
+
+    public Set<InterestDto> getInterests() {
+        return interests;
+    }
+
+    public void setInterests(Set<InterestDto> interests) {
+        this.interests = interests;
+    }
 }

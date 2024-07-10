@@ -3,7 +3,10 @@ package dao;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.NoResultException;
 import entity.WorkplaceEntity;
+
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Stateless
 public class WorkplaceDao extends AbstractDao<WorkplaceEntity> {
@@ -26,9 +29,11 @@ public class WorkplaceDao extends AbstractDao<WorkplaceEntity> {
     }
 
     // devolve todos os workplaces
-    public List<WorkplaceEntity> findAllWorkplaces() {
+    public Set<WorkplaceEntity> findAllWorkplaces() {
         try{
-            return em.createNamedQuery("Workplace.findAllWorkplaces").getResultList();
+            List<WorkplaceEntity> workplace =  em.createNamedQuery("Workplace.findAllWorkplaces", WorkplaceEntity.class).getResultList();
+
+            return new HashSet<>(workplace);
         } catch (NoResultException e) {
             return null;
         }

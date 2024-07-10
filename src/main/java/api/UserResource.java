@@ -110,10 +110,16 @@ public class UserResource {
         return Response.status(Response.Status.UNAUTHORIZED).entity("invalid token").build();
     }
     @Path("/profile/{userID}")
-    @GET@Produces(MediaType.APPLICATION_JSON)
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
     public Response getUserProfile(@HeaderParam("token") String token, @PathParam("userID") int userID){
         if (sessionService.isTokenValid(token)){
-            return Response.status(200).entity(userService.getUserProfileDto(userID)).build();
+            if(userService.getUserByID(userID).isPublicProfile()) {
+                return Response.status(200).entity(userService.getUserProfileDto(userID)).build();
+            }
+            else {
+                return Response.status(Response.Status.UNAUTHORIZED).entity("User profile is private").build();
+            }
         }
         return Response.status(400).entity("Token not valid").build();
     }
