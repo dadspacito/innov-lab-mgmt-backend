@@ -304,23 +304,18 @@ public class UserService {
         if (userDto.getFirstName() != null) {
             u.setFirstName(userDto.getFirstName());
         }
-
         if (userDto.getLastName() != null) {
             u.setLastName(userDto.getLastName());
         }
-
         if (userDto.getNickname() != null) {
             u.setNickname(userDto.getNickname());
         }
-
         if (userDto.getAvatar() != null) {
             u.setAvatar(userDto.getAvatar());
         }
-
         if (userDto.getBio() != null) {
             u.setBio(userDto.getBio());
         }
-
         return u;
     }
     @Transactional
@@ -383,7 +378,34 @@ public class UserService {
             else System.err.println("skill does not exist");
         }
         else System.err.println("user does not exist");
-
+    }
+    @Transactional
+    public void leaveProject(int userID, int projectID){
+        UserEntity u = userDao.findUserById(userID);
+        if(u != null){
+            ProjectEntity p = projectService.getProjectEntityByID(projectID);
+            if (p != null){
+                //fazer aqui verificação de que se user for manager nao pode sair
+                p.getProjectMembers().remove(u);
+                u.getProjects().remove(p);
+                userDao.merge(u);
+                userDao.flush();
+            }
+        }
+    }
+    @Transactional
+    public void joinProject(int userID, int projectID){
+        UserEntity u = userDao.findUserById(userID);
+        if(u != null){
+            ProjectEntity p = projectService.getProjectEntityByID(projectID);
+            if (p != null){
+                //aqui tem de haver uma verificação se o user recebeu um convite para se juntar ao projecto
+                p.getProjectMembers().add(u);
+                u.getProjects().add(p);
+                userDao.merge(u);
+                userDao.flush();
+            }
+        }
     }
 
 }

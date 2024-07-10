@@ -177,6 +177,26 @@ public class UserResource {
         }
         return Response.status(400).entity("invalid token").build();
     }
+    @Path("/{userID}/leaveProject/{projectID}")
+    @PATCH
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response leaveProject(@HeaderParam("token") String token, @PathParam("userID") int userID, @PathParam("projectID") int projectID){
+        if (sessionService.isTokenValid(token)){
+            userService.leaveProject(userID, projectID);
+            return Response.status(200).entity("user has successfully left the project").build();
+        }
+        return Response.status(400).entity("invalid token").build();
+    }
+    @Path("/{userID}/joinProject/{projectID}")
+    @PATCH
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response joinProject(@HeaderParam("token") String token, @PathParam("userID") int userID, @PathParam("projectID") int projectID){
+        if (sessionService.isTokenValid(token)){
+            userService.joinProject(userID, projectID);
+            return Response.status(200).entity("user has successfully joined the project").build();
+        }
+        return Response.status(400).entity("invalid token").build();
+    }
 
 
 }

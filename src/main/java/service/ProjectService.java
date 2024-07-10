@@ -1,5 +1,6 @@
 package service;
 
+import api.UserResource;
 import dao.*;
 import dto.BasicProjectDto;
 import dto.DetailedProjectDto;
@@ -422,6 +423,14 @@ public class ProjectService {
         basicProject.setProjectSkills(skillService.listProjectSkillEntityToDto(p.getSkills()));
         basicProject.setProjectInterests(interestService.listProjectEntityToDto(p.getInterests()));
         return basicProject;
+    }
+
+    public ProjectEntity getProjectEntityByID(int projectID){
+        ProjectEntity p = projectDao.getProjectByID(projectID);
+        if (p != null){
+            return p;
+        }
+        else return null;
     }
 
 }
