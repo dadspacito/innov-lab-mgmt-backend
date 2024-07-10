@@ -15,7 +15,9 @@ import jakarta.validation.*;
 import jakarta.validation.constraints.NotNull;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jboss.classfilewriter.DuplicateMemberException;
 
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -24,29 +26,35 @@ import java.util.stream.Collectors;
 
 @Stateless
 public class SkillService {
+    /**
+     * falta retornar apenas as skills ativas
+     * reativar skills
+     */
     private static final Logger LOGGER = LogManager.getLogger(HeaderResource.class);
 
-    @EJB
-    private SkillDao skillDao;
-
-    // COMENTÁRIO serviços crud para a entidade Skill
-    // acrescentar pra apagar, ou editar, ou listar, ou pesquisar, ou criar, ou ativar/desativar
-    //faltam métodos de verificação privados
-    // MAS MAIS IMPORTANTE, associar a entidade Skill a User, para que fique já associada ao user que cria
-    // e que possa ser associada a outros users, e obter lista de users com a skill , para sugerir projetos ou stats.
-
-
+    @EJB private SkillDao skillDao;
     @Transactional
+    //aqui lidar com duplicados
     public void createSkill(SkillDto skillDto) {
         SkillType skillType = mapStringToSkillType(skillDto.getType());
         SkillEntity skillEntity = new SkillEntity(skillDto.getName(), skillType);
         skillEntity.setIsActive(true);
-
-        // persistir dao
         skillDao.persist(skillEntity);
     }
+    @Transactional
+    public boolean checkSkillValidity(SkillEntity skill){
+        Set<SkillEntity> skills = skillDao.getAllSkillsOrdered();
+        for (SkillEntity s : skills){
+            if (s.getName().toLowerCase().replace(" ","").trim().matches(skill.getName().toLowerCase().replace(" ","").trim())){
+                return false;
+            }
+        }
+        return true;
+    }
 
-    //método que retorna lista de DTO's e transforma em Set
+    //***********************//
+    //****LIST METHODS******//
+    //**********************//
     public Set<SkillEntity> listProjectSkillsDtoToEntity(Set<SkillDto> skillDtos) {
         return skillDtos.stream()
                 .map(skillDto -> skillDao.findSkillByID(skillDto.getId()))
@@ -57,17 +65,45 @@ public class SkillService {
     }
     //delete skill
     @Transactional
-    public void deleteSkill(int id){
+    public void inactivateSkill(int id){
         if (isValidSkill(id)){
-            System.out.println(isValidSkill(id));
             try{
-                skillDao.remove(skillDao.findSkillByID(id));
-                LOGGER.info("Skill was removed from the database at " + LocalDateTime.now());
+                SkillEntity s = getSkillByID(id);
+                if (s.getIsActive()) {
+                    s.setIsActive(false);
+                    skillDao.merge(skillDao.findSkillByID(id));
+                    LOGGER.info("Skill was inactivated from the database at " + LocalDateTime.now());
+                }
+                else System.err.println("Skill is already inactive");
             }
             catch (NoResultException e){
                 LOGGER.error("Error removing skill with id " + id + "from the database at " + LocalDateTime.now());
             }
+            catch(NullPointerException e){
+                LOGGER.error("Skill is null");
+            }
         }
+    }
+    @Transactional
+    public void activateSkill(int id){
+        if(isValidSkill(id)){
+            try {
+                SkillEntity s = skillDao.findSkillByID(id);
+                if (!s.getIsActive()) {
+                    s.setIsActive(true);
+                    skillDao.merge(skillDao.findSkillByID(id));
+                    LOGGER.info("Skill was activated from the database at " + LocalDateTime.now());
+                }
+                else System.err.println("that skill is active");
+
+            }
+           catch (NoResultException e){
+                    LOGGER.error("Error removing skill with id " + id + "from the database at " + LocalDateTime.now());
+                }
+            catch(NullPointerException e){
+                    LOGGER.error("Skill is null");
+                }
+            }
     }
 
     //verifica se skill existe metodo privado
@@ -81,34 +117,16 @@ public class SkillService {
         }
     }
     private SkillEntity getSkillByID(int id){
-        try{
+        if(isValidSkill(id)) {
             return skillDao.findSkillByID(id);
         }
-        catch(NoResultException e){
-            System.err.println("skill does not exist" + id);
-            return null;
-        }
-
+        else return null;
     }
-
-
-
-    // métodos de obter entidades
-    // obter lista de todas as skills do sistema
-
-
-
-    public List<SkillDto> getAllSkills() {
-        List<SkillEntity> skillEntities = skillDao.findAll();
+    public Set<SkillDto> getAllSkills() {
+        Set<SkillEntity> skillEntities = skillDao.getAllSkillsOrdered();
         return skillEntities.stream().map(this::mapSkillEntityToDto)
-                            .collect(Collectors.toList());
-
+                            .collect(Collectors.toSet());
     }
-
-
-
-    // mapper entidade dto skill
-
     public SkillDto mapSkillEntityToDto(SkillEntity skillEntity) {
         SkillDto skillDto = new SkillDto();
         skillDto.setId(skillEntity.getId());
@@ -116,12 +134,6 @@ public class SkillService {
         skillDto.setType(skillEntity.getType().name());
         return skillDto;
     }
-
-    // mapper skill dto entidade
-
-    //método tem de ser privado
-    //método para criação de um novo skill, que depois faz map
-    //atenção aos null pointers exception
     public SkillEntity mapSkillDtoToEntity(SkillDto skillDto) {
         SkillEntity skillEntity = new SkillEntity();
         skillEntity.setId(skillDto.getId());
@@ -136,9 +148,4 @@ public class SkillService {
             throw new IllegalArgumentException("invalid skill type provided: " +  type);
         }
     }
-
-
-
-
-
 }

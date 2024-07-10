@@ -12,7 +12,7 @@ import enums.SkillType;
 @Table(name = "Skill")
 @NamedQueries({
         @NamedQuery(name = "Skill.findSkillByName", query = "SELECT s FROM SkillEntity s WHERE s.name = :name"),
-        @NamedQuery(name = "Skill.findAllSkills", query = "SELECT s FROM SkillEntity s order by s.createdAt asc"),
+        @NamedQuery(name = "Skill.findAllSkills", query = "SELECT s FROM SkillEntity s where s.isActive = true order by s.id asc, s.createdAt asc, s.name asc"),
         @NamedQuery(name = "Skill.findSkillByID", query = "select s from SkillEntity  s where s.id = :id")
 })
 public class SkillEntity implements Serializable {

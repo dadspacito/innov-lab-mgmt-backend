@@ -14,6 +14,7 @@ import service.SessionService;
 import service.SkillService;
 
 import java.util.List;
+import java.util.Set;
 
 @Path("/skills")
 public class SkillResource {
@@ -45,7 +46,7 @@ public class SkillResource {
     public Response getSkills(@HeaderParam("token") String token) {
 
             if (sessionService.isTokenValid(token)) {
-                List<SkillDto> skills = skillService.getAllSkills();
+                Set<SkillDto> skills = skillService.getAllSkills();
                 return Response.status(Response.Status.OK).entity(skills).build();
             }
             return Response.status(Response.Status.BAD_REQUEST).entity("Invalid token").build();
@@ -55,23 +56,35 @@ public class SkillResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createSkill(@HeaderParam("token") String token, SkillDto skill){
         if (sessionService.isTokenValid(token)){
-            skillService.createSkill(skill);
-            return Response.status(201).entity("Skill was succesfully added to db").build();
+            SkillEntity skillEnt = skillService.mapSkillDtoToEntity(skill);
+            if (skillService.checkSkillValidity(skillEnt)){
+                skillService.createSkill(skill);
+                return Response.status(201).entity("Skill was succesfully added to db").build();
+            }
+            return Response.status(400).entity("Skill already exists").build();
         }
-        return Response.status(400).entity("Skill was not added DB").build();
+        return Response.status(401).entity("Invalid token").build();
     }
-    @Path("/{id}")
-    @DELETE
+    @Path("/inactivate/{id}")
+    @PATCH
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response deleteSkill(@HeaderParam("token") String token, @PathParam("id") int id){
+    public Response inactivateSkill(@HeaderParam("token") String token, @PathParam("id") int id){
         if(sessionService.isTokenValid(token)){
-                skillService.deleteSkill(id);
+                skillService.inactivateSkill(id);
                 //colocar aqui logger
-                return Response.status(200).entity("Skill was sucessfully deleted").build();
+                return Response.status(200).entity("Skill was sucessfully inactivated").build();
         }
         return Response.status(400).entity("that user is not valid" +  id).build();
-        //colocar aqui logger
-
+    }
+    @Path("/activate/{id}")
+    @PATCH
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response activateSkill(@HeaderParam("token") String token, @PathParam("id") int id){
+        if (sessionService.isTokenValid(token)){
+            skillService.activateSkill(id);
+            return Response.status(200).entity("Skill was sucessfully activated").build();
+        }
+        return Response.status(400).entity("that user is not valid" +  id).build();
     }
 
 }

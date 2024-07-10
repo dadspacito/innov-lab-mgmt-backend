@@ -100,10 +100,6 @@ public class InterestService {
         return interestDao.findInterestByName(name) != null;
     }
 
-
-
-    //função para converter novo interesse
-    //tem de ter uma função de confirmar a identidade do user para ver se é permitido
     private InterestEntity convertInterestDtoInEntity(InterestDto i){
         InterestEntity iEnt = new InterestEntity();
         iEnt.setName(i.getName());

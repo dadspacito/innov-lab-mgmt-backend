@@ -24,17 +24,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- *
- * falta mudar perfis para privados/publicos
- * falta adicionar ou remover interesses e skills de users;
- * falta criar uma lista de convites que os users tem quando se convidam para projeto
- *  -convite tem de ter um id para quando o user aceita poder entrar no projecto especifico
- *  falta poder editar um perfil;
- *
- *
- */
-
 @Stateless
 public class UserService {
 
@@ -58,8 +47,6 @@ public class UserService {
             return UserState.ALREADY_EXISTS;
         }
         UserEntity user = new UserEntity();
-        // criar user entity com dados de dto
-        // associar dados do DTO ao user
         user.setFirstName(userDto.getFirstName());
         user.setLastName(userDto.getLastName());
         user.setNickname(userDto.getNickname());
@@ -67,8 +54,7 @@ public class UserService {
         user.setPassword(BCrypt.hashpw(userDto.getPassword(), BCrypt.gensalt()));
         user.setAvatar("https://commons.wikimedia.org/wiki/File:Default_avatar_profile.jpg");
         user.setWorkplace(workplaceDao.find(userDto.getWorkplaceId()));
-        // a verificação ja foi feita, nao vai dar erro.
-     //   user.setCreatedAt(LocalDateTime.now());
+        user.setCreatedAt(LocalDateTime.now());
         user.setActive(false);
         user.setConfirmed(false);
         user.setEmailToken(generateNewToken());
@@ -77,9 +63,8 @@ public class UserService {
         EmailSender.sendVerificationEmail(user.getEmail(), user.getFirstName(), verificationLink);
         userDao.persist(user);
          return UserState.CREATED;
-
     }
-
+    @Transactional
     public UserEntity getUserByID(int id){
         if (userIsValid(userDao.findUserById(id))){
             return userDao.findUserById(id);
@@ -93,19 +78,17 @@ public class UserService {
             System.out.println("entrei no activate user no user service");
             return false;
         }
-        user.setConfirmed(true);
-        user.setEmailToken(null);
-        user.setEmailTokenExpires(null);
-        userDao.merge(user);
-        return true;
+        else {
+            user.setConfirmed(true);
+            user.setEmailToken(null);
+            user.setEmailTokenExpires(null);
+            userDao.merge(user);
+            return true;
+        }
     }
-    // obter user pelo token (IMPORTANTE. função só chamada EM RESOURCE após validação de token, logo user existe)
-    //aqui tem de vir o header dto
-
     public UserEntity getUserByToken(String token) {
         return sessionTokenDao.findUserBySessionToken(token);
     }
-    //get user list (only active) - para adicionar ao projeto
     public List<SelectProjectMembersDto> membersAvailableProjects(){
         List<UserEntity> userEntList = userDao.findAll();
         return userEntList.stream().map(this::convertUserEntToMemberAvailable).collect(Collectors.toList());
@@ -142,13 +125,6 @@ public class UserService {
         }
         return null;
     }
-
-
-
-
-
-
-    //função que envia mail ao user para seguir para o link de reset password
     public boolean requestPasswordReset(String email) {
         UserEntity user = userDao.findUserByEmail(email);
         if (user == null) {
@@ -167,15 +143,10 @@ public class UserService {
         if (user == null) {
             return false;
         }
-        System.out.println("entrou aqui");
-        System.out.println(newPassword);
-        System.out.println(user.getPassword());
         user.setPassword(BCrypt.hashpw(newPassword, BCrypt.gensalt()));
-        System.out.println(user.getPassword());
         user.setEmailToken(null);
         user.setEmailTokenExpires(null);
         userDao.merge(user);
-        System.out.println(user.getPassword());
         return true;
     }
 
@@ -191,16 +162,14 @@ public class UserService {
         headerDto.setAvatar(user.getAvatar());
         return headerDto;
     }
-    //so retorna os membros do projeto quando é feita a query
+
+
     public List<ProjectMemberDto> returnProjectMembers(int workplaceID) {
-        // Check if the workplace exists
         if (workplaceDao.getWorkplaceByID(workplaceID) != null) {
-            // Fetch and convert users to ProjectMemberDto using Streams
             return userDao.getUserByWorkplace(workplaceID).stream()
                     .map(this::ConvertUserEntityToProjectMembers)
                     .collect(Collectors.toList());
         }
-        // Return an empty list if the workplace does not exist
         return List.of();
     }
     public ProjectMemberDto ConvertUserEntityToProjectMembers(UserEntity u) {
