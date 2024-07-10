@@ -1,6 +1,7 @@
 package api;
 
 import dto.UserDto;
+import dto.UserProfileDto;
 import jakarta.ejb.EJB;
 import jakarta.json.Json;
 import jakarta.json.JsonObject;
@@ -12,6 +13,7 @@ import service.UserService;
 import enums.UserState;
 
 import java.io.StringReader;
+import java.net.URL;
 
 // COMENTÀRIOS : USOS DESTE FICHEIRO
 // recursos de utilizador
@@ -162,6 +164,16 @@ public class UserResource {
         if (sessionService.isTokenValid(token)){
             userService.removeInterestFromUser(userID, skillID);
             return Response.status(200).entity("interest was removed to user").build();
+        }
+        return Response.status(400).entity("invalid token").build();
+    }
+    @Path("{userID}/edit")
+    @PATCH
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response editUser(@HeaderParam("token") String token,@PathParam("userID") int userID, UserProfileDto user){
+        if (sessionService.isTokenValid(token)){
+            userService.editProfile(userID,user);
+            return Response.status(200).entity("user was sucessfully updated!").build();
         }
         return Response.status(400).entity("invalid token").build();
     }

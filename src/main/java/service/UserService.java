@@ -225,7 +225,11 @@ public class UserService {
     private String generateNewToken() {
         return UUID.randomUUID().toString();
     }
+    @Transactional
     private boolean userIsValid (UserEntity u){
+        if (u == null){
+            return false;
+        }
         return userDao.findUserById(u.getId()) != null;
     }
 
@@ -273,13 +277,10 @@ public class UserService {
      * @param userDto Data Transfer Object containing updated user profile information.
      */
     @Transactional
-    public void editProfile(UserProfileDto userDto){
-        //recebe o user
-        if (userIsValid(userDao.findUserById(userDto.getId()))) {
-            UserEntity p = convertProfileDtoInUserEnt(userDto);
-            userDao.persist(p);
-        }
-
+    public void editProfile(int userID,UserProfileDto userDto){
+        UserEntity p = DtoToEntityProfileEdition(userID,userDto);
+        userDao.merge(p);
+        userDao.flush();
     }
     /**
      * Converts a UserProfileDto object to a UserEntity object.
@@ -293,14 +294,35 @@ public class UserService {
         u.setFirstName(userDto.getFirstName());
         u.setLastName(userDto.getLastName());
         u.setNickname(userDto.getNickname());
-        //u.setEmail();
         u.setAvatar(userDto.getAvatar());
         u.setPublicProfile(userDto.isPublicProfile());
         u.setBio(userDto.getBio());
         return u;
     }
-    //adicionar skills
-    //adicionar interests
+    private UserEntity DtoToEntityProfileEdition(int userID, UserProfileDto userDto){
+        UserEntity u = userDao.findUserById(userID);
+        if (userDto.getFirstName() != null) {
+            u.setFirstName(userDto.getFirstName());
+        }
+
+        if (userDto.getLastName() != null) {
+            u.setLastName(userDto.getLastName());
+        }
+
+        if (userDto.getNickname() != null) {
+            u.setNickname(userDto.getNickname());
+        }
+
+        if (userDto.getAvatar() != null) {
+            u.setAvatar(userDto.getAvatar());
+        }
+
+        if (userDto.getBio() != null) {
+            u.setBio(userDto.getBio());
+        }
+
+        return u;
+    }
     @Transactional
     public void addSkillToUser(int userID, int skillID){
         UserEntity u = userDao.findUserById(userID);
