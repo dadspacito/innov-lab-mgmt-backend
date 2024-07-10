@@ -44,6 +44,15 @@ public class InterestDao extends AbstractDao<InterestEntity> {
             return null;
         }
     }
+    public Set<InterestEntity> activeInterestList(){
+        try{
+            List<InterestEntity> interestList = em.createNamedQuery("Interest.findAllActiveInterests", InterestEntity.class).getResultList();
+            return new HashSet<>(interestList);
+        }
+        catch (NoResultException e){
+            return null;
+        }
+    }
 
 }
 

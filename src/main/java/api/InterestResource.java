@@ -49,34 +49,22 @@ public class InterestResource {
         return Response.status(Response.Status.UNAUTHORIZED).entity("invalid Token").build();
     }
     @Path("/{id}")
-    @DELETE
+    @PATCH
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response removeInterest(@HeaderParam("token") String token, @PathParam("id") int id){
+    public Response inactivateInterest(@HeaderParam("token") String token, @PathParam("id") int id){
         if (sessionService.isTokenValid(token)){
-            interestService.removeInterest(id);
+            interestService.inactivateInterest(id);
             return Response.status(Response.Status.OK).entity("interest removed from BD").build();
         }
         return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid token").build();
     }
-    /*@Path("/add")
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    public Response addInterest(@HeaderParam("token") String token, InterestDto interest){
+    @Path("/active")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getActiveInterest(@HeaderParam("token") String token){
         if (sessionService.isTokenValid(token)){
-            InterestEntity i = interestService.convertInterestDtoInEntity(interest);
-            if(!interestService.checkInterestValidity(i)){
-                interestService.createNewInterest(interest);
-                return Response.status(200).entity("skill was sucessfully created").build();
-            }
-            else return Response.status(400).entity("interest already exists").build();
+            return Response.status(200).entity(interestService.activeInterestDtoList()).build();
         }
-        return Response.status(401).entity("Token is invalid").build();
-    }*/
-
-
-    /**
-     * criar
-     * apagar
-     * retornar interesse individual
-     */
+        return Response.status(400).entity("invalid Token").build();
+    }
 }

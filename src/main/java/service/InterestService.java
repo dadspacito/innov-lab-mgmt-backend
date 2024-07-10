@@ -83,11 +83,11 @@ public class InterestService {
         interestDao.flush();
     }
     @Transactional
-    public void removeInterest(int id){
-        System.out.println(id);
+    public void inactivateInterest(int id){
         if (isValidInterestID(id)){
-            System.out.println(interestDao.findInterestByID(id));
-            interestDao.remove(interestDao.findInterestByID(id));
+            InterestEntity i = interestDao.findInterestByID(id);
+            i.setActive(false);
+            interestDao.merge(i);
             interestDao.flush();
         }
         else throw new EntityNotFoundException("That interest was not found in the database");
@@ -118,6 +118,17 @@ public class InterestService {
         }
         catch(NoResultException e){
             System.err.println("interest does not exist");
+            return null;
+        }
+    }
+    @Transactional
+    public Set<InterestDto> activeInterestDtoList(){
+        try {
+            Set<InterestDto> i = listProjectEntityToDto(interestDao.activeInterestList());
+            return i;
+        }
+        catch (NoResultException e){
+            System.err.println("no list");
             return null;
         }
     }
