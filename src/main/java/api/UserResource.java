@@ -123,6 +123,49 @@ public class UserResource {
         }
         return Response.status(400).entity("Token not valid").build();
     }
+    @Path("/{userID}/addSkill/{skillID}")
+    @PATCH
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response addSkillToUser(@HeaderParam("token") String token, @PathParam("userID") int userID, @PathParam("skillID") int skillID){
+        if (sessionService.isTokenValid(token)){
+            userService.addSkillToUser(userID, skillID);
+            return Response.status(200).entity("skill was added to user").build();
+        }
+        return Response.status(400).entity("invalid token").build();
+    }
+    @Path("/{userID}/addInterest/{interestID}")
+    @PATCH
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response addInterestToUser(@HeaderParam("token") String token, @PathParam("userID") int userID, @PathParam("interestID") int interestID){
+        if (sessionService.isTokenValid(token)){
+            userService.addInterestToUser(userID, interestID);
+            return Response.status(200).entity("Interest was added to user").build();
+        }
+        return Response.status(400).entity("invalid token").build();
+    }
+
+    //remover skills e interesses
+    @Path("/{userID}/removeSkill/{skillID}")
+    @PATCH
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response removeSkillFromUser(@HeaderParam("token") String token, @PathParam("userID") int userID, @PathParam("skillID") int skillID){
+        if (sessionService.isTokenValid(token)){
+            userService.removeSkillFromUser(userID, skillID);
+            return Response.status(200).entity("skill was removed to user").build();
+        }
+        return Response.status(400).entity("invalid token").build();
+    }
+    @Path("/{userID}/removeInterest/{skillID}")
+    @PATCH
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response removeInterestFromUser(@HeaderParam("token") String token, @PathParam("userID") int userID, @PathParam("skillID") int skillID){
+        if (sessionService.isTokenValid(token)){
+            userService.removeInterestFromUser(userID, skillID);
+            return Response.status(200).entity("interest was removed to user").build();
+        }
+        return Response.status(400).entity("invalid token").build();
+    }
+
 
 }
 

@@ -148,4 +148,17 @@ public class SkillService {
             throw new IllegalArgumentException("invalid skill type provided: " +  type);
         }
     }
+    @Transactional
+    public SkillEntity getSKillByID(int id){
+        try {
+            if (isValidSkill(id)) {
+                return skillDao.findSkillByID(id);
+            }
+            return null;
+        }
+        catch (NullPointerException e){
+            System.err.println("skill is null");
+            return null;
+        }
+    }
 }

@@ -8,6 +8,7 @@ import dao.WorkplaceDao;
 
 import dto.*;
 
+import entity.InterestEntity;
 import entity.ProjectEntity;
 import entity.SkillEntity;
 import entity.UserEntity;
@@ -298,7 +299,70 @@ public class UserService {
         u.setBio(userDto.getBio());
         return u;
     }
-    //falta me algo que reverta a lista dos projetos do user para poder integrar
+    //adicionar skills
+    //adicionar interests
+    @Transactional
+    public void addSkillToUser(int userID, int skillID){
+        UserEntity u = userDao.findUserById(userID);
+        if (userIsValid(u)){
+            SkillEntity s = skillService.getSKillByID(skillID);
+            if (s != null){
+                u.getSkills().add(s);
+                s.addUser(u);
+                userDao.merge(u);
+                userDao.flush();
+            }
+            else System.err.println("Skill does not exist");
+        }
+        else System.err.println("user does not exist");
+    }
+    @Transactional
+    public void addInterestToUser(int userID, int interestID){
+        UserEntity u = userDao.findUserById(userID);
+        if (userIsValid(u)){
+            InterestEntity i = interestService.getInterestByID(interestID);
+            if (i != null){
+                u.getInterests().add(i);
+                i.addUser(u);
+                userDao.merge(u);
+                userDao.flush();
+            }
+            else System.err.println("Interest does not exist");
+        }
+        else System.err.println("user does not exist");
+    }
+    //remove interest and skill
+    @Transactional
+    public void removeInterestFromUser(int userID, int interestID){
+        UserEntity u = userDao.findUserById(userID);
+        if (userIsValid(u)){
+            InterestEntity i = interestService.getInterestByID(interestID);
+            if (i != null){
+                u.getInterests().remove(i);
+                i.removeUser(u);
+                userDao.merge(u);
+                userDao.flush();
+            }
+            else System.err.println("Interest does not exist");
+        }
+        else System.err.println("user does not exist");
+    }
+    @Transactional
+    public void removeSkillFromUser(int userID, int interestID){
+        UserEntity u = userDao.findUserById(userID);
+        if (userIsValid(u)){
+            SkillEntity s = skillService.getSKillByID(interestID);
+            if (s != null){
+                u.getSkills().remove(s);
+                s.removeUser(u);
+                userDao.merge(u);
+                userDao.flush();
+            }
+            else System.err.println("skill does not exist");
+        }
+        else System.err.println("user does not exist");
+
+    }
 
 }
 

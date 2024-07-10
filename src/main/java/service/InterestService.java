@@ -112,9 +112,13 @@ public class InterestService {
         }
         return true;
     }
-    private InterestEntity getInterestByID(int id){
+    @Transactional
+    public InterestEntity getInterestByID(int id){
         try {
-            return interestDao.findInterestByID(id);
+            if(isValidInterestID(id)){
+                return interestDao.findInterestByID(id);
+            }
+            else return null;
         }
         catch(NoResultException e){
             System.err.println("interest does not exist");

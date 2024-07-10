@@ -34,9 +34,9 @@ public class SkillEntity implements Serializable {
     private LocalDateTime createdAt;
 
 
-    @ManyToMany(mappedBy = "skills")
+    @ManyToMany(mappedBy = "skills",cascade = CascadeType.ALL)
     private Set<UserEntity> users = new HashSet<>();
-    @ManyToMany(mappedBy = "skills")
+    @ManyToMany(mappedBy = "skills",cascade = CascadeType.ALL)
     private Set<ProjectEntity> projects = new HashSet<>();
 
 
@@ -102,9 +102,7 @@ public class SkillEntity implements Serializable {
 
     // Método para adicionar um user à skill
     public void addUser(UserEntity user) {
-
         this.users.add(user);
-        user.getSkills().add(this);
     }
 
     // Método para remover um user da skill
