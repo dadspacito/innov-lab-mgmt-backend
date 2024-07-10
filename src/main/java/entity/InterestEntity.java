@@ -14,7 +14,8 @@ import java.util.Set;
         {
                 @NamedQuery(name = "Interest.findInterestByName", query = "SELECT i FROM InterestEntity i WHERE i.name = :name"),
                 @NamedQuery(name = "Interest.findAllInterests", query = "SELECT i FROM InterestEntity i"),
-                @NamedQuery(name ="Interest.findInterestByID", query = "select i from InterestEntity i where i.id =:id")
+                @NamedQuery(name ="Interest.findInterestByID", query = "select i from InterestEntity i where i.id =:id"),
+                @NamedQuery(name = "Interest.findAllActiveInterests", query = "SELECT i FROM InterestEntity i where i.isActive = true")
 
         }
 )

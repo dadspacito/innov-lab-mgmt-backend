@@ -2,6 +2,7 @@
 package api;
 
 import dto.InterestDto;
+import entity.InterestEntity;
 import jakarta.ejb.EJB;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -12,6 +13,7 @@ import service.SessionService;
 import service.InterestService;
 
 import java.util.List;
+import java.util.Set;
 
 @Path("/interests")
 public class InterestResource {
@@ -28,7 +30,7 @@ public class InterestResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getInterests(@HeaderParam("token") String token) {
         if (sessionService.isTokenValid(token)) {
-            List<InterestDto> interests = interestService.getAllInterests();
+            Set<InterestDto> interests = interestService.getAllInterests();
             return Response.status(Response.Status.OK).entity(interests).build();
         }
         return Response.status(Response.Status.BAD_REQUEST).entity("Invalid token").build();
@@ -37,8 +39,12 @@ public class InterestResource {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response createNewInterest(@HeaderParam("token") String token, InterestDto interestDto){
         if(sessionService.isTokenValid(token)){
-            interestService.createNewInterest(interestDto);
-            return Response.status(Response.Status.CREATED).entity("new interest added").build();
+            InterestEntity i = interestService.convertInterestDtoInEntity(interestDto);
+            if(interestService.checkInterestValidity(i)){
+                interestService.createNewInterest(interestDto);
+                return Response.status(200).entity("skill was sucessfully created").build();
+            }
+            else return Response.status(400).entity("interest already exists").build();
         }
         return Response.status(Response.Status.UNAUTHORIZED).entity("invalid Token").build();
     }
@@ -52,6 +58,20 @@ public class InterestResource {
         }
         return Response.status(Response.Status.UNAUTHORIZED).entity("Invalid token").build();
     }
+    /*@Path("/add")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response addInterest(@HeaderParam("token") String token, InterestDto interest){
+        if (sessionService.isTokenValid(token)){
+            InterestEntity i = interestService.convertInterestDtoInEntity(interest);
+            if(!interestService.checkInterestValidity(i)){
+                interestService.createNewInterest(interest);
+                return Response.status(200).entity("skill was sucessfully created").build();
+            }
+            else return Response.status(400).entity("interest already exists").build();
+        }
+        return Response.status(401).entity("Token is invalid").build();
+    }*/
 
 
     /**

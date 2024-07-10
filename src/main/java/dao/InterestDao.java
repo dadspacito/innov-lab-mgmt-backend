@@ -5,6 +5,10 @@ import entity.InterestEntity;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.NoResultException;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 
 @Stateless
 public class InterestDao extends AbstractDao<InterestEntity> {
@@ -30,7 +34,15 @@ public class InterestDao extends AbstractDao<InterestEntity> {
         catch (NoResultException e){
             return null;
         }
-
+    }
+    public Set<InterestEntity> interestList(){
+        try{
+            List<InterestEntity> interestList = em.createNamedQuery("Interest.findAllInterests", InterestEntity.class).getResultList();
+            return new HashSet<>(interestList);
+        }
+        catch (NoResultException e){
+            return null;
+        }
     }
 
 }

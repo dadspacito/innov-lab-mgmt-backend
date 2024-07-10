@@ -6,6 +6,7 @@ import dto.InterestDto;
 
 import entity.InterestEntity;
 
+import entity.SkillEntity;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityExistsException;
@@ -40,10 +41,10 @@ public class InterestService {
     // métodos de obter entidades
     // obter lista de todos interesses/keywords do sistema
 
-    public List<InterestDto> getAllInterests() {
+    public Set<InterestDto> getAllInterests() {
         List<InterestEntity> interestsEntities = interestDao.findAll();
         return interestsEntities.stream().map(this::mapInterestEntityToDto)
-                            .collect(Collectors.toList());
+                            .collect(Collectors.toSet());
 
     }
     //aqui tem de receber interesses de um projetoDTO e trasforma-los em entities
@@ -75,11 +76,11 @@ public class InterestService {
     //esta função cria um interest só para a db, sem definir users e projetos
     @Transactional
     public void createNewInterest(InterestDto interest){
-        if (!isValidInterestName(interest.getName())){
-            interestDao.persist(convertInterestDtoInEntity(interest));
-            interestDao.flush();
-        }
-        else throw new EntityExistsException("That interest already exists " +  interest.getName());
+        InterestEntity iEnt = convertInterestDtoInEntity(interest);
+        iEnt.setCreatedAt(LocalDateTime.now());
+        iEnt.setActive(true);
+        interestDao.persist(iEnt);
+        interestDao.flush();
     }
     @Transactional
     public void removeInterest(int id){
@@ -96,22 +97,21 @@ public class InterestService {
     private boolean isValidInterestID(int id){
         return interestDao.findInterestByID(id) != null;
     }
-    private boolean isValidInterestName(String name){
-        return interestDao.findInterestByName(name) != null;
-    }
-
-    private InterestEntity convertInterestDtoInEntity(InterestDto i){
+    public InterestEntity convertInterestDtoInEntity(InterestDto i){
         InterestEntity iEnt = new InterestEntity();
         iEnt.setName(i.getName());
-        iEnt.setCreatedAt(LocalDateTime.now());
-        iEnt.setActive(true);
         return iEnt;
     }
-
-
-    //associar um interest a um user;
-    //funções set user e projetos a esta interests
-
+    @Transactional
+    public boolean checkInterestValidity(InterestEntity interest){
+        Set<InterestEntity> interests = interestDao.interestList();
+        for (InterestEntity s : interests){
+            if (s.getName().toLowerCase().replace(" ","").trim().matches(interest.getName().toLowerCase().replace(" ","").trim())){
+                return false;
+            }
+        }
+        return true;
+    }
     private InterestEntity getInterestByID(int id){
         try {
             return interestDao.findInterestByID(id);
