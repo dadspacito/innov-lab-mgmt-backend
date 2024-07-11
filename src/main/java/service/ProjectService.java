@@ -404,7 +404,6 @@ public class ProjectService {
      *
      * @param projectID the ID of the project to check.
      * @return {@code true} if the project has 4 or more members, {@code false} otherwise.
-     * @throws EntityNotFoundException if the project with the specified ID does not exist.
      */
     public boolean projectIsFull(int projectID){
         ProjectEntity p = projectDao.getProjectByID(projectID);
