@@ -19,44 +19,36 @@ import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Timer;
 
-
+/**
+ * Singleton startup service responsible for initializing the application with default data.
+ */
 @Singleton
 @Startup
 public class StartupService {
-
      @EJB
      private UserDao userDao;
-
     @EJB
     private SystemVariableDao systemVariableDao;
     @EJB
     private SessionTokenDao sessionTokenDao;
     @EJB
     private WorkplaceDao workplaceDao;
-
     @EJB
     private InterestDao interestDao;
-
     @EJB
     private SkillDao skillDao;
-
     @EJB
     private MaterialDao materialDao;
     @EJB private ProjectDao projectDao;
-    private boolean initializationComplete = false;
-
-
-
+    /**
+     * Initialization method called after the singleton is created.
+     * Populates the database with initial data
+     */
     @PostConstruct
     public void init() {
-
-    // verificar se existe user admin, se não existir é porque tem de ser criado tudo
-
+        //checks the existence of a admin superuser
      if (userDao.findUserByNickname("admin") == null) {
-
-
-         // criar variáveis de sistema
-
+         //populates the workplace tabçe
          String[] workplaceNames = {"COIMBRA", "LISBOA", "PORTO", "VISEU", "TOMAR", "VILA REAL"};
          for (String name : workplaceNames) {
              WorkplaceEntity workplaceEntity = new WorkplaceEntity(name);
@@ -64,7 +56,7 @@ public class StartupService {
              workplaceDao.flush();
          }
 
-
+         //creates the variables for session timeout and max people in projects
          String[] systemVariableNames = {"session_timeout", "max_people_per_project"};
          String [] systemVariableValues = {"15", "4"};
 
@@ -72,18 +64,14 @@ public class StartupService {
              SystemVariableEntity systemVariableEntity = new SystemVariableEntity(systemVariableNames[i], Integer.parseInt(systemVariableValues[i]));
              systemVariableDao.persist(systemVariableEntity);
          }
-
+         //creates a new admin "superuser"
          UserEntity userEntity = new UserEntity();
-
-       //    criar user admin
-
         userEntity.setNickname("admin");
         userEntity.setPassword(BCrypt.hashpw("admin", BCrypt.gensalt()));
         userEntity.setFirstName("Admin");
         userEntity.setLastName("Admin");
         userEntity.setEmail("admin@innovlabmgmt.com");
         userEntity.setAvatar("https://commons.wikimedia.org/wiki/File:Default_avatar_profile.jpg");
-        //userEntity.setCreatedAt(LocalDateTime.now());
         userEntity.setAdmin(true);
         userEntity.setConfirmed(true);
         userEntity.setActive(true);
@@ -94,17 +82,7 @@ public class StartupService {
 
 
     }
-
-
-
-
-     // reset de tokens de sessão (falta reset de tokens de email)
         sessionTokenDao.deleteAll();
-
-
-         // definir um token de sessão para o user admin, SEMPRE VÁLIDO PARA EFEITOS DE TESTE
-        // COMENTÁRIO MANTER ISTO APENAS EM DESENVOLVIMENTO
-
       if (sessionTokenDao.findUserBySessionToken("admin") == null) {
           SessionTokenEntity sessionTokenEntity = new SessionTokenEntity();
           sessionTokenEntity.setToken("admin");
@@ -112,14 +90,8 @@ public class StartupService {
           sessionTokenEntity.setUser(userDao.findUserByNickname("admin"));
           sessionTokenDao.persist(sessionTokenEntity);
       }
-
-      // teste de criar skills e interesses
-
         SkillEntity skillEntity = new SkillEntity("C", SkillType.SOFTWARE);
         InterestEntity interestEntity = new InterestEntity("Ballet");
-        // não é obrigatorio por causa do cascade.
-        //interestDao.persist(interestEntity);
-      //  skillDao.persist(skillEntity);
         UserEntity userEntity = userDao.findUserByNickname("admin");
         userEntity.getSkills().add(skillEntity);
         userEntity.getInterests().add(interestEntity);
@@ -131,18 +103,10 @@ public class StartupService {
         createInterests();
         createUsers();
         createMaterials();
-        initializationComplete = true;
-        //createProject(1);
-
-        // NOTA. criar bean para start com criação de vários objetos
-
-
-
-
-
-
 }
-
+    /**
+     * Creates default skills.
+     */
     @Transactional
     private void createSkills(){
         SkillEntity[] skills = {
@@ -160,10 +124,11 @@ public class StartupService {
         for (SkillEntity skill : skills){
             skillDao.persist(skill);
             skillDao.flush();
-
         }
-
     }
+    /**
+     * Creates default interests.
+     */
     @Transactional
     private void createInterests(){
         InterestEntity[] interests={
@@ -180,10 +145,11 @@ public class StartupService {
         for (InterestEntity interest : interests){
             interestDao.persist(interest);
             interestDao.flush();
-
-
         }
     }
+    /**
+     * Creates default materials.
+     */
     @Transactional
     public void createMaterials() {
         MaterialEntity[] materials = new MaterialEntity[]{
@@ -237,17 +203,15 @@ public class StartupService {
                         1010, "Weller Tools", 1234567899, 5,
                         "Includes a soldering iron, solder, and accessories.")
         };
-
-        // Persist each material entity using the materialDao
         for (MaterialEntity material : materials) {
             materialDao.persist(material);
             materialDao.flush();
-
-
         }
     }
 
-
+    /**
+     * populates table with users
+     */
     @Transactional
     private void createUsers(){
         InterestEntity interestSpace = interestDao.findInterestByName("Space exploration");
@@ -271,10 +235,20 @@ public class StartupService {
         for (UserEntity user : users) {
             userDao.persist(user);
             userDao.flush();
-
-
         }
     }
+
+    /**
+     * Sets the parameters for the creation of default users in database when system starts
+     * @param nickname
+     * @param firstName
+     * @param lastName
+     * @param email
+     * @param workplaceLocation
+     * @param skill
+     * @param interest
+     * @return
+     */
     private UserEntity createUser(String nickname, String firstName, String lastName, String email, String workplaceLocation, SkillEntity skill, InterestEntity interest) {
         UserEntity userEntity = new UserEntity();
         userEntity.setNickname(nickname);
@@ -292,35 +266,4 @@ public class StartupService {
         userEntity.getInterests().add(interest);
         return userEntity;
     }
-  //o problema desta classe é que esta a iniciar ao mesmo tempo que as outras
-    //tem de iniciar só apos
-    @Transactional
-    private void createProject(int managerID){
-        if (!initializationComplete) {
-            throw new IllegalStateException("initialization steps not completed");
-        }
-                ProjectEntity startupProject = new ProjectEntity();
-                startupProject.setName("Projecto teste");
-                startupProject.setDescription("projeto inicial para ver se as tabelas estão funcionais");
-                startupProject.setStartDate(LocalDateTime.now());
-                startupProject.setEndDate(LocalDateTime.now().plusDays(2));
-                startupProject.setProjectWorkplace(workplaceDao.findWorkplaceByLocation("COIMBRA"));
-                startupProject.setProjectState(ProjectState.PLANNING);
-                UserEntity manager = userDao.findUserById(managerID);
-                startupProject.addProjectManager(manager);
-                for (UserEntity member : userDao.getUserByWorkplace(1)) {//os membros escolhidos vem num array e é preciso correr o ciclo e adiciona-los ao projeto
-                    startupProject.addMember(member);
-                }
-                for (SkillEntity skill : skillDao.findAll()) {
-                    startupProject.addSkill(skill);
-                }
-                for (InterestEntity interest : interestDao.findAll()) {
-                    startupProject.addInterest(interest);
-                }
-                for (MaterialEntity material : materialDao.findAll()) {
-                    startupProject.addMaterial(material);
-                }
-                projectDao.persist(startupProject);
-            }
-
 }

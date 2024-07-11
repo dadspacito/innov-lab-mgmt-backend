@@ -20,7 +20,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
+/**
+ * Service class for managing interests.
+ */
 @Stateless
 public class InterestService {
 
@@ -28,55 +30,70 @@ public class InterestService {
     private InterestDao interestDao;
     @EJB
     private UserDao userDao;
+    /**
+     * Sets the InterestDao. This is primarily used for mocking purposes in tests.
+     *
+     * @param interestDao the InterestDao to set
+     */
     public void setInterestDao(InterestDao interestDao){
         this.interestDao = interestDao;
     };
-
     /**
-     * falta a parte de criar interesses;
-     * @return
+     * Retrieves all interests as a set of InterestDto.
+     *
+     * @return a set of InterestDto representing all interests
      */
-
-
-
-
-
-    // métodos de obter entidades
-    // obter lista de todos interesses/keywords do sistema
-
+    @Transactional
     public Set<InterestDto> getAllInterests() {
         List<InterestEntity> interestsEntities = interestDao.findAll();
         return interestsEntities.stream().map(this::mapInterestEntityToDto)
                             .collect(Collectors.toSet());
 
     }
-    //aqui tem de receber interesses de um projetoDTO e trasforma-los em entities
-    //é apenas reference ao projeto
-    //aqui foi definido como set, tem de ser retornado como set
-    //aqui recebe um set de id's e tranforma-os en interesses
+    /**
+     * Converts a set of InterestDto to a set of InterestEntity.
+     *
+     * @param i the set of InterestDto to convert
+     * @return a set of InterestEntity
+     */
     public Set<InterestEntity> listProjectInterestsDtoToEntity(Set<InterestDto> i ){
         return i.stream()
                 .map(interestDto -> interestDao.findInterestByID(interestDto.getId()))
                 .collect(Collectors.toSet());
     }
-    //transforma entities em set dto
+    /**
+     * Converts a set of InterestEntity to a set of InterestDto.
+     *
+     * @param i the set of InterestEntity to convert
+     * @return a set of InterestDto
+     */
     public Set<InterestDto> listProjectEntityToDto(Set<InterestEntity> i){
         return i.stream().map(this :: mapInterestEntityToDto).collect(Collectors.toSet());
     }
-    //traz o nome o id. É o que vai para o frontend
+    /**
+     * Converts an InterestEntity to an InterestDto.
+     *
+     * @param interest the InterestEntity to convert
+     * @return the corresponding InterestDto
+     */
     public InterestDto returnInterestDto(InterestEntity interest){
         return mapInterestEntityToDto(interest);
     }
-
-
-    // mapper entidade dto interesse
-
+    /**
+     * Maps an InterestEntity to an InterestDto.
+     *
+     * @param interestEntity the InterestEntity to map
+     * @return the corresponding InterestDto
+     */
     private InterestDto mapInterestEntityToDto(InterestEntity interestEntity) {
         return new InterestDto(interestEntity.getName(), interestEntity.getId());
     }
 
-
-    //esta função cria um interest só para a db, sem definir users e projetos
+    /**
+     * Creates a new interest from the provided InterestDto.
+     *
+     * @param interest the InterestDto to create
+     */
     @Transactional
     public void createNewInterest(InterestDto interest){
         InterestEntity iEnt = convertInterestDtoInEntity(interest);
@@ -85,6 +102,12 @@ public class InterestService {
         interestDao.persist(iEnt);
         interestDao.flush();
     }
+    /**
+     * Inactivates an interest by its ID.
+     *
+     * @param id the ID of the interest to inactivate
+     * @throws EntityNotFoundException if the interest with the given ID is not found
+     */
     @Transactional
     public void inactivateInterest(int id){
         if (isValidInterestID(id)){
@@ -94,17 +117,33 @@ public class InterestService {
             interestDao.flush();
         }
         else throw new EntityNotFoundException("That interest was not found in the database");
-        //faz sentido aqui o logger?
     }
-
+    /**
+     * Checks if an interest ID is valid.
+     *
+     * @param id the ID to check
+     * @return true if the ID is valid, false otherwise
+     */
     private boolean isValidInterestID(int id){
         return interestDao.findInterestByID(id) != null;
     }
+    /**
+     * Converts an InterestDto to an InterestEntity.
+     *
+     * @param i the InterestDto to convert
+     * @return the corresponding InterestEntity
+     */
     public InterestEntity convertInterestDtoInEntity(InterestDto i){
         InterestEntity iEnt = new InterestEntity();
         iEnt.setName(i.getName());
         return iEnt;
     }
+    /**
+     * Checks the validity of an interest.
+     *
+     * @param interest the InterestEntity to check
+     * @return true if the interest is valid, false otherwise
+     */
     @Transactional
     public boolean checkInterestValidity(InterestEntity interest){
         Set<InterestEntity> interests = interestDao.interestList();
@@ -115,6 +154,12 @@ public class InterestService {
         }
         return true;
     }
+    /**
+     * Retrieves an InterestEntity by its ID.
+     *
+     * @param id the ID of the interest
+     * @return the InterestEntity, or null if not found
+     */
     @Transactional
     public InterestEntity getInterestByID(int id){
         try {
@@ -128,6 +173,11 @@ public class InterestService {
             return null;
         }
     }
+    /**
+     * Retrieves a set of active interests as InterestDto.
+     *
+     * @return a set of active InterestDto, or null if none found
+     */
     @Transactional
     public Set<InterestDto> activeInterestDtoList(){
         try {

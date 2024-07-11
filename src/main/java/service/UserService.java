@@ -24,7 +24,9 @@ import java.lang.reflect.Array;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
-
+/**
+ * Service class handling operations related to users in the system.
+ */
 @Stateless
 public class UserService {
 
@@ -36,12 +38,12 @@ public class UserService {
     @EJB private ProjectService projectService;
     @EJB private InterestService interestService;
     @EJB private SkillService skillService;
-
-// função que vai adicionar user
-    // recebe user dto
-    // DTO vai ser válido quando chega aqui
-    // incluir a validação das entidades associadas. Se workplace não existir, retornar NOT_FOUND
-
+    /**
+     * Registers a new user in the system.
+     *
+     * @param userDto Data Transfer Object containing user information for registration.
+     * @return UserState indicating the status of user creation (e.g., CREATED, ALREADY_EXISTS).
+     */
     @Transactional
     public UserState registerUser(UserDto userDto) {
         if (userDao.findUserByEmail(userDto.getEmail()) != null) {
@@ -65,6 +67,12 @@ public class UserService {
         userDao.persist(user);
          return UserState.CREATED;
     }
+    /**
+     * Retrieves a user entity by its ID.
+     *
+     * @param id The ID of the user to retrieve.
+     * @return UserEntity corresponding to the given ID, or null if not found.
+     */
     @Transactional
     public UserEntity getUserByID(int id){
         if (userIsValid(userDao.findUserById(id))){
@@ -72,7 +80,12 @@ public class UserService {
         }
         else return null;
     }
-
+    /**
+     * Confirms a user's registration by validating the email token.
+     *
+     * @param emailToken The token sent to the user's email for verification.
+     * @return true if the user is successfully confirmed, false otherwise.
+     */
     public boolean confirmUser(String emailToken) {
         UserEntity user = userDao.findUserByEmailToken(emailToken);
         if (user == null) {
@@ -87,30 +100,30 @@ public class UserService {
             return true;
         }
     }
+    /**
+     * Retrieves a user entity based on the session token.
+     *
+     * @param token The session token associated with the user.
+     * @return UserEntity corresponding to the session token, or null if not found.
+     */
     public UserEntity getUserByToken(String token) {
         return sessionTokenDao.findUserBySessionToken(token);
     }
+    /**
+     * Retrieves a list of project members available for selection.
+     *
+     * @return List of SelectProjectMembersDto representing available project members.
+     */
     public List<SelectProjectMembersDto> membersAvailableProjects(){
         List<UserEntity> userEntList = userDao.findAll();
         return userEntList.stream().map(this::convertUserEntToMemberAvailable).collect(Collectors.toList());
     }
-
-    public UserState checkUserState (String email) {
-
-        UserEntity user = userDao.findUserByEmail(email);
-        /// retornar por cada tipo de condição
-        if (user == null) {
-            return UserState.NOT_FOUND;
-        }
-        if (!user.isConfirmed()) {
-            return UserState.NOT_CONFIRMED;
-        }
-       /* if (user.isActive() == false) {
-            return UserState.DELETED;
-        }*/
-        return UserState.ACTIVE;
-    }
-
+    /**
+     * Converts a ProjectManagerDto object to a ProjectMemberDto object.
+     *
+     * @param manager ProjectManagerDto object to convert.
+     * @return ProjectMemberDto representing the converted project manager.
+     */
     public ProjectMemberDto convertManagerToMember(ProjectManagerDto manager){
         if (userIsValid(userDao.findUserById(manager.getId()))){
             ProjectMemberDto member =  new ProjectMemberDto();
@@ -120,12 +133,24 @@ public class UserService {
         }
         return null;
     }
+    /**
+     * Retrieves a UserEntity object from a ProjectManagerDto object.
+     *
+     * @param manager ProjectManagerDto object from which to retrieve the UserEntity.
+     * @return UserEntity corresponding to the project manager, or null if not found.
+     */
     private UserEntity getUserEntityFromManager(ProjectManagerDto manager){
         if (userIsValid(userDao.findUserById(manager.getId()))){
             return userDao.findUserById(manager.getId());
         }
         return null;
     }
+    /**
+     * Initiates a request for resetting a user's password.
+     *
+     * @param email The email address of the user requesting password reset.
+     * @return true if the password reset request was successfully initiated, false otherwise.
+     */
     public boolean requestPasswordReset(String email) {
         UserEntity user = userDao.findUserByEmail(email);
         if (user == null) {
@@ -138,7 +163,13 @@ public class UserService {
         EmailSender.sendPasswordResetEmail(user.getEmail(), user.getFirstName(), resetLink);
         return true;
     }
-
+    /**
+     * Resets a user's password based on the email token.
+     *
+     * @param emailToken The token sent to the user's email for password reset.
+     * @param newPassword The new password to set for the user.
+     * @return true if the password was successfully reset, false otherwise.
+     */
     public boolean resetPassword(String emailToken, String newPassword) {
         UserEntity user = userDao.findUserByEmailToken(emailToken);
         if (user == null) {
@@ -150,9 +181,12 @@ public class UserService {
         userDao.merge(user);
         return true;
     }
-
-
-
+    /**
+     * Retrieves the header information of a user.
+     *
+     * @param user The UserEntity for which to retrieve the header information.
+     * @return HeaderDto containing the user's nickname and avatar.
+     */
     public HeaderDto getHeader (UserEntity user) {
         HeaderDto headerDto = new HeaderDto();
         if (user.getNickname() != null) {
@@ -163,8 +197,12 @@ public class UserService {
         headerDto.setAvatar(user.getAvatar());
         return headerDto;
     }
-
-
+    /**
+     * Retrieves a list of project members from a specified workplace.
+     *
+     * @param workplaceID The ID of the workplace from which to retrieve project members.
+     * @return List of ProjectMemberDto representing project members in the workplace.
+     */
     public List<ProjectMemberDto> returnProjectMembers(int workplaceID) {
         if (workplaceDao.getWorkplaceByID(workplaceID) != null) {
             return userDao.getUserByWorkplace(workplaceID).stream()
@@ -173,12 +211,24 @@ public class UserService {
         }
         return List.of();
     }
+    /**
+     * Converts a UserEntity object to a ProjectMemberDto object.
+     *
+     * @param u UserEntity object to convert.
+     * @return ProjectMemberDto representing the converted user entity.
+     */
     public ProjectMemberDto ConvertUserEntityToProjectMembers(UserEntity u) {
         if (userIsValid(u)) {
             return new ProjectMemberDto(u.getId(), u.getFirstName(), u.getLastName(), u.getNickname(), LocalDateTime.now());
         }
         return null;
     }
+    /**
+     * Converts a UserEntity object to a ProjectManagerDto object.
+     *
+     * @param u UserEntity object to convert.
+     * @return ProjectManagerDto representing the converted user entity as a project manager.
+     */
     public ProjectManagerDto convertUserEntityToProjectManager(UserEntity u){
         if (userIsValid(u)){
             ProjectManagerDto manager = new ProjectManagerDto();
@@ -189,7 +239,12 @@ public class UserService {
         }
         return null;
     }
-
+    /**
+     * Retrieves a UserEntity object corresponding to a ProjectManagerDto object.
+     *
+     * @param manager ProjectManagerDto object from which to retrieve the UserEntity.
+     * @return UserEntity corresponding to the project manager, or null if not found.
+     */
     public UserEntity defineManager(ProjectManagerDto manager){
         try{
             if (userDao.findUserById(manager.getId())!= null){
@@ -201,11 +256,21 @@ public class UserService {
             return null;
         }
     }
-    //metodo privado
+    /**
+     * Retrieves a UserEntity object from a ProjectMemberDto object.
+     *
+     * @param member ProjectMemberDto object from which to retrieve the UserEntity.
+     * @return UserEntity corresponding to the project member, or null if not found.
+     */
     public UserEntity getUserEntityFromProjectMember(ProjectMemberDto member){
         return userDao.findUserById(member.getId());
     }
-    //mudar nome depois
+    /**
+     * Transforms a set of member IDs into a set of UserEntity objects.
+     *
+     * @param membersIDs Set of member IDs to transform.
+     * @return Set of UserEntity representing the transformed member IDs.
+     */
     public Set<UserEntity> transformIdIntoUserEntity(Set<Integer> membersIDs){
         Set<UserEntity> members = new HashSet<>();
         for (int i : membersIDs){
@@ -213,18 +278,38 @@ public class UserService {
         }
         return members;
     }
-    //transforma o set de id's em entidades de user
+    /**
+     * Converts a set of ProjectMemberDto objects to a set of UserEntity objects.
+     *
+     * @param member Set of ProjectMemberDto objects to convert.
+     * @return Set of UserEntity representing the converted ProjectMemberDto objects.
+     */
     public Set<UserEntity> listMembersDtoToEntity(Set<ProjectMemberDto> member){
         return member.stream().map(userDto -> userDao.findUserById(userDto.getId())).collect(Collectors.toSet());
     }
+    /**
+     * Converts a set of UserEntity objects to a set of ProjectMemberDto objects.
+     *
+     * @param user Set of UserEntity objects to convert.
+     * @return Set of ProjectMemberDto representing the converted UserEntity objects.
+     */
     public Set<ProjectMemberDto> listUserEntityToMemberDto(Set<UserEntity> user){
         return user.stream().map(this :: ConvertUserEntityToProjectMembers).collect(Collectors.toSet());
     }
-    // gerar token para email
-
+    /**
+     * Generates a new random token for email verification or password reset.
+     *
+     * @return String containing the generated token.
+     */
     private String generateNewToken() {
         return UUID.randomUUID().toString();
     }
+    /**
+     * Checks if a UserEntity object is valid based on existence and database retrieval.
+     *
+     * @param u UserEntity to validate.
+     * @return true if the user is valid, false otherwise.
+     */
     @Transactional
     private boolean userIsValid (UserEntity u){
         if (u == null){
@@ -232,8 +317,12 @@ public class UserService {
         }
         return userDao.findUserById(u.getId()) != null;
     }
-
-    //para que é que isto aqui está seu burro (estou a falar para mim)
+    /**
+     * Converts a UserEntity object to a SelectProjectMembersDto object for available project members.
+     *
+     * @param user UserEntity object to convert.
+     * @return SelectProjectMembersDto representing the converted UserEntity.
+     */
     private SelectProjectMembersDto convertUserEntToMemberAvailable(UserEntity user){
         SelectProjectMembersDto member = new SelectProjectMembersDto();
         member.setId(user.getId());
@@ -242,6 +331,12 @@ public class UserService {
         member.setEmail(user.getEmail());
         return member;
     }
+    /**
+     * Converts a UserEntity object to a UserProfileDto object.
+     *
+     * @param u UserEntity object to convert.
+     * @return UserProfileDto representing the converted UserEntity, or null if not found.
+     */
     private UserProfileDto convertUserEntityToProfileDto(UserEntity u){
         if (userDao.findUserById(u.getId()) != null){
             UserProfileDto userProfile = new UserProfileDto();
@@ -262,18 +357,19 @@ public class UserService {
         }
         return null;
     }
+
     public UserProfileDto getUserProfileDto(int userID){
         if (userIsValid(userDao.findUserById(userID))){
             return convertUserEntityToProfileDto(userDao.findUserById(userID));
         }
         System.err.println("user does not exist");
-        //aqui é que tem de se usar o null pointer exception?
         return null;
     }
 
     /**
-     * Edits the profile of a user.
+     * Edits the profile of a user based on the provided UserProfileDto.
      *
+     * @param userID The ID of the user whose profile is being edited.
      * @param userDto Data Transfer Object containing updated user profile information.
      */
     @Transactional
@@ -299,6 +395,13 @@ public class UserService {
         u.setBio(userDto.getBio());
         return u;
     }
+    /**
+     * Converts a UserProfileDto object to update an existing UserEntity object for profile edition.
+     *
+     * @param userID The ID of the user whose profile is being edited.
+     * @param userDto Data Transfer Object containing updated user profile information.
+     * @return UserEntity object with updated profile information.
+     */
     private UserEntity DtoToEntityProfileEdition(int userID, UserProfileDto userDto){
         UserEntity u = userDao.findUserById(userID);
         if (userDto.getFirstName() != null) {
@@ -318,6 +421,12 @@ public class UserService {
         }
         return u;
     }
+    /**
+     * Adds a skill to a user identified by their ID.
+     *
+     * @param userID The ID of the user to whom the skill is being added.
+     * @param skillID The ID of the skill to add.
+     */
     @Transactional
     public void addSkillToUser(int userID, int skillID){
         UserEntity u = userDao.findUserById(userID);
@@ -333,6 +442,12 @@ public class UserService {
         }
         else System.err.println("user does not exist");
     }
+    /**
+     * Adds an interest to a user identified by their ID.
+     *
+     * @param userID The ID of the user to whom the interest is being added.
+     * @param interestID The ID of the interest to add.
+     */
     @Transactional
     public void addInterestToUser(int userID, int interestID){
         UserEntity u = userDao.findUserById(userID);
@@ -348,7 +463,12 @@ public class UserService {
         }
         else System.err.println("user does not exist");
     }
-    //remove interest and skill
+    /**
+     * Removes an interest from a user identified by their ID.
+     *
+     * @param userID The ID of the user from whom the interest is being removed.
+     * @param interestID The ID of the interest to remove.
+     */
     @Transactional
     public void removeInterestFromUser(int userID, int interestID){
         UserEntity u = userDao.findUserById(userID);
@@ -364,11 +484,17 @@ public class UserService {
         }
         else System.err.println("user does not exist");
     }
+    /**
+     * Removes a skill from a user identified by their ID.
+     *
+     * @param userID The ID of the user from whom the skill is being removed.
+     * @param skillID The ID of the skill to remove.
+     */
     @Transactional
-    public void removeSkillFromUser(int userID, int interestID){
+    public void removeSkillFromUser(int userID, int skillID){
         UserEntity u = userDao.findUserById(userID);
         if (userIsValid(u)){
-            SkillEntity s = skillService.getSKillByID(interestID);
+            SkillEntity s = skillService.getSKillByID(skillID);
             if (s != null){
                 u.getSkills().remove(s);
                 s.removeUser(u);
@@ -379,13 +505,18 @@ public class UserService {
         }
         else System.err.println("user does not exist");
     }
+    /**
+     * Allows a user identified by their ID to leave a project identified by its ID.
+     *
+     * @param userID The ID of the user leaving the project.
+     * @param projectID The ID of the project from which the user is leaving.
+     */
     @Transactional
     public void leaveProject(int userID, int projectID){
         UserEntity u = userDao.findUserById(userID);
         if(u != null){
             ProjectEntity p = projectService.getProjectEntityByID(projectID);
             if (p != null){
-                //fazer aqui verificação de que se user for manager nao pode sair
                 p.getProjectMembers().remove(u);
                 u.getProjects().remove(p);
                 userDao.merge(u);
@@ -393,13 +524,18 @@ public class UserService {
             }
         }
     }
+    /**
+     * Allows a user identified by their ID to join a project identified by its ID.
+     *
+     * @param userID The ID of the user joining the project.
+     * @param projectID The ID of the project to join.
+     */
     @Transactional
     public void joinProject(int userID, int projectID){
         UserEntity u = userDao.findUserById(userID);
         if(u != null){
             ProjectEntity p = projectService.getProjectEntityByID(projectID);
             if (p != null){
-                //aqui tem de haver uma verificação se o user recebeu um convite para se juntar ao projecto
                 p.getProjectMembers().add(u);
                 u.getProjects().add(p);
                 userDao.merge(u);
@@ -407,6 +543,13 @@ public class UserService {
             }
         }
     }
+    /**
+     * Retrieves a set of basic project information associated with a user identified by their ID.
+     *
+     * @param userID The ID of the user for whom to retrieve associated projects.
+     * @return Set of BasicProjectDto representing the user's associated projects.
+     * @throws NullPointerException if the user with the specified ID does not exist.
+     */
     @Transactional
     public Set<BasicProjectDto> getUserProjects(int userID){
         UserEntity u = userDao.findUserById(userID);
@@ -417,7 +560,6 @@ public class UserService {
         }
         else throw new NullPointerException("user is null");
     }
-
 }
 
 

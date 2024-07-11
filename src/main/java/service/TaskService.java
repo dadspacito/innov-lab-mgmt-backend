@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  * It interacts with DAOs (Data Access Objects) to perform CRUD operations on tasks and handles task-related business logic.
  * </p>
  *
- * @author Your Name
+ * @author Pedro Monteiro, Daniel Silva
  * @version 1.0
  */
 
@@ -192,7 +192,21 @@ public class TaskService {
         }
         return null;
     }
-
+    /**
+     * Updates a task within a project based on the provided task DTO.
+     *
+     * This method retrieves the project and task entities by their IDs and updates the task
+     * attributes with the values from the task DTO. If a property in the task DTO is not null,
+     * it updates the corresponding property in the task entity. The updated task entity is then
+     * merged back into the database.
+     *
+     * @param projectID The ID of the project to which the task belongs.
+     * @param taskID The ID of the task to be updated.
+     * @param taskDto The DTO containing the updated task information.
+     *
+     * @throws NullPointerException If either the project or task entity is not found.
+     *                             This can happen if either the projectID or taskID does not exist.
+     */
     @Transactional
     public void updateTask( int projectID,int taskID,TaskDto taskDto){
         ProjectEntity p = projectService.getProjectEntityByID(projectID);

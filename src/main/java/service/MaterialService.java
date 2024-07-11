@@ -4,6 +4,7 @@ package service;
 import dao.MaterialDao;
 import dto.MaterialDto;
 import entity.MaterialEntity;
+import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityExistsException;
@@ -15,17 +16,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
+/**
+ * Service class for managing materials.
+ */
 @Stateless public class MaterialService {
-    @Inject
-    private MaterialDao materialDao;
-
-    //a lista que retorna do backend tem de ser transformada em DTO
-    //adicionar material
-    //remover material
-    //retornar lista de materiais
-
-    //função que recebe array entity backend e transforma em array dtos para mostrar no frontend
+    @EJB private MaterialDao materialDao;
+    /**
+     * Converts a MaterialEntity to a MaterialDto.
+     *
+     * @param material the MaterialEntity to convert
+     * @return the corresponding MaterialDto
+     */
     private MaterialDto convertMaterialsEntityToDTO(MaterialEntity material){
             MaterialDto materialDTO = new MaterialDto();
             materialDTO.setId(material.getId());
@@ -38,11 +39,14 @@ import java.util.stream.Collectors;
             materialDTO.setSupplierContact(material.getSupplierContact());
             materialDTO.setQuantity(material.getQuantity());
             materialDTO.setObservations(material.getObservations());
-            //aqui falta depois o get project
-            //materialsDtoList.add(materialDTO);
             return materialDTO;
     }
-    //transforma um material DTO em material entity
+    /**
+     * Converts a MaterialDto to a MaterialEntity.
+     *
+     * @param material the MaterialDto to convert
+     * @return the corresponding MaterialEntity
+     */
     private MaterialEntity convertMaterialDTOtoEntity(MaterialDto material){
         MaterialEntity me =  new MaterialEntity();
         me.setName(material.getName());
@@ -56,9 +60,11 @@ import java.util.stream.Collectors;
         me.setObservations(material.getObservations());
         return me;
     }
-
-    //adiciona um material à base de dados
-    //aqui tem de ser transacional
+    /**
+     * Adds a new material to the database.
+     *
+     * @param material the MaterialDto to add
+     */
     @Transactional
     public void addMaterialToDB(MaterialDto material){
         if (!materialNameIsValid(material.getName())){
@@ -66,14 +72,20 @@ import java.util.stream.Collectors;
             materialDao.flush();
         }
     }
-
-
-    //retorna todos os materiais em DTO
+    /**
+     * Retrieves all materials as a set of MaterialDto.
+     *
+     * @return a set of MaterialDto representing all materials
+     */
     public Set<MaterialDto> getAllMaterials (){
         List<MaterialEntity> m = materialDao.findAll();
         return m.stream().map(this::convertMaterialsEntityToDTO).collect(Collectors.toSet());
     }
-    //adicionar novo material À DB
+    /**
+     * Removes a material from the database by its ID.
+     *
+     * @param id the ID of the material to remove
+     */
     @Transactional
     public void removeMaterialFromDB(int id){
         System.out.println(id);
@@ -83,20 +95,48 @@ import java.util.stream.Collectors;
             materialDao.flush();
         }
     }
+    /**
+     * Checks if a material name is valid (i.e., does not already exist in the database).
+     *
+     * @param name the name to check
+     * @return true if the name is valid, false otherwise
+     */
     private boolean materialNameIsValid(String name){
         return materialDao.findMaterialByName(name)!= null;
     }
+    /**
+     * Checks if a material ID is valid (i.e., exists in the database).
+     *
+     * @param id the ID to check
+     * @return true if the ID is valid, false otherwise
+     */
     private boolean materialIDIsValid(int id){
         return materialDao.findMaterialByID(id)!= null;
     }
-
-    //isto nao estara bem feito porque precisa de pre validações sobre projeto onde esta inserido e afins
+    /**
+     * Converts a set of MaterialDto to a set of MaterialEntity.
+     *
+     * @param m the set of MaterialDto to convert
+     * @return a set of MaterialEntity
+     */
     public Set<MaterialEntity> listProjectMaterialsDtoToEntity(Set<MaterialDto> m){
         return m.stream().map(materialDto -> materialDao.findMaterialByID(materialDto.getId())).collect(Collectors.toSet());
     }
+    /**
+     * Converts a set of MaterialEntity to a set of MaterialDto.
+     *
+     * @param m the set of MaterialEntity to convert
+     * @return a set of MaterialDto
+     */
     public Set<MaterialDto> listProjectMaterialEntityToDto(Set<MaterialEntity> m){
         return m.stream().map(this ::convertMaterialsEntityToDTO).collect(Collectors.toSet());
     }
+    /**
+     * Retrieves a MaterialEntity by its ID.
+     *
+     * @param id the ID of the material
+     * @return the MaterialEntity, or null if not found
+     */
     private MaterialEntity getMaterialsByID(int id){
         try{
             return materialDao.findMaterialByID(id);
@@ -106,7 +146,4 @@ import java.util.stream.Collectors;
             return null;
         }
     }
-
-    //apagar material da DB
-
 }

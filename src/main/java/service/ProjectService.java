@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  * It interacts with various DAOs (Data Access Objects) and services to handle business logic and data operations.
  * </p>
  *
- * @author Your Name
+ * @author Pedro Monteiro, Daniel Silva
  * @version 1.0
  */
 
@@ -69,9 +69,14 @@ public class ProjectService {
     /**
      * EJB (Enterprise JavaBean) for accessing user data in the database
      */
-    @EJB
-    private UserDao userDao;
+    @EJB private UserDao userDao;
+    /**
+     * EJB (Enterprise JavaBean) for accessing workplace data in the database
+     */
     @EJB private WorkplaceDao workplaceDao;
+    /**
+     * EJB (Enterprise JavaBean) for accessing material data in the database
+     */
     @EJB private MaterialDao materialDao;
 
 
@@ -219,6 +224,12 @@ public class ProjectService {
             taskDao.flush();
         }
     }
+    /**
+     * Removes a member from a project if the project and member are valid.
+     *
+     * @param projectID the ID of the project
+     * @param memberID  the ID of the member to remove
+     */
     @Transactional
     public void removeProjectMembers(int projectID, int memberID){
         if (projectIsValid(projectID)){
@@ -230,6 +241,12 @@ public class ProjectService {
             System.err.println("user is not in project");
         }
     }
+    /**
+     * Adds a member to a project if the project is valid and the member is not already in the project.
+     *
+     * @param projectID the ID of the project
+     * @param memberID  the ID of the member to add
+     */
     @Transactional
     public void addProjectMember(int projectID, int memberID){
         if (projectIsValid(projectID)){
@@ -265,16 +282,22 @@ public class ProjectService {
         System.err.println("project does not exist");
        return null;
     }
-        public Set<BasicProjectDto> getBasicProjects() {
-            try{
-                Set<ProjectEntity> p = projectDao.getAllProjectsOrdered();
-                return p.stream().map(this::convertProjectEntityToBasicProjectDto).collect(Collectors.toSet());
-            }
-            catch (NoResultException e){
-                System.err.println("No projects were found");
-                return null;
-            }
+    /**
+     * Retrieves a set of basic project DTOs from all projects ordered.
+     *
+     * @return a set of {@link BasicProjectDto} representing basic project information.
+     *         Returns null if no projects were found.
+     */
+    public Set<BasicProjectDto> getBasicProjects() {
+        try{
+            Set<ProjectEntity> p = projectDao.getAllProjectsOrdered();
+            return p.stream().map(this::convertProjectEntityToBasicProjectDto).collect(Collectors.toSet());
         }
+        catch (NoResultException e){
+            System.err.println("No projects were found");
+            return null;
+        }
+    }
     /**
      * Converts a {@link DetailedProjectDto} to a {@link ProjectEntity}.
      * <p>
@@ -376,6 +399,13 @@ public class ProjectService {
     private boolean projectIsValid(int projectID){
         return projectDao.getProjectByID(projectID) != null;
     }
+    /**
+     * Checks if the specified project is full. A project is considered full if it has 4 or more members.
+     *
+     * @param projectID the ID of the project to check.
+     * @return {@code true} if the project has 4 or more members, {@code false} otherwise.
+     * @throws EntityNotFoundException if the project with the specified ID does not exist.
+     */
     public boolean projectIsFull(int projectID){
         ProjectEntity p = projectDao.getProjectByID(projectID);
         return p.getProjectMembers().size() >= 4;
@@ -395,8 +425,12 @@ public class ProjectService {
         //isto aqui tem de ser uma query do dao em que vai buscar os projetos que pertencem ao id dele
         return p.stream().map(this::convertProjectEntityToBasicProjectDto).collect(Collectors.toSet());
     }
-
-    //isto é para o carrosel
+    /**
+     * Converts a ProjectEntity to a BasicProjectDto.
+     *
+     * @param p the ProjectEntity to convert.
+     * @return the converted BasicProjectDto.
+     */
     private BasicProjectDto convertProjectEntityToBasicProjectDto(ProjectEntity p){
         BasicProjectDto basicProject =  new BasicProjectDto();
         basicProject.setId(p.getId());
@@ -407,7 +441,12 @@ public class ProjectService {
         basicProject.setProjectInterests(interestService.listProjectEntityToDto(p.getInterests()));
         return basicProject;
     }
-
+    /**
+     * Retrieves a ProjectEntity by its ID.
+     *
+     * @param projectID the ID of the project.
+     * @return the ProjectEntity if found, or null if not found.
+     */
     public ProjectEntity getProjectEntityByID(int projectID){
         ProjectEntity p = projectDao.getProjectByID(projectID);
         if (p != null){
@@ -415,7 +454,13 @@ public class ProjectService {
         }
         else return null;
     }
-
+    /**
+     * Updates an existing project with the given details.
+     *
+     * @param projectID the ID of the project to update.
+     * @param project the DetailedProjectDto containing updated project details.
+     * @throws IllegalArgumentException if the project with the specified ID is not found.
+     */
     @Transactional
     public void updateProject (int projectID, DetailedProjectDto project) {
         ProjectEntity p = getProjectEntityByID(projectID);

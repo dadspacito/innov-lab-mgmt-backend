@@ -14,18 +14,31 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
+/**
+ * Service class handling operations related to workplaces in the system.
+ */
 @Stateless
 public class WorkplaceService {
     @EJB
     private WorkplaceDao workplaceDao;
-
+    /**
+     * Retrieves all workplaces and converts them to DTOs.
+     *
+     * @return Set of WorkplaceDto containing all workplaces in the system.
+     */
     @Transactional
     public Set<WorkplaceDto> returnWorkplaces() {
         return workplaceDao.findAllWorkplaces().stream()
                 .map(this::convertWorkplaceEntityToDto)
                 .collect(Collectors.toSet());
     }
+    /**
+     * Retrieves a workplace entity by its ID and validates its existence.
+     *
+     * @param id The ID of the workplace to retrieve.
+     * @return WorkplaceEntity corresponding to the given ID.
+     * @throws EntityNotFoundException if the workplace with the specified ID does not exist.
+     */
     @Transactional
     public WorkplaceEntity getWorkplaceByID(int id) {
         System.out.println("getWorkplaceByID: Trying to find Workplace with ID: " + id);
@@ -39,11 +52,23 @@ public class WorkplaceService {
             throw new NullPointerException("that location is null");
         }
     }
-
+    /**
+     * Retrieves the users associated with a specific workplace.
+     *
+     * @param workplace The WorkplaceEntity for which to retrieve associated users.
+     * @return Set of UserEntity representing users associated with the workplace.
+     */
     public Set<UserEntity> getUsersFromWorkplace(WorkplaceEntity workplace){
         System.out.println(workplace.getUsers());
         return workplace.getUsers();
     }
+    /**
+     * Converts a WorkplaceDto object to a WorkplaceEntity object.
+     *
+     * @param workplace The WorkplaceDto object to convert.
+     * @return WorkplaceEntity corresponding to the provided WorkplaceDto.
+     * @throws NullPointerException if the workplace with the specified ID does not exist.
+     */
     public WorkplaceEntity getWorkplaceEntityByDto(WorkplaceDto workplace){
         System.out.println("in workplace entity by dto");
         if (isValidWorkplace(workplaceDao.getWorkplaceByID(workplace.getId()))){
@@ -59,9 +84,21 @@ public class WorkplaceService {
         System.err.println(workplaceDao.getWorkplaceByID(workplace.getId()));
         throw new NullPointerException("that workplace does not exist");
     }
+    /**
+     * Converts a WorkplaceEntity object to a WorkplaceDto object.
+     *
+     * @param w The WorkplaceEntity object to convert.
+     * @return WorkplaceDto representing the converted WorkplaceEntity.
+     */
     public WorkplaceDto getWorkplaceDto(WorkplaceEntity w){
         return convertWorkplaceEntityToDto(w);
     }
+    /**
+     * Converts a WorkplaceEntity object to a WorkplaceDto object.
+     *
+     * @param workplace The WorkplaceEntity object to convert.
+     * @return WorkplaceDto representing the converted WorkplaceEntity, or null if not valid.
+     */
     private WorkplaceDto convertWorkplaceEntityToDto(WorkplaceEntity workplace){
         if (isValidWorkplace(workplace)){
             WorkplaceDto workplaceDto =  new WorkplaceDto();
@@ -71,6 +108,12 @@ public class WorkplaceService {
         }
         return null;
     }
+    /**
+     * Checks if a WorkplaceEntity object is valid based on existence in the database.
+     *
+     * @param w The WorkplaceEntity to validate.
+     * @return true if the workplace is valid, false otherwise.
+     */
     private boolean isValidWorkplace(WorkplaceEntity w){
         return workplaceDao.getWorkplaceByID(w.getId()) != null;
     }
