@@ -6,6 +6,7 @@ import dao.TaskDao;
 import dao.UserDao;
 import dto.DetailedProjectDto;
 import dto.TaskDto;
+import entity.ProjectEntity;
 import entity.TaskEntity;
 import entity.UserEntity;
 import enums.TaskState;
@@ -40,6 +41,7 @@ public class TaskService {
     @EJB private UserDao userDao;
     @EJB private ProjectDao projectDao;
     @EJB private UserService userService;
+    @EJB private ProjectService projectService;
     private static final Logger LOGGER = LogManager.getLogger(TaskService.class);
 
 
@@ -50,16 +52,8 @@ public class TaskService {
      *          This parameter should not be {@code null}.
      * @return The {@link TaskDto} representing the retrieved task, or {@code null} if the task does not exist or the user is invalid.
      */
-    public TaskDto getTaskByID(TaskEntity t){
-        if (isValidUser(t.getId())){
-            taskDao.returnTaskByID(t.getId());
-            LOGGER.info("sucessfully retrieved task" + t.getOwner().getEmail(), LocalDateTime.now());
-            return convertTaskEntityToDto(t);
 
-        }
-        LOGGER.error("Error fetching task with id" + t.getOwner().getEmail(), LocalDateTime.now());
-        return null;
-    }
+
     /**
      * Retrieves a set of task entities from a list of task DTOs.
      *
@@ -125,7 +119,6 @@ public class TaskService {
      */
     public TaskEntity convertTaskDtoToEntity(TaskDto taskDto){
         TaskEntity taskEnt =  new TaskEntity();
-
         taskEnt.setActive(true);
         taskEnt.setName(taskDto.getName());
         taskEnt.setDescription(taskDto.getDescription());
@@ -190,13 +183,49 @@ public class TaskService {
      * @param id The ID of the task to retrieve.
      * @return The {@link TaskEntity} object representing the retrieved task, or {@code null} if the task does not exist.
      */
-    public TaskEntity getTaskByID(int id){
-        try{
-            return taskDao.returnTaskByID(id);
+    @Transactional
+    public TaskDto getTaskByID(int id){
+        TaskEntity t =  taskDao.returnTaskByID(id);
+        if (t != null) {
+            TaskDto tDto = convertTaskEntityToDto(t);
+            return tDto;
         }
-        catch (NoResultException e){
-            System.err.println("that task does not exist");
-            return null;
+        return null;
+    }
+
+    @Transactional
+    public void updateTask( int projectID,int taskID,TaskDto taskDto){
+        ProjectEntity p = projectService.getProjectEntityByID(projectID);
+        if (p != null){
+            TaskEntity t = convertTaskDtoToEntity(getTaskByID(taskID));
+            if (t != null){
+                if (taskDto.getName() != null){
+                    t.setName(taskDto.getName());
+                }
+                if (taskDto.getDescription() != null){
+                    t.setDescription(taskDto.getDescription());
+                }
+                if (taskDto.getStartDate() != null){
+                    t.setStartDate(taskDto.getStartDate());
+                }
+                if (taskDto.getEndDate() != null){
+                    t.setEndDate(taskDto.getEndDate());
+                }
+
+                if (taskDto.getOwner() != null){
+                    UserEntity u = userService.getUserByID(taskDto.getOwner().getId());
+                    if (u != null){
+                        t.setOwner(u);
+                    }
+                }
+
+                if (taskDto.getState() != null){
+                    t.setState(taskDto.getState());
+                }
+                taskDao.merge(t);
+            }
+            throw new NullPointerException("Task is null");
         }
+        throw new NullPointerException("project is null");
     }
 }

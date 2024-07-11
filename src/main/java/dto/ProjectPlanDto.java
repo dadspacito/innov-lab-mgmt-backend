@@ -9,7 +9,7 @@ public class ProjectPlanDto {
 
     private Set<TaskDto> taskList;
     private String projectDuration;
-    private String aditionalExecutors;
+    private String additionalExecutors;
 
     public ProjectPlanDto() {
     }
@@ -28,18 +28,14 @@ public class ProjectPlanDto {
     }
     private void setProjectDuration(Set<TaskDto> tasks) {
         Period totalDuration = Period.ZERO; // Initialize total duration to zero
-
         for (TaskDto t : tasks) {
             LocalDate startDate = t.getStartDate().toLocalDate();
             LocalDate endDate = t.getEndDate().toLocalDate();
-
             // Calculate the period between start and end dates
             Period taskPeriod = Period.between(startDate, endDate);
-
             // Add the task period to the total duration
             totalDuration = totalDuration.plus(taskPeriod);
         }
-
         // Convert the total duration to a readable format (e.g., "X months Y days")
         this.projectDuration = totalDuration.getMonths() + " months " + totalDuration.getDays() + " days";
     }
@@ -47,11 +43,11 @@ public class ProjectPlanDto {
 
 
     public String getAditionalExecutors() {
-        return aditionalExecutors;
+        return additionalExecutors;
     }
 
     public void setAditionalExecutors(String aditionalExecutors) {
-        this.aditionalExecutors = aditionalExecutors;
+        this.additionalExecutors = aditionalExecutors;
     }
 
 }

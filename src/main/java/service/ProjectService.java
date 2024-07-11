@@ -112,20 +112,19 @@ public class ProjectService {
             projectDao.persist(projectEntity);
             projectDao.flush();
 
-            // seção adicionar projecto a entidades relacionadas
             WorkplaceEntity workplace = workplaceService.getWorkplaceByID(projectEntity.getProjectWorkplace().getId());
             workplace.getProjects().add(projectEntity);
 
             Set<MaterialEntity> listMaterialEntity = materialService.listProjectMaterialsDtoToEntity(p.getProjectMaterials());
             for (MaterialEntity material : listMaterialEntity ){
                 material.setProject(projectEntity);
-
             }
+
             Set<SkillEntity> listSkillEntities = skillService.listProjectSkillsDtoToEntity(p.getProjectSkills());
             for (SkillEntity skill : listSkillEntities){
                 skill.getProjects().add(projectEntity);
-
             }
+
             Set<InterestEntity> listInterestEntities = interestService.listProjectInterestsDtoToEntity(p.getProjectInterests());
             for (InterestEntity interest : listInterestEntities){
                 interest.getProjects().add(projectEntity);
@@ -216,12 +215,8 @@ public class ProjectService {
     @Transactional
     public void removeTaskFromProject(int taskID, int projectID){
         if (projectIsValid(projectID)){
-            //tambem tem de remover a task do array dos projetos
-            //ProjectEntity pEnt = projectDao.getProjectByID(projectID);
-            //pEnt.getTasks().remove(taskService.getTaskByID(taskID));
             taskDao.remove(taskDao.returnTaskByID(taskID));
             taskDao.flush();
-
         }
     }
     @Transactional
@@ -238,11 +233,9 @@ public class ProjectService {
     @Transactional
     public void addProjectMember(int projectID, int memberID){
         if (projectIsValid(projectID)){
-            //verificação se projeto ja contem este user
             ProjectEntity p = projectDao.getProjectByID(projectID);
             if (!p.getProjectMembers().contains(userService.getUserByID(memberID))) {
                 p.getProjectMembers().add(userDao.findUserById(memberID));
-                //adiciona-se user ao projeto
                 UserEntity u = userService.getUserByID(memberID);
                 u.getProjects().add(p);
                 projectDao.merge(p);
@@ -307,18 +300,18 @@ public class ProjectService {
         pEnt.setStartDate(p.getStartDate());
         pEnt.setEndDate(p.getEndDate());
         pEnt.setProjectState(p.getProjectState());
-
-
         UserEntity manager = userService.defineManager(p.getProjectManager());
         pEnt.setManager(manager);
+        pEnt.getProjectMembers().add(manager);
         pEnt.setProjectWorkplace(workplaceService.getWorkplaceByID(p.getProjectWorkplace().getId()));
+
         Set<InterestEntity> interestEntity = interestService.listProjectInterestsDtoToEntity(p.getProjectInterests());
         for (InterestEntity interest : interestEntity){
             pEnt.getInterests().add(interest);
         }
+
         Set<SkillEntity> skillsEntity =skillService.listProjectSkillsDtoToEntity(p.getProjectSkills());
         for (SkillEntity skill : skillsEntity){
-
             pEnt.getSkills().add(skill);
         }
 
@@ -326,11 +319,6 @@ public class ProjectService {
         for (MaterialEntity material : materialEntities){
             pEnt.getMaterials().add(material);
         }
-        //isto também está mal
-        /*Set<UserEntity> userEntities = userService.listMembersDtoToEntity(p.getProjectMembers());
-        for (UserEntity u : userEntities){
-            u.getManagedProjects().add(pEnt);
-        }*/
         pEnt.getProjectMembers().addAll(userService.listMembersDtoToEntity(p.getProjectMembers()));
         return pEnt;
     }
@@ -370,7 +358,6 @@ public class ProjectService {
         detailedProjectDto.setProjectMembers(userService.listUserEntityToMemberDto(p.getProjectMembers()));
         detailedProjectDto.setProjectMaterials(materialService.listProjectMaterialEntityToDto(p.getMaterials()));
         detailedProjectDto.setProjectSkills(skillService.listProjectSkillEntityToDto(p.getSkills()));
-        //detailedProjectDto.setProjectTasks(taskService.returnProjectTasksDto(p.getTasks()));
         ProjectPlanDto plan = new ProjectPlanDto();
         plan.setTaskList(taskService.returnProjectTasksDto(p.getTasks()));
         detailedProjectDto.setProjectPlan(plan);
@@ -428,9 +415,7 @@ public class ProjectService {
         }
         else return null;
     }
-    /**
-     * project edition
-     */
+
     @Transactional
     public void updateProject (int projectID, DetailedProjectDto project) {
         ProjectEntity p = getProjectEntityByID(projectID);
@@ -467,7 +452,6 @@ public class ProjectService {
                     }
                     p.getProjectMembers().add(u);
                 }
-
             }
 
             if (project.getProjectInterests() != null) {
@@ -480,9 +464,7 @@ public class ProjectService {
                     }
                     p.getInterests().add(interest);
                 }
-
             }
-
 
             if (project.getProjectSkills() != null) {
                 p.getSkills().clear();
@@ -496,19 +478,15 @@ public class ProjectService {
                 }
             }
 
-
             if (project.getProjectMaterials() != null) {
                 Set<MaterialEntity> listMaterialEntity = materialService.listProjectMaterialsDtoToEntity(project.getProjectMaterials());
                 p.getMaterials().clear();
                 for (MaterialEntity material : listMaterialEntity) {
-
                     if (material != null) {
                         material.setProject(p);
-                        System.out.println("materials in for " + material);
                     }
                     p.getMaterials().add(material);
                 }
-                System.out.println("Updated materials: " + p.getMaterials());
             }
 
             if (project.getProjectPlan() != null && project.getProjectPlan().getTaskList() != null) {

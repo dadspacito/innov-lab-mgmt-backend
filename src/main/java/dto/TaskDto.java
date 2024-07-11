@@ -1,5 +1,4 @@
 package dto;
-//o que é que ele vai retornar para ser visualizado?
 
 import entity.ProjectEntity;
 import entity.TaskEntity;
