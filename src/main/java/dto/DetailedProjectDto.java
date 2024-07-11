@@ -31,8 +31,9 @@ public class DetailedProjectDto {
     private Set<InterestDto> projectInterests;
     private Set<SkillDto> projectSkills;
     private Set<MaterialDto> projectMaterials;
-    private Set<TaskDto> projectTasks;
+    //private Set<TaskDto> projectTasks;
     private WorkplaceDto projectWorkplace;
+    private ProjectPlanDto projectPlan;
 
     public DetailedProjectDto(){}
 
@@ -124,13 +125,13 @@ public class DetailedProjectDto {
         this.projectMaterials = projectMaterials;
     }
 
-   public Set<TaskDto> getProjectTasks() {
+   /*public Set<TaskDto> getProjectTasks() {
         return projectTasks;
     }
 
     public void setProjectTasks(Set<TaskDto> projectTasks) {
         this.projectTasks = projectTasks;
-    }
+    }*/
 
     public WorkplaceDto getProjectWorkplace() {
         return projectWorkplace;
@@ -140,4 +141,11 @@ public class DetailedProjectDto {
         this.projectWorkplace = workplace;
     }
 
+    public ProjectPlanDto getProjectPlan() {
+        return projectPlan;
+    }
+
+    public void setProjectPlan(ProjectPlanDto projectplan) {
+        this.projectPlan = projectplan;
+    }
 }

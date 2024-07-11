@@ -36,16 +36,6 @@ public class ProjectResource {
         }
         return Response.status(Response.Status.UNAUTHORIZED).entity("invalid token").build();
     }
-/*    @GET//retornar todos os projetos
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getProjects(@HeaderParam("token") String token){
-        if (sessionService.isTokenValid(token)){
-
-            return Response.status(Response.Status.OK).entity(projectService.getProjects()).build();
-        }
-        else return Response.status(Response.Status.UNAUTHORIZED).build();
-    }*/
-
     @Path("/{projectID}/task/{taskID}")
     @DELETE//apagar tarefas
     @Consumes(MediaType.APPLICATION_JSON)
@@ -120,5 +110,15 @@ public class ProjectResource {
             return Response.status(200).entity(projectService.getDetailedProject(projectID)).build();
         }
         return Response.status(400).entity("invalid token").build();
+    }
+    @Path("/update/{projectID}")
+    @PATCH
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response updateProject(@HeaderParam("token") String token, @PathParam("projectID") int projectID, DetailedProjectDto project){
+        if (sessionService.isTokenValid(token)){
+            projectService.updateProject(projectID, project);
+            return Response.status(200).entity("Project was successfully updated").build();
+        }
+        return Response.status(400).entity("Invalid token").build();
     }
 }

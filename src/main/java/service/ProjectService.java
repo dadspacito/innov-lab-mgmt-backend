@@ -2,11 +2,9 @@ package service;
 
 import api.UserResource;
 import dao.*;
-import dto.BasicProjectDto;
-import dto.DetailedProjectDto;
-import dto.MaterialDto;
-import dto.TaskDto;
+import dto.*;
 import entity.*;
+import enums.ProjectState;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
@@ -16,6 +14,7 @@ import jakarta.transaction.Transactional;
 import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
 
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -109,6 +108,7 @@ public class ProjectService {
     public void createNewProject(DetailedProjectDto p){
         try{
             ProjectEntity projectEntity = convertProjectDtoToEntity(p);
+            projectEntity.setProjectState(ProjectState.IN_PROGRESS);
             projectDao.persist(projectEntity);
             projectDao.flush();
 
@@ -119,18 +119,18 @@ public class ProjectService {
             Set<MaterialEntity> listMaterialEntity = materialService.listProjectMaterialsDtoToEntity(p.getProjectMaterials());
             for (MaterialEntity material : listMaterialEntity ){
                 material.setProject(projectEntity);
-                System.out.println(material.getProject());
+
             }
             Set<SkillEntity> listSkillEntities = skillService.listProjectSkillsDtoToEntity(p.getProjectSkills());
             for (SkillEntity skill : listSkillEntities){
                 skill.getProjects().add(projectEntity);
-                System.out.println(skill.getProjects());
+
             }
             Set<InterestEntity> listInterestEntities = interestService.listProjectInterestsDtoToEntity(p.getProjectInterests());
             for (InterestEntity interest : listInterestEntities){
                 interest.getProjects().add(projectEntity);
-                System.out.println(interest.getProjects());
             }
+
             Set<UserEntity> listUserEntities = userService.listMembersDtoToEntity(p.getProjectMembers());
             for (UserEntity user : listUserEntities){
                 user.getProjects().add(projectEntity);
@@ -142,7 +142,7 @@ public class ProjectService {
             taskDao.persist(initialTaskEntity);
             taskDao.flush();
             projectEntity.getTasks().add(initialTaskEntity);
-            //atualizar projeto
+
             projectDao.merge(projectEntity);
             projectDao.flush();
         }
@@ -152,6 +152,7 @@ public class ProjectService {
             System.err.println("Error: " + e.getMessage());
         }
     }
+
     /**
      * Adds a new task to an existing project.
      * <p>
@@ -310,26 +311,19 @@ public class ProjectService {
 
         UserEntity manager = userService.defineManager(p.getProjectManager());
         pEnt.setManager(manager);
-        //manager.getManagedProjects().add(pEnt);
-
         pEnt.setProjectWorkplace(workplaceService.getWorkplaceByID(p.getProjectWorkplace().getId()));
-        System.out.println("pent workplace" + pEnt.getProjectWorkplace());
-
-
         Set<InterestEntity> interestEntity = interestService.listProjectInterestsDtoToEntity(p.getProjectInterests());
         for (InterestEntity interest : interestEntity){
-            //interest.getProjects().add(pEnt);
             pEnt.getInterests().add(interest);
         }
         Set<SkillEntity> skillsEntity =skillService.listProjectSkillsDtoToEntity(p.getProjectSkills());
         for (SkillEntity skill : skillsEntity){
-            //skill.getProjects().add(pEnt);
+
             pEnt.getSkills().add(skill);
         }
 
         Set<MaterialEntity> materialEntities = materialService.listProjectMaterialsDtoToEntity(p.getProjectMaterials());
         for (MaterialEntity material : materialEntities){
-            //material.setProject(pEnt);
             pEnt.getMaterials().add(material);
         }
         //isto também está mal
@@ -374,10 +368,12 @@ public class ProjectService {
         detailedProjectDto.setProjectManager(userService.convertUserEntityToProjectManager(p.getManager()));
         detailedProjectDto.setProjectInterests(interestService.listProjectEntityToDto(p.getInterests()));
         detailedProjectDto.setProjectMembers(userService.listUserEntityToMemberDto(p.getProjectMembers()));
-        //isto está mal
         detailedProjectDto.setProjectMaterials(materialService.listProjectMaterialEntityToDto(p.getMaterials()));
         detailedProjectDto.setProjectSkills(skillService.listProjectSkillEntityToDto(p.getSkills()));
-        detailedProjectDto.setProjectTasks(taskService.returnProjectTasksDto(p.getTasks()));
+        //detailedProjectDto.setProjectTasks(taskService.returnProjectTasksDto(p.getTasks()));
+        ProjectPlanDto plan = new ProjectPlanDto();
+        plan.setTaskList(taskService.returnProjectTasksDto(p.getTasks()));
+        detailedProjectDto.setProjectPlan(plan);
         return detailedProjectDto;
     }
     /**
@@ -432,5 +428,93 @@ public class ProjectService {
         }
         else return null;
     }
+    /**
+     * project edition
+     */
+    @Transactional
+    public void updateProject (int projectID, DetailedProjectDto project){
+        ProjectEntity p = getProjectEntityByID(projectID);
+        if (p != null){
+            if (project.getName() != null){
+                p.setName(project.getName());
+            }
+            if (project.getDescription()!= null){
+                p.setDescription(project.getDescription());
+            }
+            if (project.getStartDate() != null){
+                p.setStartDate(project.getStartDate());
+            }
+            if (project.getProjectState() != null){
+                p.setProjectState(project.getProjectState());
+            }
+            if (project.getProjectManager() != null) {
+                UserEntity manager = userDao.findUserById(project.getProjectManager().getId());
+                if (manager != null) {
+                    p.setManager(manager);
+                    manager.getManagedProjects().add(p);
+                }
+                else System.err.println("Manager does not exist");
+            }
+
+            if (project.getProjectMembers() != null) {
+                Set<UserEntity> members = userService.listMembersDtoToEntity(project.getProjectMembers());
+                for (UserEntity u : members) {
+                    if (u != null) {
+                        u.getProjects().add(p);
+                    }
+                }
+                p.getProjectMembers().addAll(members);
+            }
+            if (project.getProjectInterests() != null) {
+                Set<InterestEntity> listInterestEntities = interestService.listProjectInterestsDtoToEntity(project.getProjectInterests());
+                for (InterestEntity interest : listInterestEntities){
+                    if (interest != null) {
+                        interest.getProjects().add(p);
+                    }
+                }
+                p.getInterests().addAll(listInterestEntities);
+            }
+
+
+            if (project.getProjectSkills() != null) {
+                Set<SkillEntity> listSkillEntities = skillService.listProjectSkillsDtoToEntity(project.getProjectSkills());
+                for (SkillEntity skill : listSkillEntities){
+                    if (skill != null) {
+                        skill.getProjects().add(p);
+                    }
+                }
+                p.getSkills().addAll(listSkillEntities);
+
+            if (project.getProjectMaterials() != null) {
+                Set<MaterialEntity> listMaterialEntity = materialService.listProjectMaterialsDtoToEntity(project.getProjectMaterials());
+                for (MaterialEntity material : listMaterialEntity ){
+                    if (material != null) {
+                        material.setProject(p);
+                    }
+                }
+                p.getMaterials().addAll(listMaterialEntity);
+            }
+
+            if (project.getProjectPlan() != null && project.getProjectPlan().getTaskList() != null) {
+                Set<TaskEntity> tasks = taskService.returnProjectTasksEntity(project.getProjectPlan().getTaskList());
+                for (TaskEntity task : tasks) {
+                    if (task != null) {
+                        task.setProject(p);
+                    }
+                }
+                p.setTasks(tasks);
+            }
+            if (project.getProjectWorkplace() != null) {
+                WorkplaceEntity workplace = workplaceService.getWorkplaceByID(project.getProjectWorkplace().getId());
+                workplace.getProjects().add(p);
+                p.setProjectWorkplace(workplace);
+            }
+        }
+        projectDao.merge(p);
+        } else {
+            throw new IllegalArgumentException("Project with ID " + projectID + " not found.");
+        }
+    }
+
 
 }
