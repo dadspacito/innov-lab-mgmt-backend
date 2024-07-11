@@ -222,10 +222,6 @@ public class ProjectEntity implements Serializable {
     public void setProjectWorkplace(WorkplaceEntity workplace) {
         this.projectWorkplace = workplace;
     }
-
-    //faz se override ao equals e hashcode methods
-    //este override o que faz é descriminar e dar consistencia aos equals que se utilizam para pesquisar, fazer merge
-    //e outras funções que requerem comparação de elementos dentro da base de dados
     @Override
     public boolean equals(Object o){
         if (this == o) return true;
@@ -234,13 +230,10 @@ public class ProjectEntity implements Serializable {
         return id == that.id;
     }
 
-    //este método define que a chave/codigo do hash é o ID o que melhora a performance de buscar de elementos
     @Override
     public int hashCode(){
         return Objects.hash(id);
     }
-    //metodo para listas
-    //metodos para adicionar interesses, skills, tasks, materiais e users ao projeto.
 
     /**
      * metodos set
@@ -254,8 +247,7 @@ public class ProjectEntity implements Serializable {
         this.projectMembers.remove(member);
         member.getProjects().remove(this);//
     }
-    //em materiais a construção é diferente porque a relação é one to many
-    //neste cenario o que o set project está a apontar é a referencia aos materiais
+
     public void addMaterial(MaterialEntity material){
         this.materials.add(material);
         material.setProject(this);
@@ -264,8 +256,8 @@ public class ProjectEntity implements Serializable {
         if (this.materials.contains(material)){
             this.materials.remove(material);
             material.setProject(null);
-
-        }    }
+        }
+    }
     public void addSkill(SkillEntity skill){
         this.skills.add(skill);
         skill.getProjects().add(this);

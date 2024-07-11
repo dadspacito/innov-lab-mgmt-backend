@@ -432,67 +432,83 @@ public class ProjectService {
      * project edition
      */
     @Transactional
-    public void updateProject (int projectID, DetailedProjectDto project){
+    public void updateProject (int projectID, DetailedProjectDto project) {
         ProjectEntity p = getProjectEntityByID(projectID);
-        if (p != null){
-            if (project.getName() != null){
+        if (p != null) {
+            if (project.getName() != null) {
                 p.setName(project.getName());
             }
-            if (project.getDescription()!= null){
+            if (project.getDescription() != null) {
                 p.setDescription(project.getDescription());
             }
-            if (project.getStartDate() != null){
+            if (project.getStartDate() != null) {
                 p.setStartDate(project.getStartDate());
             }
-            if (project.getProjectState() != null){
+            if (project.getProjectState() != null) {
                 p.setProjectState(project.getProjectState());
             }
+
             if (project.getProjectManager() != null) {
                 UserEntity manager = userDao.findUserById(project.getProjectManager().getId());
                 if (manager != null) {
                     p.setManager(manager);
+                    manager.getManagedProjects().clear();
                     manager.getManagedProjects().add(p);
-                }
-                else System.err.println("Manager does not exist");
+                } else System.err.println("Manager does not exist");
             }
 
             if (project.getProjectMembers() != null) {
+                p.getProjectMembers().clear();
                 Set<UserEntity> members = userService.listMembersDtoToEntity(project.getProjectMembers());
                 for (UserEntity u : members) {
                     if (u != null) {
+                        u.getManagedProjects().clear();
                         u.getProjects().add(p);
                     }
+                    p.getProjectMembers().add(u);
                 }
-                p.getProjectMembers().addAll(members);
+
             }
+
             if (project.getProjectInterests() != null) {
+                p.getInterests().clear();
                 Set<InterestEntity> listInterestEntities = interestService.listProjectInterestsDtoToEntity(project.getProjectInterests());
-                for (InterestEntity interest : listInterestEntities){
+                for (InterestEntity interest : listInterestEntities) {
                     if (interest != null) {
+                        interest.getProjects().clear();
                         interest.getProjects().add(p);
                     }
+                    p.getInterests().add(interest);
                 }
-                p.getInterests().addAll(listInterestEntities);
+
             }
 
 
             if (project.getProjectSkills() != null) {
+                p.getSkills().clear();
                 Set<SkillEntity> listSkillEntities = skillService.listProjectSkillsDtoToEntity(project.getProjectSkills());
-                for (SkillEntity skill : listSkillEntities){
+                for (SkillEntity skill : listSkillEntities) {
                     if (skill != null) {
+                        skill.getProjects().clear();
                         skill.getProjects().add(p);
                     }
+                    p.getSkills().add(skill);
                 }
-                p.getSkills().addAll(listSkillEntities);
+            }
+
 
             if (project.getProjectMaterials() != null) {
                 Set<MaterialEntity> listMaterialEntity = materialService.listProjectMaterialsDtoToEntity(project.getProjectMaterials());
-                for (MaterialEntity material : listMaterialEntity ){
+                p.getMaterials().clear();
+                for (MaterialEntity material : listMaterialEntity) {
+
                     if (material != null) {
                         material.setProject(p);
+                        System.out.println("materials in for " + material);
                     }
+                    p.getMaterials().add(material);
                 }
-                p.getMaterials().addAll(listMaterialEntity);
+                System.out.println("Updated materials: " + p.getMaterials());
             }
 
             if (project.getProjectPlan() != null && project.getProjectPlan().getTaskList() != null) {
@@ -504,17 +520,15 @@ public class ProjectService {
                 }
                 p.setTasks(tasks);
             }
+
             if (project.getProjectWorkplace() != null) {
                 WorkplaceEntity workplace = workplaceService.getWorkplaceByID(project.getProjectWorkplace().getId());
                 workplace.getProjects().add(p);
                 p.setProjectWorkplace(workplace);
             }
-        }
-        projectDao.merge(p);
+            projectDao.merge(p);
         } else {
             throw new IllegalArgumentException("Project with ID " + projectID + " not found.");
         }
     }
-
-
 }
