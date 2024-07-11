@@ -28,6 +28,9 @@ public class InterestService {
     private InterestDao interestDao;
     @EJB
     private UserDao userDao;
+    public void setInterestDao(InterestDao interestDao){
+        this.interestDao = interestDao;
+    };
 
     /**
      * falta a parte de criar interesses;
