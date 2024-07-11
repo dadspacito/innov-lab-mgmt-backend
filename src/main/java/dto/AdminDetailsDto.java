@@ -1,7 +1,11 @@
 package dto;
 
+import java.util.Set;
+
 public class AdminDetailsDto {
-    //lista de users
-    //lista de projetos
-    //estatisticas de projetos (fazer queries)
+    //receber uma lista dos projetos
+    private Set<DetailedProjectDto> detailedProjectDtos;
+    private Set<UserProfileDto> usersDto;
+
+    private DataPDFDto dataPDFDto;
 }
