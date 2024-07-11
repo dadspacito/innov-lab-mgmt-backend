@@ -18,8 +18,6 @@ public class UserProfileDto {
     private boolean isPublicProfile;
     private WorkplaceDto workplace;
     private Set<BasicProjectDto> isInProject;
-    //lista de convites para projetos
-    //falta ver se é admin de um projeto
     private Set<SkillDto> skills;
     private Set<InterestDto> interests;
 

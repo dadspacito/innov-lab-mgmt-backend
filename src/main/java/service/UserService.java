@@ -407,6 +407,16 @@ public class UserService {
             }
         }
     }
+    @Transactional
+    public Set<BasicProjectDto> getUserProjects(int userID){
+        UserEntity u = userDao.findUserById(userID);
+        if (u != null){
+            Set<ProjectEntity> projects = userDao.getUserProjects(userID);
+            Set<BasicProjectDto> projectsDto = projectService.listProjectEntityToBasicProject(projects);
+            return projectsDto;
+        }
+        else throw new NullPointerException("user is null");
+    }
 
 }
 

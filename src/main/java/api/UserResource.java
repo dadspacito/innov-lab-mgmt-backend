@@ -14,44 +14,20 @@ import enums.UserState;
 
 import java.io.StringReader;
 import java.net.URL;
-
-// COMENTÀRIOS : USOS DESTE FICHEIRO
-// recursos de utilizador
-// utilizado para registar utilizadores, obter informação para perfil de utilizadores
-// APAGAR UTILIZADORES (permite o próprio utilizador apagar a sua conta)
-
-// fazer validação de DTOs pós endpoints de utilizador (validar se o email é válido, se a password é válida, etc)
-
-    // POST /users: Registo de utilizador.
-    // DELETE /users: Apagar utilizador.
-    // get /users: obter dados do proprio utilizador. FALTA
-    // get /users/{id}: obter dados de um utilizador. (se o perfil for publico) FALTA
-
-    // campos depois para atualização, usar só /users/ sem id porque só quem chama pode manipular a si próprio
-
-    // o caso especial da foto de perfil: neste ou noutro endpoint?
-
-
-
 @Path("/users")
 public class UserResource {
 
     @EJB
     private UserService userService;
     @EJB private SessionService sessionService;
-
-    // PERMITE O REGISTO
-    // vamos considerar que DTO é válido para já
-
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Response registerUser(UserDto userDto) {
-        if ((userService.registerUser(userDto)) == UserState.CREATED)
-            return Response.status(201).entity("User created. Check your email "+userDto.getEmail()+" to activate").build();
+        if ((userService.registerUser(userDto)) == UserState.CREATED) {
+            return Response.status(201).entity("User created. Check your email " + userDto.getEmail() + " to activate").build();
+        }
         else return Response.status(400).entity("User already exists").build();
-
 }
-
     @Path("/activations/{emailtoken}")
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
@@ -59,11 +35,8 @@ public class UserResource {
         if ((userService.confirmUser(emailtoken))) {
             return Response.status(200).entity("ativado").build();
         }
-        return Response.status(400).entity("Invalid email token").build();
+        else return Response.status(400).entity("Invalid email token").build();
     }
-
-    // pedir para criar nova passe
-    // chamado por "https://localhost:3000/forget-password/"
     @Path("/passwords/resets")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -72,10 +45,8 @@ public class UserResource {
             return Response.status(200).entity("Password reset email sent").build();
         }
         // ou request inválido pq pediu de pass. verificar cena de token expirado.
-        return Response.status(400).entity("Invalid email").build();
+        else return Response.status(400).entity("Invalid email").build();
     }
-
-    //nova password
     @Path("/passwords/resets/{emailtoken}")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -84,13 +55,10 @@ public class UserResource {
         JsonObject jsonObject = Json.createReader(new StringReader(newPassword)).readObject();
         String password = jsonObject.getString("password");
         if ((userService.resetPassword(emailtoken, password))) {
-
             return Response.status(200).entity("Password reset").build();
         }
-        return Response.status(400).entity("Invalid email token").build();
+        else return Response.status(400).entity("Invalid email token").build();
     }
-
-    //o postlogin DTO retorna o user
     @Path("/{token}")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -99,9 +67,8 @@ public class UserResource {
         if (sessionService.isTokenValid(token)) {
             return Response.status(200).entity(userService.getUserByToken(token)).build();
         }
-        return Response.status(400).entity("user not found").build();
+        else return Response.status(400).entity("user not found").build();
     }
-    //get all users
     @Path("/available")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -109,7 +76,7 @@ public class UserResource {
         if (sessionService.isTokenValid(token)){
             return Response.status(Response.Status.OK).entity(userService.membersAvailableProjects()).build();
         }
-        return Response.status(Response.Status.UNAUTHORIZED).entity("invalid token").build();
+        else return Response.status(Response.Status.UNAUTHORIZED).entity("invalid token").build();
     }
     @Path("/profile/{userID}")
     @GET
@@ -123,7 +90,7 @@ public class UserResource {
                 return Response.status(Response.Status.UNAUTHORIZED).entity("User profile is private").build();
             }
         }
-        return Response.status(400).entity("Token not valid").build();
+        else return Response.status(400).entity("Token not valid").build();
     }
     @Path("/{userID}/addSkill/{skillID}")
     @PATCH
@@ -133,7 +100,7 @@ public class UserResource {
             userService.addSkillToUser(userID, skillID);
             return Response.status(200).entity("skill was added to user").build();
         }
-        return Response.status(400).entity("invalid token").build();
+        else return Response.status(400).entity("invalid token").build();
     }
     @Path("/{userID}/addInterest/{interestID}")
     @PATCH
@@ -143,10 +110,8 @@ public class UserResource {
             userService.addInterestToUser(userID, interestID);
             return Response.status(200).entity("Interest was added to user").build();
         }
-        return Response.status(400).entity("invalid token").build();
+        else return Response.status(400).entity("invalid token").build();
     }
-
-    //remover skills e interesses
     @Path("/{userID}/removeSkill/{skillID}")
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON)
@@ -155,7 +120,7 @@ public class UserResource {
             userService.removeSkillFromUser(userID, skillID);
             return Response.status(200).entity("skill was removed to user").build();
         }
-        return Response.status(400).entity("invalid token").build();
+        else return Response.status(400).entity("invalid token").build();
     }
     @Path("/{userID}/removeInterest/{skillID}")
     @PATCH
@@ -165,7 +130,7 @@ public class UserResource {
             userService.removeInterestFromUser(userID, skillID);
             return Response.status(200).entity("interest was removed to user").build();
         }
-        return Response.status(400).entity("invalid token").build();
+        else return Response.status(400).entity("invalid token").build();
     }
     @Path("{userID}/edit")
     @PATCH
@@ -175,7 +140,7 @@ public class UserResource {
             userService.editProfile(userID,user);
             return Response.status(200).entity("user was sucessfully updated!").build();
         }
-        return Response.status(400).entity("invalid token").build();
+        else return Response.status(400).entity("invalid token").build();
     }
     @Path("/{userID}/leaveProject/{projectID}")
     @PATCH
@@ -185,7 +150,7 @@ public class UserResource {
             userService.leaveProject(userID, projectID);
             return Response.status(200).entity("user has successfully left the project").build();
         }
-        return Response.status(400).entity("invalid token").build();
+        else return Response.status(400).entity("invalid token").build();
     }
     @Path("/{userID}/joinProject/{projectID}")
     @PATCH
@@ -195,7 +160,16 @@ public class UserResource {
             userService.joinProject(userID, projectID);
             return Response.status(200).entity("user has successfully joined the project").build();
         }
-        return Response.status(400).entity("invalid token").build();
+        else return Response.status(400).entity("invalid token").build();
+    }
+    @Path("/getProjects/{userID}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getUserProjects(@HeaderParam("token") String token, @PathParam("userID") int userID){
+        if (sessionService.isTokenValid(token)){
+            return Response.status(200).entity(userService.getUserProjects(userID)).build();
+        }
+        else return Response.status(400).entity("invalid token").build();
     }
 
 
