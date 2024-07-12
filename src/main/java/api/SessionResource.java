@@ -13,6 +13,7 @@ import dto.LoginDto;
 import dto.PostLoginDto;
 import service.SessionService;
 import org.apache.logging.log4j.*;
+import service.UserService;
 
 /**
  * Resource class for managing session-related operations.
@@ -22,13 +23,11 @@ import org.apache.logging.log4j.*;
 public class SessionResource {
 
     @EJB
-    SessionService sessionService;
+    private SessionService sessionService;
     @EJB
-    SessionTokenDao sessionTokenDao;
-
+    private SessionTokenDao sessionTokenDao;
+    @EJB private UserService userService;
     private static final Logger LOGGER = LogManager.getLogger(SessionResource.class);
-
-
     /**
      * Performs user login, creating a new session if successful.
      *
@@ -43,13 +42,10 @@ public class SessionResource {
     public Response login(LoginDto loginDto, @Context HttpServletRequest request) {
         String clientIP = request.getRemoteAddr();
         String token = sessionService.login(loginDto.getEmail(), loginDto.getPassword());
-
         if (token != null) {
             UserEntity ue = sessionTokenDao.findUserBySessionToken(token);
             PostLoginDto postLoginDto = new PostLoginDto(ue, token, sessionService.getSessionTimeout());
-            //faz set as credenciais do user aqui
             LOGGER.info("Successful login from IP: " + clientIP + " for user: " + loginDto.getEmail());
-            //retorna o user contruido aqui
             return Response.status(Response.Status.CREATED).entity(postLoginDto).build();
         } else {
             LOGGER.warn("Failed login attempt from IP: {} for user: {}", clientIP, loginDto.getEmail());
@@ -69,9 +65,12 @@ public class SessionResource {
     public Response renewToken(@HeaderParam("token") String token) {
         if (sessionService.isTokenValid(token)) {
             sessionService.incrementSessionTimeout(token);
+            LOGGER.error("Token successfully renewed for" + userService.getUserByToken(token).getEmail());
             return Response.status(Response.Status.OK).entity("Token timeout reset").build();
         } else {
+            LOGGER.error("Error renewing token for " + userService.getUserByToken(token).getEmail());
             return Response.status(Response.Status.BAD_REQUEST).entity("Invalid token").build();
+
         }
     }
 
@@ -85,8 +84,10 @@ public class SessionResource {
     public Response logout(@HeaderParam("token") String token) {
         if (sessionService.isTokenValid(token) ) {
             sessionService.logout(token);
+            LOGGER.warn("User logged out" + userService.getUserByToken(token).getEmail());
             return Response.status(Response.Status.OK).entity("Logout successful").build();
         } else {
+            LOGGER.error("Error logging out " +  userService.getUserByToken(token).getEmail());
             return Response.status(401).entity("Invalid token").build();
         }
     }
@@ -102,10 +103,10 @@ public class SessionResource {
     public Response logoutAllDevices(@HeaderParam("token") String token) {
         if (sessionService.isTokenValid(token)) {
             sessionService.logoutAllDevices(token);
+            LOGGER.warn("Logged all accounts " + userService.getUserByToken(token).getEmail());
             return Response.status(200).entity("Logout from all devices successful").build();
-
-
         } else {
+            LOGGER.error("Error logging out on all devices " + userService.getUserByToken(token).getEmail());
             return Response.status(401).entity("Invalid token").build();
         }
     }

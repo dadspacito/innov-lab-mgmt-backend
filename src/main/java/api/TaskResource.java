@@ -8,27 +8,20 @@ import jakarta.ws.rs.core.Response;
 import org.hibernate.engine.jdbc.ReaderInputStream;
 import service.SessionService;
 import service.TaskService;
-
+/**
+ * TaskResource class provides RESTful endpoints for managing tasks.
+ */
 @Path("/tasks")
 public class TaskResource {
     @EJB private SessionService sessionService;
     @EJB private TaskService taskService;
     /**
-     * que paths é que esta resource precisa?
-     * criar task- precisa de verificar se o user que a está a criar é um user válido na DB e válido dentro do projeto
-     * apagar task- mesmo principio do acima
-     * receber tasks:
-     * -ver validade do user como entity na DB
-     * -ver validade do user como pertencente ao projeto
-     * -filtrar se calhar tasks que ja estao completas
-     * -retornar tasks associados a certo user
-     * -retornar tasks associados a projeto com o respetivo state
-     * -retornar task por id
-     * -retornar tasks associados a user por projeto
-     * -retornar tasks associados a user no geral
+     * Retrieves a task by its ID.
      *
+     * @param token  the session token
+     * @param taskID the task ID
+     * @return the response containing the task DTO
      */
-
     @Path("/{taskID}")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -38,6 +31,15 @@ public class TaskResource {
         }
         return Response.status(400).entity("invalid token").build();
     }
+    /**
+     * Updates a task.
+     *
+     * @param token     the session token
+     * @param projectID the project ID
+     * @param taskID    the task ID
+     * @param taskDto   the task DTO
+     * @return the response indicating the result of the operation
+     */
     @Path("{projectID}/update/{taskID}")
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON)
@@ -48,6 +50,4 @@ public class TaskResource {
         }
         return Response.status(400).entity("invalid token").build();
     }
-
-
 }

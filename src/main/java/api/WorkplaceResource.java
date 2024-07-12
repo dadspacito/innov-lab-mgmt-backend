@@ -9,16 +9,18 @@ import jakarta.ws.rs.core.Response;
 import service.WorkplaceService;
 
 import java.util.concurrent.locks.ReadWriteLock;
-
+/**
+ * WorkplaceResource class provides RESTful endpoints for managing workplaces.
+ */
 @Path("/workplace")
 public class WorkplaceResource {
     @EJB
     private WorkplaceService workplaceService;
-
-
-
-
-    //este endpoint precisa de ser mais verificado a nivel de integridade
+    /**
+     * Retrieves all workplaces.
+     *
+     * @return the response containing the list of workplaces
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getWorkplaces(){
@@ -28,6 +30,12 @@ public class WorkplaceResource {
             return Response.status(400).entity("could not return tasks").build();
         }
     }
+    /**
+     * Retrieves a workplace by its ID.
+     *
+     * @param id the workplace ID
+     * @return the response containing the workplace DTO or an error message
+     */
     @Path("/{id}")
     @GET
     @Produces(MediaType.APPLICATION_JSON)

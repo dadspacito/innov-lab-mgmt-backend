@@ -15,16 +15,11 @@ import org.apache.logging.log4j.*;
 
 @Path("/header")
 public class HeaderResource {
-
         @EJB
         SessionService sessionService;
-
         @EJB
         UserService userService;
-
         private static final Logger LOGGER = LogManager.getLogger(HeaderResource.class);
-
-
         @GET
         @Produces(MediaType.APPLICATION_JSON)
         public Response getHeader(@HeaderParam("token") String token) {

@@ -14,12 +14,21 @@ import enums.UserState;
 
 import java.io.StringReader;
 import java.net.URL;
+/**
+ * UserResource class provides RESTful endpoints for user management.
+ */
 @Path("/users")
 public class UserResource {
 
     @EJB
     private UserService userService;
     @EJB private SessionService sessionService;
+    /**
+     * Registers a new user.
+     *
+     * @param userDto the user DTO
+     * @return the response indicating the result of the registration
+     */
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     public Response registerUser(UserDto userDto) {
@@ -27,7 +36,13 @@ public class UserResource {
             return Response.status(201).entity("User created. Check your email " + userDto.getEmail() + " to activate").build();
         }
         else return Response.status(400).entity("User already exists").build();
-}
+    }
+    /**
+     * Verifies a user account using an email token.
+     *
+     * @param emailtoken the email token
+     * @return the response indicating the result of the verification
+     */
     @Path("/activations/{emailtoken}")
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
@@ -37,6 +52,12 @@ public class UserResource {
         }
         else return Response.status(400).entity("Invalid email token").build();
     }
+    /**
+     * Requests a password reset.
+     *
+     * @param email the user's email
+     * @return the response indicating the result of the password reset request
+     */
     @Path("/passwords/resets")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -44,9 +65,15 @@ public class UserResource {
         if ((userService.requestPasswordReset(email))) {
             return Response.status(200).entity("Password reset email sent").build();
         }
-        // ou request inválido pq pediu de pass. verificar cena de token expirado.
         else return Response.status(400).entity("Invalid email").build();
     }
+    /**
+     * Resets a user's password using an email token.
+     *
+     * @param emailtoken the email token
+     * @param newPassword the new password
+     * @return the response indicating the result of the password reset
+     */
     @Path("/passwords/resets/{emailtoken}")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
@@ -59,16 +86,27 @@ public class UserResource {
         }
         else return Response.status(400).entity("Invalid email token").build();
     }
+    /**
+     * Retrieves a user by session token.
+     *
+     * @param token the session token
+     * @return the response containing the user DTO
+     */
     @Path("/{token}")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUser(@PathParam("token") String token){
-        //mecanismos de segurança aqui dentro
         if (sessionService.isTokenValid(token)) {
             return Response.status(200).entity(userService.getUserByToken(token)).build();
         }
         else return Response.status(400).entity("user not found").build();
     }
+    /**
+     * Retrieves all users available for projects.
+     *
+     * @param token the session token
+     * @return the response containing the list of available users
+     */
     @Path("/available")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -78,6 +116,13 @@ public class UserResource {
         }
         else return Response.status(Response.Status.UNAUTHORIZED).entity("invalid token").build();
     }
+    /**
+     * Retrieves the profile of a user.
+     *
+     * @param token the session token
+     * @param userID the user ID
+     * @return the response containing the user profile DTO
+     */
     @Path("/profile/{userID}")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -92,6 +137,14 @@ public class UserResource {
         }
         else return Response.status(400).entity("Token not valid").build();
     }
+    /**
+     * Adds a skill to a user.
+     *
+     * @param token the session token
+     * @param userID the user ID
+     * @param skillID the skill ID
+     * @return the response indicating the result of the operation
+     */
     @Path("/{userID}/addSkill/{skillID}")
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON)
@@ -102,6 +155,14 @@ public class UserResource {
         }
         else return Response.status(400).entity("invalid token").build();
     }
+    /**
+     * Adds an interest to a user.
+     *
+     * @param token the session token
+     * @param userID the user ID
+     * @param interestID the interest ID
+     * @return the response indicating the result of the operation
+     */
     @Path("/{userID}/addInterest/{interestID}")
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON)
@@ -112,6 +173,14 @@ public class UserResource {
         }
         else return Response.status(400).entity("invalid token").build();
     }
+    /**
+     * Removes a skill from a user.
+     *
+     * @param token the session token
+     * @param userID the user ID
+     * @param skillID the skill ID
+     * @return the response indicating the result of the operation
+     */
     @Path("/{userID}/removeSkill/{skillID}")
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON)
@@ -122,16 +191,32 @@ public class UserResource {
         }
         else return Response.status(400).entity("invalid token").build();
     }
-    @Path("/{userID}/removeInterest/{skillID}")
+    /**
+     * Removes an interest from a user.
+     *
+     * @param token the session token
+     * @param userID the user ID
+     * @param interestID the interest ID
+     * @return the response indicating the result of the operation
+     */
+    @Path("/{userID}/removeInterest/{interestID}")
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON)
-    public Response removeInterestFromUser(@HeaderParam("token") String token, @PathParam("userID") int userID, @PathParam("skillID") int skillID){
+    public Response removeInterestFromUser(@HeaderParam("token") String token, @PathParam("userID") int userID, @PathParam("interestID") int interestID){
         if (sessionService.isTokenValid(token)){
-            userService.removeInterestFromUser(userID, skillID);
+            userService.removeInterestFromUser(userID, interestID);
             return Response.status(200).entity("interest was removed to user").build();
         }
         else return Response.status(400).entity("invalid token").build();
     }
+    /**
+     * Edits a user's profile.
+     *
+     * @param token the session token
+     * @param userID the user ID
+     * @param user the user profile DTO
+     * @return the response indicating the result of the operation
+     */
     @Path("{userID}/edit")
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON)
@@ -142,6 +227,14 @@ public class UserResource {
         }
         else return Response.status(400).entity("invalid token").build();
     }
+    /**
+     * Removes a user from a project.
+     *
+     * @param token the session token
+     * @param userID the user ID
+     * @param projectID the project ID
+     * @return the response indicating the result of the operation
+     */
     @Path("/{userID}/leaveProject/{projectID}")
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON)
@@ -152,6 +245,14 @@ public class UserResource {
         }
         else return Response.status(400).entity("invalid token").build();
     }
+    /**
+     * Adds a user to a project.
+     *
+     * @param token the session token
+     * @param userID the user ID
+     * @param projectID the project ID
+     * @return the response indicating the result of the operation
+     */
     @Path("/{userID}/joinProject/{projectID}")
     @PATCH
     @Consumes(MediaType.APPLICATION_JSON)
@@ -162,6 +263,13 @@ public class UserResource {
         }
         else return Response.status(400).entity("invalid token").build();
     }
+    /**
+     * Retrieves the projects of a user.
+     *
+     * @param token the session token
+     * @param userID the user ID
+     * @return the response containing the list of user projects
+     */
     @Path("/getProjects/{userID}")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -171,7 +279,5 @@ public class UserResource {
         }
         else return Response.status(400).entity("invalid token").build();
     }
-
-
 }
 
