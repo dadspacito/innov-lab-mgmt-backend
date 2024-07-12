@@ -141,7 +141,7 @@ public class InterestServiceTest {
 
         @Test
         void testCheckInterestValidity(){
-            String validInterest = "Ballet";
+            String validInterest = "Fencing";
 
             InterestEntity iEnt = new InterestEntity();
             iEnt.setName(validInterest);

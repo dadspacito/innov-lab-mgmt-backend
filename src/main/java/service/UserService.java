@@ -41,6 +41,10 @@ public class UserService {
 
     public void setUserDao(UserDao userDao) {this.userDao = userDao;}
 
+    public void setSessionTokenDao(SessionTokenDao sessionTokenDao) {this.sessionTokenDao = sessionTokenDao;}
+
+    public void setWorkplaceDao(WorkplaceDao workplaceDao) {this.workplaceDao = workplaceDao;}
+
     /**
      * Registers a new user in the system.
      *
@@ -142,7 +146,7 @@ public class UserService {
      * @param manager ProjectManagerDto object from which to retrieve the UserEntity.
      * @return UserEntity corresponding to the project manager, or null if not found.
      */
-    private UserEntity getUserEntityFromManager(ProjectManagerDto manager){
+    public UserEntity getUserEntityFromManager(ProjectManagerDto manager){
         if (userIsValid(userDao.findUserById(manager.getId()))){
             return userDao.findUserById(manager.getId());
         }
