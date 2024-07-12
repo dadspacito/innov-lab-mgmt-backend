@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 public class WorkplaceService {
     @EJB
     private WorkplaceDao workplaceDao;
+
+
     /**
      * Retrieves all workplaces and converts them to DTOs.
      *

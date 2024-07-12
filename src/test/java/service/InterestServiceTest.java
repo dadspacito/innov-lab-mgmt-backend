@@ -34,7 +34,7 @@ public class InterestServiceTest {
             // preparation
             InterestEntity iEnt = new InterestEntity();
             iEnt.setId(1);
-            iEnt.setName("Ballet");
+            iEnt.setName("Fencing");
 
             Set<InterestEntity> interests = new HashSet<InterestEntity>();
             interests.add(iEnt);
@@ -54,7 +54,7 @@ public class InterestServiceTest {
             int interestId = 1;
             InterestEntity iEnt = new InterestEntity();
             iEnt.setId(interestId);
-            iEnt.setName("Ballet");
+            iEnt.setName("Fencing");
 
             InterestEntity interestEntityResult =interestService.getInterestByID(interestId);
             //assert
@@ -81,7 +81,7 @@ public class InterestServiceTest {
 
             InterestDto iDto = new InterestDto();
             iDto.setId(1);
-            iDto.setName("Ballet");
+            iDto.setName("Horse Riding");
 
             interestService.createNewInterest(iDto);
 

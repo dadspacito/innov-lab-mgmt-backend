@@ -36,41 +36,46 @@ public class ProjectDao extends AbstractDao<ProjectEntity>{
             return null;
         }
     }
-    public List<UserEntity> returnProjectMembers(int id){
+    public Set<UserEntity> returnProjectMembers(int id){
         try{
-            return em.createNamedQuery("Project.getMembers", UserEntity.class).setParameter("id", id).getResultList();
+            List<UserEntity> userEntities =  em.createNamedQuery("Project.getMembers", UserEntity.class).setParameter("id", id).getResultList();
+            return new HashSet<>(userEntities);
         }
         catch(NoResultException e){
             return null;
         }
     }
-    public List<InterestEntity> returnProjectInterests(int id){
+    public Set<InterestEntity> returnProjectInterests(int id){
         try{
-            return em.createNamedQuery("Project.getInterests", InterestEntity.class).setParameter("id", id).getResultList();
+            List<InterestEntity> interestEntities =  em.createNamedQuery("Project.getInterests", InterestEntity.class).setParameter("id", id).getResultList();
+            return new HashSet<>(interestEntities);
         }
         catch(NoResultException e){
             return null;
         }
     }
-    public List<SkillEntity> returnProjectSkills(int id){
+    public Set<SkillEntity> returnProjectSkills(int id){
         try{
-            return em.createNamedQuery("Project.getSkills", SkillEntity.class).setParameter("id", id).getResultList();
+            List<SkillEntity> skillEntities = em.createNamedQuery("Project.getSkills", SkillEntity.class).setParameter("id", id).getResultList();
+            return new HashSet<>(skillEntities);
         }
         catch(NoResultException e){
             return null;
         }
     }
-    public List<TaskEntity> returnProjectTasks(int id){
+    public Set<TaskEntity> returnProjectTasks(int id){
         try{
-            return em.createNamedQuery("Project.getTasks", TaskEntity.class).setParameter("id", id).getResultList();
+            List<TaskEntity> taskEntities =  em.createNamedQuery("Project.getTasks", TaskEntity.class).setParameter("id", id).getResultList();
+            return new HashSet<>(taskEntities);
         }
         catch(NoResultException e){
             return null;
         }
     }
-    public List<MaterialEntity> returnProjectMaterials(int id){
+    public Set<MaterialEntity> returnProjectMaterials(int id){
         try{
-            return em.createNamedQuery("Project.getMaterials", MaterialEntity.class).setParameter("id", id).getResultList();
+            List<MaterialEntity> materialEntities =  em.createNamedQuery("Project.getMaterials", MaterialEntity.class).setParameter("id", id).getResultList();
+            return new HashSet<>(materialEntities);
         }
         catch(NoResultException e){
             return null;

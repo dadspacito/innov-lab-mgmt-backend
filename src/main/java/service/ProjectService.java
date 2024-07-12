@@ -79,6 +79,24 @@ public class ProjectService {
      */
     @EJB private MaterialDao materialDao;
 
+    //class used for testing
+    public void setProjectDao(ProjectDao projectDao){this.projectDao = projectDao;}
+
+    public void setTaskDao(TaskDao taskDao){this.taskDao = taskDao;}
+
+    public void setUserDao(UserDao userDao){this.userDao = userDao;}
+    public void setInterestService(InterestService interestService){this.interestService = interestService;}
+    public void setUserService(UserService userService){this.userService = userService;}
+    public void setTaskService(TaskService taskService){this.taskService = taskService;}
+    public void setSkillService(SkillService skillService){this.skillService = skillService;}
+
+    public void setMaterialService(MaterialService materialService) {
+        this.materialService = materialService;
+    }
+
+    public void setWorkplaceService(WorkplaceService workplaceService) {
+        this.workplaceService = workplaceService;
+    }
 
     /**
      * Creates a new project and sets up an initial presentation task associated with it.

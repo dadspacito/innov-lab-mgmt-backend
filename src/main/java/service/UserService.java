@@ -38,6 +38,9 @@ public class UserService {
     @EJB private ProjectService projectService;
     @EJB private InterestService interestService;
     @EJB private SkillService skillService;
+
+    public void setUserDao(UserDao userDao) {this.userDao = userDao;}
+
     /**
      * Registers a new user in the system.
      *

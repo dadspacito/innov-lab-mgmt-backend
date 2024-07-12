@@ -91,7 +91,7 @@ public class StartupService {
           sessionTokenDao.persist(sessionTokenEntity);
       }
         SkillEntity skillEntity = new SkillEntity("C", SkillType.SOFTWARE);
-        InterestEntity interestEntity = new InterestEntity("Ballet");
+        InterestEntity interestEntity = new InterestEntity("Golf");
         UserEntity userEntity = userDao.findUserByNickname("admin");
         userEntity.getSkills().add(skillEntity);
         userEntity.getInterests().add(interestEntity);

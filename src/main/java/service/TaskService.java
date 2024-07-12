@@ -44,7 +44,14 @@ public class TaskService {
     @EJB private ProjectService projectService;
     private static final Logger LOGGER = LogManager.getLogger(TaskService.class);
 
+    public void setTaskDao(TaskDao taskDao){this.taskDao = taskDao;}
+    public void setUserDao(UserDao userDao){this.userDao = userDao;}
 
+    public void setProjectDao(ProjectDao projectDao){this.projectDao = projectDao;}
+
+    public void setUserService(UserService userService){this.userService = userService;}
+
+    public void setProjectService(ProjectService projectService){this.projectService = projectService;}
     /**
      * Retrieves a task DTO by its associated entity.
      *
@@ -238,8 +245,8 @@ public class TaskService {
                 }
                 taskDao.merge(t);
             }
-            throw new NullPointerException("Task is null");
+            else throw new NullPointerException("Task is null");
         }
-        throw new NullPointerException("project is null");
+        else throw new NullPointerException("project is null");
     }
 }

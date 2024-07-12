@@ -15,8 +15,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class MaterialServiceTest {
-    MaterialService materialService;
-    MaterialDao materialDaoMock;
+    private MaterialService materialService;
+    private MaterialDao materialDaoMock;
 
     @BeforeEach
     void setup() {
@@ -24,7 +24,7 @@ public class MaterialServiceTest {
         materialService = new MaterialService();
         //create mock objects
         materialDaoMock = mock(MaterialDao.class);
-        //marerial service user the mock objects previously created
+        //material service user the mock objects previously created
         materialService.setMaterialDao(materialDaoMock);
 
         //preparation
