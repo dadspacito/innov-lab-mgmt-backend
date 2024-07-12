@@ -13,7 +13,8 @@ import java.util.Objects;
 //devolver materiais por projeto id
 @NamedQueries({
         @NamedQuery(name = "Material.findMaterialByID", query = "SELECT m FROM MaterialEntity m WHERE m.id= :id"),
-        @NamedQuery(name = "Material.findMaterialByName", query ="select m from MaterialEntity m where m.name = :name")
+        @NamedQuery(name = "Material.findMaterialByName", query ="select m from MaterialEntity m where m.name = :name"),
+        @NamedQuery(name ="Material.getAllMaterials", query = "select m from MaterialEntity m order by m.id asc")
 
 })
 public class MaterialEntity implements Serializable {

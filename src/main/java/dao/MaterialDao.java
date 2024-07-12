@@ -8,6 +8,10 @@ import entity.MaterialEntity;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.NoResultException;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 @Stateless  public class MaterialDao extends AbstractDao<MaterialEntity> {
     private static final long serialVersionUID = 1L;
 
@@ -33,4 +37,13 @@ import jakarta.persistence.NoResultException;
             return null;
         }
     }
+    public Set<MaterialEntity> getAllMaterials (){
+        try{
+            List<MaterialEntity> materials = em.createNamedQuery("Material.getAllMaterials", MaterialEntity.class).getResultList();
+            return new HashSet<>(materials);
+        } catch(NoResultException e){
+            return null;
+        }
+    }
+
 }

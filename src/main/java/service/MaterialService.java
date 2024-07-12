@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
  */
 @Stateless public class MaterialService {
     @EJB private MaterialDao materialDao;
+    //for testing purposes
+    public void setMaterialDao(MaterialDao materialDao){this.materialDao = materialDao;}
     /**
      * Converts a MaterialEntity to a MaterialDto.
      *
@@ -88,9 +90,7 @@ import java.util.stream.Collectors;
      */
     @Transactional
     public void removeMaterialFromDB(int id){
-        System.out.println(id);
         if (materialIDIsValid(id)){
-            System.out.println(materialDao.findMaterialByID(id));
             materialDao.remove(materialDao.findMaterialByID(id));
             materialDao.flush();
         }
@@ -137,7 +137,8 @@ import java.util.stream.Collectors;
      * @param id the ID of the material
      * @return the MaterialEntity, or null if not found
      */
-    private MaterialEntity getMaterialsByID(int id){
+    @Transactional
+    public MaterialEntity getMaterialsByID(int id){
         try{
             return materialDao.findMaterialByID(id);
         }
